@@ -29,7 +29,7 @@ Please use them depending on the situation.
 - ArtnetReveiver
 - Artnet (Integrated Sender/Receiver)
 
-### Art-Net Sender
+### ArtnetSender
 
 ```C++
 #include <Artnet.h>
@@ -54,7 +54,7 @@ void loop()
 }
 ```
 
-### Art-Net Receiver
+### ArtnetReceiver
 
 ```C++
 #include <Artnet.h>
@@ -91,7 +91,7 @@ void loop()
 
 ```
 
-### Art-Net Sender
+### Artnet (Integrated Sender/Receiver)
 
 ```C++
 #include <Artnet.h>
