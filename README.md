@@ -61,7 +61,7 @@ void loop()
 
 // declarations for Ethernet/WiFi
 
-ArtnetSender artnet;
+ArtnetReceiver artnet;
 
 void callback(uint8_t* data, uint16_t size)
 {
