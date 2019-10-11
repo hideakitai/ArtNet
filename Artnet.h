@@ -100,7 +100,7 @@ namespace arduino
         constexpr float DEFAULT_FPS { 40. };
         constexpr uint32_t DEFAULT_INTERVAL_MS { (uint32_t)(1000. / DEFAULT_FPS) };
 
-        static const uint8_t NUM_PIXELS_PER_UNIV { 170 };
+        static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
         #ifdef __AVR__
         template <uint16_t SIZE>
