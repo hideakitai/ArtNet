@@ -16,6 +16,8 @@ uint8_t value = 0;
 
 void setup()
 {
+    Serial.begin(115200);
+
     // WiFi stuff
     WiFi.begin(ssid, pwd);
     WiFi.config(ip, gateway, subnet);
