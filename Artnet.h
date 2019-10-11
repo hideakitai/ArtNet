@@ -30,6 +30,9 @@ namespace arduino
 {
     namespace artnet
     {
+        // Packet Summary : https://art-net.org.uk/structure/packet-summary-2/
+        // Packet Definition : https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/
+
         enum class OpCode : uint16_t
         {
             // Device Discovery
