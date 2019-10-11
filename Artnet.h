@@ -174,6 +174,11 @@ namespace arduino
                 set(data, size);
             }
 
+            void set(const uint16_t ch, const uint8_t data)
+            {
+                packet[IDX(Index::DATA) + ch] = data;
+            }
+
             void send()
             {
                 packet[IDX(Index::SEQUENCE)] = seq++;
