@@ -9,17 +9,6 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 - flexible net/subnet/universe setting
 - etc.
 
-### Supported Platforms
-
-- ESP32, ESP8266 (WiFi)
-- Teensy 3.x (Ethernet)
-- Arduino Uno/Mega etc. (Ethernet)
-
-#### Note
-
-Some boards without enough memory may not be able to use integrated sender/receiver.
-Please use only sender OR receiver.
-
 ## Usage
 
 This library has following Art-Net controller options.
@@ -225,6 +214,36 @@ void subscribe(const uint32_t universe, const CallbackType& func)
 void subscribe(const CallbackType& func)
 void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func)
 ```
+
+## Supported Platform
+
+This library currently supports following platforms and interfaces.
+Please feel free to send PR or request for more board support!
+
+#### WiFi
+
+- ESP32
+- ESP8266
+- Arduino Uno WiFi Rev2
+- Arduino MKR VIDOR 4000
+- Arduino MKR WiFi 1010
+- Arduino MKR WiFi 1000
+- Arduino Nano 33 IoT
+
+#### Ethernet
+
+- ESP8266
+- Teensy 3.x, 4.x
+- AVR (Arduino Uno, Mega, ...)
+- megaAVR (Arduino Uno WiFi Rev2, ...)
+- SAMD (Arduino MKR series, ...)
+- SPRESENSE
+
+
+#### Note
+
+Some boards without enough memory may not be able to use integrated sender/receiver.
+Please use only sender OR receiver.
 
 ## License
 
