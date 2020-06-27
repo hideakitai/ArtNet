@@ -7,22 +7,70 @@
 // Packet Definition : https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/
 
 #include <Arduino.h>
-#ifndef __AVR__
+
+#if defined(ARDUINO_ARCH_AVR)\
+ || defined(ARDUINO_ARCH_MEGAAVR)\
+ || defined(ARDUINO_ARCH_SAM)\
+ || defined(ARDUINO_ARCH_SAMD)\
+ || defined(ARDUINO_spresense_ast)
+    #define ARDUINOOSC_DISABLE_STL
+#endif
+
+#if defined(ESP_PLATFORM)\
+ || defined(ESP8266)\
+ || defined(ARDUINO_AVR_UNO_WIFI_REV2)\
+ || defined(ARDUINO_SAMD_MKRWIFI1010)\
+ || defined(ARDUINO_SAMD_MKRVIDOR4000)\
+ || defined(ARDUINO_SAMD_MKR1000)\
+ || defined(ARDUINO_SAMD_NANO_33_IOT)
+    #define ARDUINOOSC_ENABLE_WIFI
+#endif
+
+#if defined(TEENSYDUINO)\
+ || defined(ESP8266)\
+ || defined(ARDUINOOSC_DISABLE_STL)
+    #define ARDUINOOSC_ENABLE_ETHER
+#endif
+
+#if !defined (ARDUINOOSC_ENABLE_WIFI)\
+ && !defined (ARDUINOOSC_ENABLE_ETHER)\
+ && !defined (ARDUINOOSC_DISABLE_STL)
+    #error THIS PLATFORM HAS NO WIFI OR ETHERNET OR NOT SUPPORTED ARCHITECTURE. PLEASE LET ME KNOW!
+#endif
+
+#ifdef ARDUINOOSC_ENABLE_WIFI
+    #ifdef ESP_PLATFORM
+        #include <WiFi.h>
+        #include <WiFiUdp.h>
+    #elif defined (ESP8266)
+        #include <ESP8266WiFi.h>
+        #include <WiFiUdp.h>
+    #elif defined (ARDUINO_AVR_UNO_WIFI_REV2)\
+        || defined(ARDUINO_SAMD_MKRWIFI1010)\
+        || defined(ARDUINO_SAMD_MKRVIDOR4000)\
+        || defined(ARDUINO_SAMD_NANO_33_IOT)
+        #include <SPI.h>
+        #include <WiFiNINA.h>
+        #include <WiFiUdp.h>
+    #elif defined (ARDUINO_SAMD_MKR1000)
+        #include <SPI.h>
+        #include <WiFi101.h>
+        #include <WiFiUdp.h>
+    #endif
+#endif // ARDUINOOSC_ENABLE_WIFI
+
+#ifdef ARDUINOOSC_ENABLE_ETHER
+    #include <Ethernet.h>
+    #include <EthernetUdp.h>
+    #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
+#endif // ARDUINOOSC_ENABLE_ETHER
+
+#ifdef ARDUINOOSC_DISABLE_STL
+    #include "util/ArxContainer/ArxContainer.h"
+#else
     #include <array>
     #include <vector>
     #include <functional>
-#else
-    #include "RingBuffer.h"
-#endif
-#ifdef ESP_PLATFORM
-    #include <WiFi.h>
-    #include <WiFiUdp.h>
-#elif defined (ESP8266)
-    #include <ESP8266WiFi.h>
-    #include <WiFiUdp.h>
-#elif defined (TEENSYDUINO) || defined (__AVR__)
-    #include <Ethernet.h>
-    #include <EthernetUdp.h>
 #endif
 
 
@@ -102,7 +150,7 @@ namespace arduino
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
-        #ifdef __AVR__
+#ifdef ARDUINOOSC_DISABLE_STL
         template <uint16_t SIZE>
         class Array
         {
@@ -114,16 +162,16 @@ namespace arduino
             uint8_t operator[] (const size_t i) const { return buffer[i]; }
             uint8_t& operator[] (const size_t i) { return buffer[i]; }
         };
-        #endif
+#endif
 
         template <typename S>
         class Sender_
         {
-            #ifdef __AVR__
+#ifdef ARDUINOOSC_DISABLE_STL
             Array<PACKET_SIZE> packet;
-            #else
+#else
             std::array<uint8_t, PACKET_SIZE> packet;
-            #endif
+#endif
 
             const char* ip;
             uint16_t port {DEFAULT_PORT};
@@ -233,17 +281,18 @@ namespace arduino
         template <typename S>
         class Receiver_
         {
-            #ifdef __AVR__
+#ifdef ARDUINOOSC_DISABLE_STL
             typedef void (*CallbackType)(uint8_t* data, uint16_t size);
             struct Map { uint32_t universe; CallbackType func; };
-            using CallbackMap = RingBuffer<Map, 8>;
+            arx::vector<Map, 8> v;
+            using CallbackMap = arx::vector<Map, 8>;
             Array<PACKET_SIZE> packet;
-            #else
+#else
             using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
             struct Map { uint32_t universe; CallbackType func; };
             using CallbackMap = std::vector<Map>;
             std::array<uint8_t, PACKET_SIZE> packet;
-            #endif
+#endif
 
             IPAddress remote_ip;
             uint16_t remote_port;
@@ -412,14 +461,15 @@ namespace arduino
     }
 }
 
-#if defined (ESP_PLATFORM) || defined (ESP8266)
-using Artnet = arduino::artnet::Manager<WiFiUDP>;
-using ArtnetSender = arduino::artnet::Sender<WiFiUDP>;
-using ArtnetReceiver = arduino::artnet::Receiver<WiFiUDP>;
-#elif defined (TEENSYDUINO) || defined (__AVR__)
-using Artnet = arduino::artnet::Manager<EthernetUDP>;
-using ArtnetSender = arduino::artnet::Sender<EthernetUDP>;
-using ArtnetReceiver = arduino::artnet::Receiver<EthernetUDP>;
+#ifdef ARDUINOOSC_ENABLE_WIFI
+    using ArtnetWiFi = arduino::artnet::Manager<WiFiUDP>;
+    using ArtnetWiFiSender = arduino::artnet::Sender<WiFiUDP>;
+    using ArtnetWiFiReceiver = arduino::artnet::Receiver<WiFiUDP>;
+#endif
+#ifdef ARDUINOOSC_ENABLE_ETHER
+    using Artnet = arduino::artnet::Manager<EthernetUDP>;
+    using ArtnetSender = arduino::artnet::Sender<EthernetUDP>;
+    using ArtnetReceiver = arduino::artnet::Receiver<EthernetUDP>;
 #endif
 
 #endif // ARDUINO_ARTNET_H

@@ -7,7 +7,7 @@ const IPAddress ip(192, 168, 1, 201);
 const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
-ArtnetSender artnet;
+ArtnetWiFiSender artnet;
 uint32_t universe = 1;
 
 const uint16_t size = 512;
