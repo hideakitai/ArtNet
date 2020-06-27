@@ -13,7 +13,7 @@
  || defined(ARDUINO_ARCH_SAM)\
  || defined(ARDUINO_ARCH_SAMD)\
  || defined(ARDUINO_spresense_ast)
-    #define ARDUINOOSC_DISABLE_STL
+    #define ARTNET_DISABLE_STL
 #endif
 
 #if defined(ESP_PLATFORM)\
@@ -23,22 +23,22 @@
  || defined(ARDUINO_SAMD_MKRVIDOR4000)\
  || defined(ARDUINO_SAMD_MKR1000)\
  || defined(ARDUINO_SAMD_NANO_33_IOT)
-    #define ARDUINOOSC_ENABLE_WIFI
+    #define ARTNET_ENABLE_WIFI
 #endif
 
 #if defined(TEENSYDUINO)\
  || defined(ESP8266)\
- || defined(ARDUINOOSC_DISABLE_STL)
-    #define ARDUINOOSC_ENABLE_ETHER
+ || defined(ARTNET_DISABLE_STL)
+    #define ARTNET_ENABLE_ETHER
 #endif
 
-#if !defined (ARDUINOOSC_ENABLE_WIFI)\
- && !defined (ARDUINOOSC_ENABLE_ETHER)\
- && !defined (ARDUINOOSC_DISABLE_STL)
+#if !defined (ARTNET_ENABLE_WIFI)\
+ && !defined (ARTNET_ENABLE_ETHER)\
+ && !defined (ARTNET_DISABLE_STL)
     #error THIS PLATFORM HAS NO WIFI OR ETHERNET OR NOT SUPPORTED ARCHITECTURE. PLEASE LET ME KNOW!
 #endif
 
-#ifdef ARDUINOOSC_ENABLE_WIFI
+#ifdef ARTNET_ENABLE_WIFI
     #ifdef ESP_PLATFORM
         #include <WiFi.h>
         #include <WiFiUdp.h>
@@ -57,15 +57,15 @@
         #include <WiFi101.h>
         #include <WiFiUdp.h>
     #endif
-#endif // ARDUINOOSC_ENABLE_WIFI
+#endif // ARTNET_ENABLE_WIFI
 
-#ifdef ARDUINOOSC_ENABLE_ETHER
+#ifdef ARTNET_ENABLE_ETHER
     #include <Ethernet.h>
     #include <EthernetUdp.h>
     #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
-#endif // ARDUINOOSC_ENABLE_ETHER
+#endif // ARTNET_ENABLE_ETHER
 
-#ifdef ARDUINOOSC_DISABLE_STL
+#ifdef ARTNET_DISABLE_STL
     #include "util/ArxContainer/ArxContainer.h"
 #else
     #include <array>
@@ -150,7 +150,7 @@ namespace arduino
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
-#ifdef ARDUINOOSC_DISABLE_STL
+#ifdef ARTNET_DISABLE_STL
         template <uint16_t SIZE>
         class Array
         {
@@ -167,7 +167,7 @@ namespace arduino
         template <typename S>
         class Sender_
         {
-#ifdef ARDUINOOSC_DISABLE_STL
+#ifdef ARTNET_DISABLE_STL
             Array<PACKET_SIZE> packet;
 #else
             std::array<uint8_t, PACKET_SIZE> packet;
@@ -281,7 +281,7 @@ namespace arduino
         template <typename S>
         class Receiver_
         {
-#ifdef ARDUINOOSC_DISABLE_STL
+#ifdef ARTNET_DISABLE_STL
             typedef void (*CallbackType)(uint8_t* data, uint16_t size);
             struct Map { uint32_t universe; CallbackType func; };
             arx::vector<Map, 8> v;
@@ -461,12 +461,12 @@ namespace arduino
     }
 }
 
-#ifdef ARDUINOOSC_ENABLE_WIFI
+#ifdef ARTNET_ENABLE_WIFI
     using ArtnetWiFi = arduino::artnet::Manager<WiFiUDP>;
     using ArtnetWiFiSender = arduino::artnet::Sender<WiFiUDP>;
     using ArtnetWiFiReceiver = arduino::artnet::Receiver<WiFiUDP>;
 #endif
-#ifdef ARDUINOOSC_ENABLE_ETHER
+#ifdef ARTNET_ENABLE_ETHER
     using Artnet = arduino::artnet::Manager<EthernetUDP>;
     using ArtnetSender = arduino::artnet::Sender<EthernetUDP>;
     using ArtnetReceiver = arduino::artnet::Receiver<EthernetUDP>;
