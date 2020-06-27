@@ -13,7 +13,7 @@
         "url": "https://github.com/hideakitai",
         "maintainer": true
     },
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "MIT",
     "frameworks": "*",
     "platforms": "*"
