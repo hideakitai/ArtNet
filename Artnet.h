@@ -192,17 +192,17 @@ namespace arduino
 
             virtual ~Sender_() {}
 
-            void net(uint8_t n) { target_net = n & 0x7F; }
-            void subnet(uint8_t s) { target_subnet = s & 0x0F; }
-            void universe(uint8_t u) { target_universe = u & 0x0F; }
-            void universe15bit(uint8_t u)
+            void net(const uint8_t n) { target_net = n & 0x7F; }
+            void subnet(const uint8_t s) { target_subnet = s & 0x0F; }
+            void universe(const uint8_t u) { target_universe = u & 0x0F; }
+            void universe15bit(const uint8_t u)
             {
                 net((u >> 8) & 0xFF);
                 subnet((u >> 4) & 0x0F);
                 universe((u >> 0) & 0x0F);
             }
 
-            void set(const uint8_t* const data, uint16_t size = 512)
+            void set(const uint8_t* const data, const uint16_t size = 512)
             {
                 packet[IDX(Index::PHYSICAL)] = phy;
                 packet[IDX(Index::NET)] = target_net;
@@ -212,13 +212,13 @@ namespace arduino
                 memcpy((&packet[IDX(Index::DATA)]), data, size);
             }
 
-            void set(const uint32_t universe_, const uint8_t* const data, uint16_t size = 512)
+            void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512)
             {
                 universe15bit(universe_);
                 set(data, size);
             }
 
-            void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, uint16_t size = 512)
+            void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512)
             {
                 net(net_);
                 subnet(subnet_);
@@ -238,17 +238,17 @@ namespace arduino
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
             }
-            void send(const uint8_t* const data, uint16_t size = 512)
+            void send(const uint8_t* const data, const uint16_t size = 512)
             {
                 set(data, size);
                 send();
             }
-            void send(const uint32_t universe_, const uint8_t* const data, uint16_t size = 512)
+            void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512)
             {
                 set(universe_, data, size);
                 send();
             }
-            void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, uint16_t size = 512)
+            void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512)
             {
                 set(net_, subnet_, universe_, data, size);
                 send();
@@ -263,12 +263,12 @@ namespace arduino
                 }
             }
 
-            void physical(uint8_t i) { phy = constrain(i, 0, 3); }
+            void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
             uint8_t sequence() const { return seq; }
 
         protected:
 
-            void attach(S& s, const char* user_ip, uint16_t user_port = DEFAULT_PORT)
+            void attach(S& s, const char* user_ip, const uint16_t user_port = DEFAULT_PORT)
             {
                 stream = &s;
                 ip = user_ip;
@@ -420,7 +420,7 @@ namespace arduino
         {
             S stream;
         public:
-            void begin(const char* send_ip, uint32_t send_port = DEFAULT_PORT, uint32_t recv_port = DEFAULT_PORT)
+            void begin(const char* send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT)
             {
                 stream.begin(recv_port);
                 this->Sender_<S>::attach(stream, send_ip, send_port);
@@ -433,7 +433,7 @@ namespace arduino
         {
             S stream;
         public:
-            void begin(const char* ip, uint32_t port = DEFAULT_PORT)
+            void begin(const char* ip, const uint16_t port = DEFAULT_PORT)
             {
                 this->Sender_<S>::attach(stream, ip, port);
             }
@@ -444,7 +444,7 @@ namespace arduino
         {
             S stream;
         public:
-            void begin(uint32_t port = DEFAULT_PORT)
+            void begin(const uint16_t port = DEFAULT_PORT)
             {
                 stream.begin(port);
                 this->Receiver_<S>::attach(stream);

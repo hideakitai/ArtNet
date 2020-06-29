@@ -7,7 +7,7 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 - support Art-Net with both Ethernet and WiFi
 - register multiple callbacks depending on universe
 - flexible net/subnet/universe setting
-- etc.
+
 
 ## Usage
 
@@ -174,45 +174,45 @@ artnet.begin(ip, send_port, recv_port); // set your own
 ### ArtnetSender
 
 ```C++
-void net(uint8_t n)
-void subnet(uint8_t s)
-void universe(uint8_t u)
-void universe15bit(uint8_t u)
-void set(const uint8_t* const data, uint16_t size = 512)
-void set(const uint32_t universe_, const uint8_t* const data, uint16_t size = 512)
-void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, uint16_t size = 512)
-void send()
-void send(const uint8_t* const data, uint16_t size = 512)
-void send(const uint32_t universe_, const uint8_t* const data, uint16_t size = 512)
-void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, uint16_t size = 512)
-void streaming()
-void physical(uint8_t i)
-uint8_t sequence() const
+void net(const uint8_t n);
+void subnet(const uint8_t s);
+void universe(const uint8_t u);
+void universe15bit(const uint8_t u);
+void set(const uint8_t* const data, const uint16_t size = 512);
+void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512);
+void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512);
+void send();
+void send(const uint8_t* const data, const uint16_t size = 512);
+void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512);
+void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512);
+void streaming();
+void physical(const uint8_t i) const;
+uint8_t sequence() const;
 ```
 
 ### ArtnetReceiver
 
 ```C++
-bool parse()
-inline const IPAddress& ip() const { return remote_ip; }
-uint16_t port() const { return remote_port; }
-String id() const
-uint16_t opcode() const
-uint16_t opcode(const uint8_t* p) const
-uint16_t version() const
-uint8_t sequence() const
-uint8_t physical() const
-uint8_t net() const
-uint8_t subnet() const
-uint8_t universe() const
-uint16_t universe15bit() const
-uint16_t length() const
-uint16_t size() const
-uint8_t* data()
-uint8_t data(const uint16_t i) const
-void subscribe(const uint32_t universe, const CallbackType& func)
-void subscribe(const CallbackType& func)
-void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func)
+bool parse();
+inline const IPAddress& ip() const;
+uint16_t port() const;
+String id() const;
+uint16_t opcode() const;
+uint16_t opcode(const uint8_t* p) const;
+uint16_t version() const;
+uint8_t sequence() const;
+uint8_t physical() const;
+uint8_t net() const;
+uint8_t subnet() const;
+uint8_t universe() const;
+uint16_t universe15bit() const;
+uint16_t length() const;
+uint16_t size() const;
+uint8_t* data();
+uint8_t data(const uint16_t i) const;
+void subscribe(const uint32_t universe, const CallbackType& func);
+void subscribe(const CallbackType& func);
+void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func);
 ```
 
 ## Supported Platform
