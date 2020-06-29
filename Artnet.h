@@ -162,17 +162,21 @@ namespace arduino
             uint8_t operator[] (const size_t i) const { return buffer[i]; }
             uint8_t& operator[] (const size_t i) { return buffer[i]; }
         };
+        typedef void (*CallbackType)(uint8_t* data, uint16_t size);
+        struct Map { uint32_t universe; CallbackType func; };
+        using CallbackMap = arx::vector<Map, 8>;
+#else
+        template <uint16_t SIZE>
+        using Array = std::array<uint8_t, SIZE>;
+        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
+        struct Map { uint32_t universe; CallbackType func; };
+        using CallbackMap = std::vector<Map>;
 #endif
 
         template <typename S>
         class Sender_
         {
-#ifdef ARTNET_DISABLE_STL
             Array<PACKET_SIZE> packet;
-#else
-            std::array<uint8_t, PACKET_SIZE> packet;
-#endif
-
             const char* ip;
             uint16_t port {DEFAULT_PORT};
             uint8_t target_net {0};
@@ -281,19 +285,7 @@ namespace arduino
         template <typename S>
         class Receiver_
         {
-#ifdef ARTNET_DISABLE_STL
-            typedef void (*CallbackType)(uint8_t* data, uint16_t size);
-            struct Map { uint32_t universe; CallbackType func; };
-            arx::vector<Map, 8> v;
-            using CallbackMap = arx::vector<Map, 8>;
             Array<PACKET_SIZE> packet;
-#else
-            using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
-            struct Map { uint32_t universe; CallbackType func; };
-            using CallbackMap = std::vector<Map>;
-            std::array<uint8_t, PACKET_SIZE> packet;
-#endif
-
             IPAddress remote_ip;
             uint16_t remote_port;
             CallbackMap callbacks;
@@ -315,7 +307,7 @@ namespace arduino
                 {
                     if (opcode(d) == OPC(OpCode::Dmx))
                     {
-                        // TODO: std::move...
+                        memmove(packet.data(), d, size);
                         memcpy(packet.data(), d, size);
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
