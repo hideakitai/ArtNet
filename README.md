@@ -245,6 +245,13 @@ Please feel free to send PR or request for more board support!
 Some boards without enough memory may not be able to use integrated sender/receiver.
 Please use only sender OR receiver.
 
+
+## Embedded Libraries
+
+- [ArxContainer v0.3.7](https://github.com/hideakitai/ArxContainer)
+- [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
+
+
 ## License
 
 MIT
