@@ -162,6 +162,7 @@ PRs are welcome!
 - [ArduinoOSC](https://github.com/hideakitai/ArduinoOSC)
 - [ArtNet](https://github.com/hideakitai/ArtNet)
 - [Tween](https://github.com/hideakitai/Tween)
+- [TimeProfiler](https://github.com/hideakitai/TimeProfiler)
 
 
 ## License

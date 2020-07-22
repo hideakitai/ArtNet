@@ -248,7 +248,7 @@ Please use only sender OR receiver.
 
 ## Embedded Libraries
 
-- [ArxContainer v0.3.7](https://github.com/hideakitai/ArxContainer)
+- [ArxContainer v0.3.8](https://github.com/hideakitai/ArxContainer)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 
