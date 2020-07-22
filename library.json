@@ -2,18 +2,16 @@
     "name": "ArtNet",
     "keywords": "Art-Net,Artnet,Ethernet,WiFi",
     "description": "Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)binary data packer / unpacker",
-    "repository":
-    {
+    "repository": {
         "type": "git",
         "url": "https://github.com/hideakitai/ArtNet.git"
     },
-    "authors":
-    {
+    "authors": {
         "name": "Hideaki Tai",
         "url": "https://github.com/hideakitai",
         "maintainer": true
     },
-    "version": "0.1.3",
+    "version": "0.1.4",
     "license": "MIT",
     "frameworks": "*",
     "platforms": "*"
