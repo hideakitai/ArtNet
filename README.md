@@ -213,6 +213,9 @@ uint8_t data(const uint16_t i) const;
 void subscribe(const uint32_t universe, const CallbackType& func);
 void subscribe(const CallbackType& func);
 void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func);
+void unsubscribe(const uint32_t universe);
+void unsubscribe();
+void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe);
 ```
 
 ## Supported Platform

@@ -397,6 +397,28 @@ namespace arduino
                 subscribe(u, func);
             }
 
+            inline void unsubscribe(const uint32_t universe)
+            {
+                size_t idx = callbacks.size();
+                for (size_t i = 0; i < callbacks.size(); ++i)
+                    if (callbacks[i].universe == universe) {
+                        idx = i;
+                        break;
+                    }
+
+                if (idx != callbacks.size())
+                    callbacks.erase(callbacks.begin() + idx);
+            }
+            inline void unsubscribe()
+            {
+                unsubscribe(0);
+            }
+            inline void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe)
+            {
+                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
+                unsubscribe(u);
+            }
+
         protected:
 
             void attach(S& s) { stream = &s; }
