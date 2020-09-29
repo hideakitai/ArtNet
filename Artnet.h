@@ -7,14 +7,8 @@
 // Packet Definition : https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/
 
 #include <Arduino.h>
-
-#if defined(ARDUINO_ARCH_AVR)\
- || defined(ARDUINO_ARCH_MEGAAVR)\
- || defined(ARDUINO_ARCH_SAM)\
- || defined(ARDUINO_ARCH_SAMD)\
- || defined(ARDUINO_spresense_ast)
-    #define ARTNET_DISABLE_STL
-#endif
+#include "util/ArxTypeTraits/ArxTypeTraits.h"
+#include "util/ArxContainer/ArxContainer.h"
 
 #if defined(ESP_PLATFORM)\
  || defined(ESP8266)\
@@ -26,15 +20,13 @@
     #define ARTNET_ENABLE_WIFI
 #endif
 
-#if defined(TEENSYDUINO)\
- || defined(ESP8266)\
- || defined(ARTNET_DISABLE_STL)
+#if defined(ESP8266)\
+ || !defined(ARTNET_ENABLE_WIFI)
     #define ARTNET_ENABLE_ETHER
 #endif
 
 #if !defined (ARTNET_ENABLE_WIFI)\
- && !defined (ARTNET_ENABLE_ETHER)\
- && !defined (ARTNET_DISABLE_STL)
+ && !defined (ARTNET_ENABLE_ETHER)
     #error THIS PLATFORM HAS NO WIFI OR ETHERNET OR NOT SUPPORTED ARCHITECTURE. PLEASE LET ME KNOW!
 #endif
 
@@ -64,14 +56,6 @@
     #include <EthernetUdp.h>
     #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
 #endif // ARTNET_ENABLE_ETHER
-
-#ifdef ARTNET_DISABLE_STL
-    #include "util/ArxContainer/ArxContainer.h"
-#else
-    #include <array>
-    #include <vector>
-    #include <functional>
-#endif
 
 
 namespace arduino
@@ -150,7 +134,13 @@ namespace arduino
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
-#ifdef ARTNET_DISABLE_STL
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+        template <uint16_t SIZE>
+        using Array = std::array<uint8_t, SIZE>;
+        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
+        struct Map { uint32_t universe; CallbackType func; };
+        using CallbackMap = std::vector<Map>;
+#else
         template <uint16_t SIZE>
         class Array
         {
@@ -165,12 +155,6 @@ namespace arduino
         typedef void (*CallbackType)(uint8_t* data, uint16_t size);
         struct Map { uint32_t universe; CallbackType func; };
         using CallbackMap = arx::vector<Map, 8>;
-#else
-        template <uint16_t SIZE>
-        using Array = std::array<uint8_t, SIZE>;
-        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
-        struct Map { uint32_t universe; CallbackType func; };
-        using CallbackMap = std::vector<Map>;
 #endif
 
         template <typename S>
