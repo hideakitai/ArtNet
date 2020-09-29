@@ -3,17 +3,26 @@
 #ifndef ARX_RINGBUFFER_H
 #define ARX_RINGBUFFER_H
 
-#include <Arduino.h>
-
-#if defined(ARDUINO_ARCH_AVR)\
- || defined(ARDUINO_ARCH_MEGAAVR)\
- || defined(ARDUINO_ARCH_SAM)\
- || defined(ARDUINO_ARCH_SAMD)\
- || defined(ARDUINO_spresense_ast)
-    #define ARX_CONTAINER_DISABLED
+#if __cplusplus < 201103L
+    #error "C++11 must be enabled in the compiler for this library to work, please check your compiler flags"
 #endif
 
-#ifdef ARX_CONTAINER_DISABLED
+#include "ArxContainer/has_include.h"
+#include "ArxContainer/has_libstdcplusplus.h"
+
+#include <Arduino.h>
+
+#include "ArxContainer/replace_minmax_macros.h"
+#include "ArxContainer/initializer_list.h"
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+
+#include <vector>
+#include <deque>
+#include <map>
+
+#else // Do not have libstdc++11
+
 
 #ifndef ARX_VECTOR_DEFAULT_SIZE
 #define ARX_VECTOR_DEFAULT_SIZE 16
@@ -27,25 +36,6 @@
 #define ARX_MAP_DEFAULT_SIZE 16
 #endif // ARX_MAP_DEFAULT_SIZE
 
-#ifndef ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
-#define ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
-namespace std
-{
-    template<class T>
-    class initializer_list
-    {
-    private:
-        const T* array;
-        size_t len;
-        initializer_list(const T* a, size_t l) : array(a), len(l) {}
-    public:
-        initializer_list() : array(nullptr), len(0) {}
-        size_t size() const { return len; }
-        const T *begin() const { return array; }
-        const T *end() const { return array + len; }
-    };
-}
-#endif // ARX_TYPE_TRAITS_INITIALIZER_LIST_DEFINED
 
 namespace arx {
 
@@ -560,5 +550,5 @@ template<typename T, size_t N>
 using ArxRingBuffer = arx::RingBuffer<T, N>;
 
 
-#endif // ARX_CONTAINER_DISABLED
+#endif // Do not have libstdc++11
 #endif // ARX_RINGBUFFER_H

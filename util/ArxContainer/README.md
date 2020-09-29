@@ -1,12 +1,14 @@
 # ArxContainer
 
-C++ container-like classes (vector, map, etc.) for Arduino which cannot use STL
+C++ container-like classes (`vector`, `deque`, `map` etc.) for Arduino which cannot use STL
 
 ## Note
 
-`ArxContainer` is C++ container-__like__ classes for Arduino.
-All of the functions is not supported currently.
-Detail of these containers are described in Detail section.
+- `ArxContainer` is C++ container-__like__ classes for Arduino
+  - Containers in this library is defined inside namespace `arx` instad of `std` (e.g. `arx::vector`)
+  - All of the functions is not supported currently
+- If standard libraries are available, automatically use `std` version instead of `arx` version
+
 
 ## Supported Container Types
 
@@ -17,14 +19,12 @@ Detail of these containers are described in Detail section.
 
 ## Supported Boards
 
-This library is currently enabled only if you use following architecture.
-Please use C++ Standard Template Library for other boards.
+`arx` version of containers are enabled only if you use following architecture.
+In other borads, `arx` version is disabled and standard libraries (`std` version) will be imported (because they can use them).
 
 - AVR (Uno, Nano, Mega, etc.)
 - MEGAAVR (Uno WiFi, Nano Ecery, etc.)
 - SAM (Due)
-- SAMD (Zero, MKR, M0, etc.)
-- SPRESENSE
 
 
 ## Usage
