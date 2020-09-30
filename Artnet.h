@@ -394,6 +394,12 @@ namespace arx
                 unsubscribe(u);
             }
 
+            inline void clear_subscribers()
+            {
+                unsubscribe();
+                callbacks.clear();
+            }
+
         protected:
 
             void attach(S& s) { stream = &s; }
