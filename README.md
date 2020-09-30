@@ -100,6 +100,12 @@ void setup()
     {
         // do something with data coming to universe
     });
+
+    // if Artnet packet comes, this function is called to every universe
+    artnet.subscribe([&](uint32_t univ, uint8_t* data, uint16_t size)
+    {
+        // do something with data coming to all universe
+    });
 }
 
 void loop()

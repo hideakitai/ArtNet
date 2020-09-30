@@ -33,6 +33,14 @@ void setup()
         Serial.println();
     });
 
+
+    // if Artnet packet comes, this function is called to every universe
+    artnet.subscribe([&](uint32_t univ, uint8_t* data, uint16_t size)
+    {
+        Serial.print("ArtNet data has come to universe: ");
+        Serial.println(univ);
+    });
+
     Serial.println("start");
 }
 

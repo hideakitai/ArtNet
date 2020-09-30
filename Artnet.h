@@ -134,6 +134,7 @@ namespace arx
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
+        using CallbackAllType = std::function<void(uint32_t universe, uint8_t* data, uint16_t size)>;
         using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
         struct Map { uint32_t universe; CallbackType func; };
 
@@ -263,6 +264,7 @@ namespace arx
             IPAddress remote_ip;
             uint16_t remote_port;
             CallbackMap callbacks;
+            CallbackAllType callback_all {nullptr};
             S* stream;
 
         public:
@@ -285,10 +287,9 @@ namespace arx
                         memcpy(packet.data(), d, size);
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
+                        if (callback_all) callback_all(universe15bit(), data(), size);
                         for (auto& c : callbacks)
-                        {
                             if (universe15bit() == c.universe) c.func(data(), size);
-                        }
                         return true;
                     }
                 }
@@ -361,9 +362,9 @@ namespace arx
             {
                 callbacks.push_back(Map{universe, func});
             }
-            inline void subscribe(const CallbackType& func)
+            inline void subscribe(const CallbackAllType& func)
             {
-                subscribe(0, func);
+                callback_all = func;
             }
             inline void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func)
             {
@@ -385,7 +386,7 @@ namespace arx
             }
             inline void unsubscribe()
             {
-                unsubscribe(0);
+                callback_all = nullptr;
             }
             inline void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe)
             {
