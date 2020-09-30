@@ -283,7 +283,6 @@ namespace arx
                 {
                     if (opcode(d) == OPC(OpCode::Dmx))
                     {
-                        memmove(packet.data(), d, size);
                         memcpy(packet.data(), d, size);
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
