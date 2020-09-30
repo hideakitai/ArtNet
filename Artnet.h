@@ -134,26 +134,16 @@ namespace arduino
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
 
+        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
+        struct Map { uint32_t universe; CallbackType func; };
+
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
         template <uint16_t SIZE>
         using Array = std::array<uint8_t, SIZE>;
-        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
-        struct Map { uint32_t universe; CallbackType func; };
         using CallbackMap = std::vector<Map>;
 #else
         template <uint16_t SIZE>
-        class Array
-        {
-            uint8_t buffer[SIZE];
-        public:
-            const uint8_t* data() const { return buffer; }
-            uint8_t* data() { return buffer; }
-            uint16_t size() const { return SIZE; }
-            uint8_t operator[] (const size_t i) const { return buffer[i]; }
-            uint8_t& operator[] (const size_t i) { return buffer[i]; }
-        };
-        typedef void (*CallbackType)(uint8_t* data, uint16_t size);
-        struct Map { uint32_t universe; CallbackType func; };
+        using Array = arx::vector<uint8_t, SIZE>;
         using CallbackMap = arx::vector<Map, 8>;
 #endif
 
