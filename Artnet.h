@@ -136,16 +136,17 @@ namespace arx
 
         using CallbackAllType = std::function<void(uint32_t universe, uint8_t* data, uint16_t size)>;
         using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
-        struct Map { uint32_t universe; CallbackType func; };
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
         template <uint16_t SIZE>
         using Array = std::array<uint8_t, SIZE>;
-        using CallbackMap = std::vector<Map>;
+        using CallbackMap = std::map<uint32_t, CallbackType>;
+        using namespace std;
 #else
         template <uint16_t SIZE>
         using Array = arx::vector<uint8_t, SIZE>;
-        using CallbackMap = arx::vector<Map, 8>;
+        using CallbackMap = arx::map<uint32_t, CallbackType, 8>;
+        using namespace arx;
 #endif
 
         template <typename S>
@@ -264,7 +265,7 @@ namespace arx
             IPAddress remote_ip;
             uint16_t remote_port;
             CallbackMap callbacks;
-            CallbackAllType callback_all {nullptr};
+            CallbackAllType callback_all;
             S* stream;
 
         public:
@@ -288,7 +289,7 @@ namespace arx
                         remote_port = (uint16_t)stream->S::remotePort();
                         if (callback_all) callback_all(universe15bit(), data(), size);
                         for (auto& c : callbacks)
-                            if (universe15bit() == c.universe) c.func(data(), size);
+                            if (universe15bit() == c.first) c.second(data(), size);
                         return true;
                     }
                 }
@@ -359,7 +360,7 @@ namespace arx
 
             inline void subscribe(const uint32_t universe, const CallbackType& func)
             {
-                callbacks.push_back(Map{universe, func});
+                callbacks.insert(make_pair(universe, func));
             }
             inline void subscribe(const CallbackAllType& func)
             {
@@ -373,15 +374,9 @@ namespace arx
 
             inline void unsubscribe(const uint32_t universe)
             {
-                size_t idx = callbacks.size();
-                for (size_t i = 0; i < callbacks.size(); ++i)
-                    if (callbacks[i].universe == universe) {
-                        idx = i;
-                        break;
-                    }
-
-                if (idx != callbacks.size())
-                    callbacks.erase(callbacks.begin() + idx);
+                auto it = callbacks.find(universe);
+                if (it != callbacks.end())
+                    callbacks.erase(it);
             }
             inline void unsubscribe()
             {
