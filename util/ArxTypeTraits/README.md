@@ -8,13 +8,13 @@ C++ type_traits for Arduino which cannot use it as default
 - automatically use standard library first if the boards can
 - if standard library is not enough (e.g. only C++11 is available), add missing parts listed below
 - works almost all Arduino platforms (Let me know if you have errors)
-- compatible with [ArduinoSTL](https://github.com/mike-matera/ArduinoSTL) or other [uClibc++](https://www.uclibc.org/) libraries (include them before `ArxTypeTraits`)
+- compatible with [ArduinoSTL](https://github.com/mike-matera/ArduinoSTL) or other [uClibc++](https://www.uclibc.org/) libraries
   - thx @matthijskooijman
 
 
 ## Supported Class Templates
 
-### C++11 (defined only for platforms above which cannot use `type_traits`)
+### C++11 (defined only for boards before C++11)
 
 - `std::integral_constant`
 - `std::true_type`
@@ -102,6 +102,7 @@ C++ type_traits for Arduino which cannot use it as default
 - [PollingTimer](https://github.com/hideakitai/PollingTimer)
 - [Tween](https://github.com/hideakitai/Tween)
 - [ArxStringUtils](https://github.com/hideakitai/ArxStringUtils)
+- [Filters](https://github.com/hideakitai/Filters)
 
 
 ## Contributors

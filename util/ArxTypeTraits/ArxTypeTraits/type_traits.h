@@ -9,7 +9,7 @@
 
 #else // Do not have libstdc++98
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     template <class T>
     void swap(T& a, T& b)
@@ -18,7 +18,7 @@ namespace arx { namespace arx_std {
         a = move(b);
         b = move(t);
     }
-} } // namespace arx::arx_std
+} } // namespace arx::stdx
 
 #endif // Do not have libstdc++98
 
@@ -34,7 +34,7 @@ namespace arx { namespace arx_std {
 #include <limits.h>
 #include <stdint.h>
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     using nullptr_t = decltype(nullptr);
 
@@ -143,10 +143,6 @@ namespace arx { namespace arx_std {
     template<class T> struct remove_extent                 { typedef T type; };
     template<class T> struct remove_extent<T[]>            { typedef T type; };
     template<class T, size_t N> struct remove_extent<T[N]> { typedef T type; };
-
-
-    template<class T>
-    T&& move(T& t){ return static_cast<T&&>(t); }
 
 
     template <class T>
@@ -381,9 +377,30 @@ namespace arx { namespace arx_std {
     template<class Sig>
     using result_of = details::result_of<Sig>;
 
-} } // namespace arx::arx_std
+} } // namespace arx::stdx
 
 #endif // Do not have libstdc++11
+
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201402L // Have libstdc++14
+
+#else // Do not have libstdc++14
+
+namespace arx { namespace stdx {
+
+    // `move` must be declared before including `functional.h`
+    // C++14 constexpr version should be inside of C++14,
+    // but moved before `functional.h`
+    template <class T>
+    constexpr typename remove_reference<T>::type&& move(T&& t) noexcept
+    {
+        return static_cast<typename remove_reference<T>::type&&>(t);
+    }
+
+} } // namespace arx::stdx
+
+#endif // Do not have libstdc++14
+
 
 #include "initializer_list.h"
 #include "tuple.h"
@@ -394,7 +411,7 @@ namespace arx { namespace arx_std {
     // for C++11  above.
 #else // Do not have libstdc++14
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     template <bool B, typename T = void>
     using enable_if_t = typename enable_if<B, T>::type;
@@ -448,7 +465,7 @@ namespace arx { namespace arx_std {
     template<typename... Ts>
     using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-} } // namespace arx::arx_std
+} } // namespace arx::stdx
 
 #endif // Do not have libstdc++14
 
@@ -458,7 +475,7 @@ namespace arx { namespace arx_std {
     // for C++11  above.
 #else // Do not have libstdc++17
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     template <class... Ts>
     struct Tester { using type = void; };
@@ -506,7 +523,7 @@ namespace arx { namespace arx_std {
         );
     }
 
-} } // namespace arx::arx_std
+} } // namespace arx::stdx
 
 #endif // Do not have libstdc++17
 
@@ -516,7 +533,7 @@ namespace arx { namespace arx_std {
     // for C++11  above.
 #else // Do not have libstdc++2a
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     template<class T>
     struct remove_cvref
@@ -527,7 +544,7 @@ namespace arx { namespace arx_std {
     template< class T >
     using remove_cvref_t = typename remove_cvref<T>::type;
 
-} } // namespace arx::arx_std
+} } // namespace arx::stdx
 #endif // Do not have libstdc++2a
 
 

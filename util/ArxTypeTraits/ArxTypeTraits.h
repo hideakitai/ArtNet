@@ -15,12 +15,12 @@ namespace std { }
 
 // Import everything from the std namespace into arx::std, so that
 // anything we import rather than define is also available through
-// arx::arx_std.
+// arx::stdx.
 // This includes everything yet to be defined, so we can do this early
 // (and must do so, to allow e.g. the C++14 additions in the arx::std
 // namespace to reference the C++11 stuff from the system headers.
 namespace arx {
-    namespace arx_std {
+    namespace stdx {
         using namespace ::std;
     }
 }
@@ -30,9 +30,9 @@ namespace arx {
 // the standard library version if it is available, falling back to arx
 // versions for things not supplied by the standard library. Only when
 // you really need the arx version (e.g. for constexpr numeric_limits
-// when also using ArduinoSTL), you need to qualify with arx::arx_std::
+// when also using ArduinoSTL), you need to qualify with arx::stdx::
 namespace std {
-    using namespace ::arx::arx_std;
+    using namespace ::arx::stdx;
 }
 
 #include "ArxTypeTraits/replace_minmax_macros.h"

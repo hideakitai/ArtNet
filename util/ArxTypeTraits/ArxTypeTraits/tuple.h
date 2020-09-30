@@ -9,7 +9,7 @@
 
 #else // Do not have libstdc++11
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     // https://theolizer.com/cpp-school2/cpp-school2-15/
     // https://wandbox.org/permlink/C0BWIzjqg4iO3kKZ

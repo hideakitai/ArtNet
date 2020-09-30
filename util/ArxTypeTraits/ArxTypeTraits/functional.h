@@ -28,7 +28,7 @@
 inline void* operator new (const size_t size, void* ptr) noexcept { (void)size; return ptr; }
 #endif
 
-namespace arx { namespace arx_std {
+namespace arx { namespace stdx {
 
     // reference:
     // stack overflow https://stackoverflow.com/questions/32074410/stdfunction-bind-like-type-erasure-without-standard-c-library
