@@ -217,11 +217,12 @@ uint16_t size() const;
 uint8_t* data();
 uint8_t data(const uint16_t i) const;
 void subscribe(const uint32_t universe, const CallbackType& func);
-void subscribe(const CallbackType& func);
 void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func);
+void subscribe(const CallbackAllType& func); // for all packet of all universe
 void unsubscribe(const uint32_t universe);
-void unsubscribe();
 void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe);
+void unsubscribe(); // for all packet of all universe
+void clear_subscribers(); // clear all callbacks
 ```
 
 ## Supported Platform
@@ -242,11 +243,7 @@ Please feel free to send PR or request for more board support!
 #### Ethernet
 
 - ESP8266
-- Teensy 3.x, 4.x
-- AVR (Arduino Uno, Mega, ...)
-- megaAVR (Arduino Uno WiFi Rev2, ...)
-- SAMD (Arduino MKR series, ...)
-- SPRESENSE
+- Almost all platforms without WiFi
 
 
 #### Note
