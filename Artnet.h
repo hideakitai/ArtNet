@@ -58,7 +58,7 @@
 #endif // ARTNET_ENABLE_ETHER
 
 
-namespace arduino
+namespace arx
 {
     namespace artnet
     {
@@ -450,14 +450,14 @@ namespace arduino
 }
 
 #ifdef ARTNET_ENABLE_WIFI
-    using ArtnetWiFi = arduino::artnet::Manager<WiFiUDP>;
-    using ArtnetWiFiSender = arduino::artnet::Sender<WiFiUDP>;
-    using ArtnetWiFiReceiver = arduino::artnet::Receiver<WiFiUDP>;
+    using ArtnetWiFi = arx::artnet::Manager<WiFiUDP>;
+    using ArtnetWiFiSender = arx::artnet::Sender<WiFiUDP>;
+    using ArtnetWiFiReceiver = arx::artnet::Receiver<WiFiUDP>;
 #endif
 #ifdef ARTNET_ENABLE_ETHER
-    using Artnet = arduino::artnet::Manager<EthernetUDP>;
-    using ArtnetSender = arduino::artnet::Sender<EthernetUDP>;
-    using ArtnetReceiver = arduino::artnet::Receiver<EthernetUDP>;
+    using Artnet = arx::artnet::Manager<EthernetUDP>;
+    using ArtnetSender = arx::artnet::Sender<EthernetUDP>;
+    using ArtnetReceiver = arx::artnet::Receiver<EthernetUDP>;
 #endif
 
 #endif // ARDUINO_ARTNET_H
