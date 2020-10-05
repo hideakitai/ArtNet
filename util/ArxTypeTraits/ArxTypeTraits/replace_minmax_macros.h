@@ -6,7 +6,9 @@
 // Make sure Arduino.h is actually included, since otherwise it might be
 // included later and break *uses* of the min/max methods, rather than
 // the declarations of it.
-#include <Arduino.h>
+#ifdef ARDUINO
+    #include <Arduino.h>
+#endif
 
 // These macros are defined by Arduino.h on some platforms, and conflict
 // with min/max methods defined or included by ArxTypeTraits, so replace

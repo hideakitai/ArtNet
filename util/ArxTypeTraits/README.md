@@ -103,6 +103,7 @@ C++ type_traits for Arduino which cannot use it as default
 - [Tween](https://github.com/hideakitai/Tween)
 - [ArxStringUtils](https://github.com/hideakitai/ArxStringUtils)
 - [Filters](https://github.com/hideakitai/Filters)
+- [Debouncer](https://github.com/hideakitai/Debouncer)
 
 
 ## Contributors
