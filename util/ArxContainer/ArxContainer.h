@@ -10,7 +10,9 @@
 #include "ArxContainer/has_include.h"
 #include "ArxContainer/has_libstdcplusplus.h"
 
-#include <Arduino.h>
+#ifdef ARDUINO
+    #include <Arduino.h>
+#endif
 
 #include "ArxContainer/replace_minmax_macros.h"
 #include "ArxContainer/initializer_list.h"

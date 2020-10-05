@@ -165,6 +165,8 @@ PRs are welcome!
 - [TimeProfiler](https://github.com/hideakitai/TimeProfiler)
 - [SceneManager](https://github.com/hideakitai/SceneManager)
 - [TaskManager](https://github.com/hideakitai/TaskManager)
+- [ArxStringUtils](https://github.com/hideakitai/ArxStringUtils)
+- [Debouncer](https://github.com/hideakitai/Debouncer)
 
 
 ## License

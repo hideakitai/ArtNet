@@ -254,7 +254,7 @@ Please use only sender OR receiver.
 
 ## Embedded Libraries
 
-- [ArxContainer v0.3.9](https://github.com/hideakitai/ArxContainer)
+- [ArxContainer v0.3.10](https://github.com/hideakitai/ArxContainer)
 - [ArxTypeTraits v0.2.0](https://github.com/hideakitai/ArxTypeTraits)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
