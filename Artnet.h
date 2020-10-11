@@ -358,15 +358,40 @@ namespace arx
                 return packet[HEADER_SIZE + i];
             }
 
-            inline void subscribe(const uint32_t universe, const CallbackType& func)
+            template <typename F>
+            inline auto subscribe(const uint32_t universe, F&& func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
             {
-                callbacks.insert(make_pair(universe, func));
+                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
             }
-            inline void subscribe(const CallbackAllType& func)
+            template <typename F>
+            inline auto subscribe(const uint32_t universe, F* func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
             {
-                callback_all = func;
+                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
             }
-            inline void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func)
+            template <typename F>
+            inline auto subscribe(F&& func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
+            {
+                callback_all = arx::function_traits<F>::cast(func);
+            }
+            template <typename F>
+            inline auto subscribe(F* func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
+            {
+                callback_all = arx::function_traits<F>::cast(func);
+            }
+            template <typename F>
+            inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F&& func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
+            {
+                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
+                subscribe(u, func);
+            }
+            template <typename F>
+            inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F* func)
+            -> std::enable_if_t<arx::is_callable<F>::value>
             {
                 uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
                 subscribe(u, func);
