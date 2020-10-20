@@ -166,6 +166,10 @@ namespace arx
 
         public:
 
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#else
+            Sender_() { packet.resize(PACKET_SIZE); }
+#endif
             virtual ~Sender_() {}
 
             void net(const uint8_t n) { target_net = n & 0x7F; }
@@ -269,6 +273,11 @@ namespace arx
             S* stream;
 
         public:
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#else
+            Receiver_() { packet.resize(PACKET_SIZE); }
+#endif
 
             virtual ~Receiver_() {}
 
