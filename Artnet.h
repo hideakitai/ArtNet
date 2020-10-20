@@ -153,7 +153,7 @@ namespace arx
         class Sender_
         {
             Array<PACKET_SIZE> packet;
-            const char* ip;
+            String ip;
             uint16_t port {DEFAULT_PORT};
             uint8_t target_net {0};
             uint8_t target_subnet {0};
@@ -210,7 +210,7 @@ namespace arx
             void send()
             {
                 packet[IDX(Index::SEQUENCE)] = seq++;
-                stream->beginPacket(ip, port);
+                stream->beginPacket(ip.c_str(), port);
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
             }
@@ -244,7 +244,7 @@ namespace arx
 
         protected:
 
-            void attach(S& s, const char* user_ip, const uint16_t user_port = DEFAULT_PORT)
+            void attach(S& s, const String& user_ip, const uint16_t user_port = DEFAULT_PORT)
             {
                 stream = &s;
                 ip = user_ip;
@@ -442,7 +442,7 @@ namespace arx
         {
             S stream;
         public:
-            void begin(const char* send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT)
+            void begin(const String& send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT)
             {
                 stream.begin(recv_port);
                 this->Sender_<S>::attach(stream, send_ip, send_port);
@@ -455,8 +455,9 @@ namespace arx
         {
             S stream;
         public:
-            void begin(const char* ip, const uint16_t port = DEFAULT_PORT)
+            void begin(const String& ip, const uint16_t port = DEFAULT_PORT)
             {
+                stream.begin(DEFAULT_PORT);
                 this->Sender_<S>::attach(stream, ip, port);
             }
         };
