@@ -275,7 +275,7 @@ namespace arx
             bool parse()
             {
                 const size_t size = stream->parsePacket();
-                if (size == 0) return false;
+                if (size <= HEADER_SIZE) return false;
 
                 uint8_t d[size];
                 stream->read(d, size);
@@ -287,9 +287,9 @@ namespace arx
                         memcpy(packet.data(), d, size);
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
-                        if (callback_all) callback_all(universe15bit(), data(), size);
+                        if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
                         for (auto& c : callbacks)
-                            if (universe15bit() == c.first) c.second(data(), size);
+                            if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
                         return true;
                     }
                 }
