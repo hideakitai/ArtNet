@@ -32,8 +32,10 @@ void setup()
     artnet.subscribe(universe1, [&](uint8_t* data, uint16_t size)
     {
         Serial.print("lambda : artnet data (universe : ");
-        Serial.print(universe1);
-        Serial.println(") = ");
+        Serial.print(universe);
+        Serial.print(", size = ");
+        Serial.print(size);
+        Serial.print(") :");
         for (size_t i = 0; i < size; ++i)
         {
             Serial.print(data[i]); Serial.print(",");

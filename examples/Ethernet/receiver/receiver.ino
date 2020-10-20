@@ -1,7 +1,7 @@
 #include <Artnet.h>
 
 // Ethernet stuff
-const IPAddress ip(192, 168, 1, 201);
+const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 ArtnetReceiver artnet;
@@ -24,8 +24,10 @@ void setup()
     artnet.subscribe(universe1, [&](uint8_t* data, uint16_t size)
     {
         Serial.print("artnet data (universe : ");
-        Serial.print(universe1);
-        Serial.println(") = ");
+        Serial.print(universe);
+        Serial.print(", size = ");
+        Serial.print(size);
+        Serial.print(") :");
         for (size_t i = 0; i < size; ++i)
         {
             Serial.print(data[i]); Serial.print(",");

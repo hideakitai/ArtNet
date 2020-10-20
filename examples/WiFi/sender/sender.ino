@@ -8,6 +8,7 @@ const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetWiFiSender artnet;
+const String target_ip = "192.168.1.200";
 uint32_t universe = 1;
 
 const uint16_t size = 512;
@@ -24,12 +25,12 @@ void setup()
     while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(500); }
     Serial.print("WiFi connected, IP = "); Serial.println(WiFi.localIP());
 
-    artnet.begin("127.0.0.1");
+    artnet.begin(target_ip);
 }
 
 void loop()
 {
-    value = millis() % 256;
+    value = (millis() / 4) % 256;
     memset(data, value, size);
 
     artnet.set(universe, data, size);
