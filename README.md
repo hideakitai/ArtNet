@@ -252,6 +252,13 @@ Some boards without enough memory may not be able to use integrated sender/recei
 Please use only sender OR receiver.
 
 
+## Reference
+
+- [Spec (Art-Net 4)](http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf)
+- [Packet Summary](https://art-net.org.uk/structure/packet-summary-2/)
+- [Packet Definition](https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/)
+
+
 ## Embedded Libraries
 
 - [ArxContainer v0.3.10](https://github.com/hideakitai/ArxContainer)
