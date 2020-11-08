@@ -24,7 +24,7 @@ void setup()
     artnet.subscribe(universe1, [&](uint8_t* data, uint16_t size)
     {
         Serial.print("artnet data (universe : ");
-        Serial.print(universe);
+        Serial.print(universe1);
         Serial.print(", size = ");
         Serial.print(size);
         Serial.print(") :");
