@@ -292,10 +292,9 @@ Please feel free to send PR or request for more board support!
 - Almost all platforms without WiFi
 
 
-#### Note
+### Note
 
-Some boards without enough memory may not be able to use integrated sender/receiver.
-Please use only sender OR receiver.
+Some boards without enough memory (e.g. Uno, Nano, etc.) may not be able to use integrated sender/receiver because of the lack of enough memory. Please consider to use more powerful board or to use only sender OR receiver.
 
 
 ## Reference
