@@ -1,3 +1,7 @@
+#ifdef __AVR__
+#warning THIS EXAMPLE MAY USE TOO MUCH MEMORY FOR AVR. WE RECOMMEND TO USE SENDER OR RECEIVER ONLY.
+#endif
+
 #include <Artnet.h>
 
 // Ethernet stuff
