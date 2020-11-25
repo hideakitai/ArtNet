@@ -19,7 +19,7 @@ Please use them depending on the situation.
 - Artnet (Integrated Sender/Receiver)
 
 
-#### Warning
+### Warning
 
 **From v0.1.11, arguments of callbacks must be `const` for safety. Previous sketches can not be compiled as is, so please add `const` to the arguments of callbacks.**
 
@@ -57,7 +57,7 @@ void loop()
 
 ArtnetReceiver artnet;
 
-void callback(uint8_t* data, uint16_t size)
+void callback(const uint8_t* data, const uint16_t size)
 {
     // you can also use pre-defined callbacks
 }
@@ -69,7 +69,7 @@ void setup()
     artnet.begin(); // waiting for Art-Net in default port
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe1, [](uint8_t* data, uint16_t size)
+    artnet.subscribe(universe1, [](const uint8_t* data, const uint16_t size)
     {
         // use received data[], and size
     });
@@ -101,13 +101,13 @@ void setup()
     artnet.begin("127.0.0.1"); // send to localhost and listen to default port
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [&](uint8_t* data, uint16_t size)
+    artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size)
     {
         // do something with data coming to universe
     });
 
     // if Artnet packet comes, this function is called to every universe
-    artnet.subscribe([&](uint32_t univ, uint8_t* data, uint16_t size)
+    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size)
     {
         // do something with data coming to all universe
     });
