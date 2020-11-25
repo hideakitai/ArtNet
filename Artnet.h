@@ -367,6 +367,24 @@ namespace arx {
                 callbacks.clear();
             }
 
+#ifdef FASTLED_VERSION
+            inline void forward(const uint32_t universe, CRGB* leds, const uint16_t num) {
+                subscribe(universe, [&](uint8_t* data, uint16_t size) {
+                    if (size < num * 3) Serial.println(F("ERROR: Too many LEDs to forward"));
+                    for (size_t pixel = 0; pixel < num; ++pixel) {
+                        size_t idx = pixel * 3;
+                        leds[pixel].r = data[idx + 0];
+                        leds[pixel].g = data[idx + 1];
+                        leds[pixel].b = data[idx + 2];
+                    }
+                });
+            }
+            inline void forward(const uint8_t net, const uint8_t subnet, const uint8_t universe, CRGB* leds, const uint16_t num) {
+                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
+                forward(u, leds, num);
+            }
+#endif
+
         protected:
             void attach(S& s) {
                 stream = &s;
