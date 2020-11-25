@@ -118,8 +118,8 @@ namespace arx {
 
         static constexpr uint8_t NUM_PIXELS_PER_UNIV{170};
 
-        using CallbackAllType = std::function<void(uint32_t universe, uint8_t* data, uint16_t size)>;
-        using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
+        using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
+        using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
         template <uint16_t SIZE>
@@ -369,7 +369,7 @@ namespace arx {
 
 #ifdef FASTLED_VERSION
             inline void forward(const uint32_t universe, CRGB* leds, const uint16_t num) {
-                subscribe(universe, [&](uint8_t* data, uint16_t size) {
+                subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
                     if (size < num * 3) Serial.println(F("ERROR: Too many LEDs to forward"));
                     for (size_t pixel = 0; pixel < num; ++pixel) {
                         size_t idx = pixel * 3;
