@@ -18,6 +18,11 @@ Please use them depending on the situation.
 - ArtnetReveiver
 - Artnet (Integrated Sender/Receiver)
 
+
+#### Warning
+
+**From v0.1.11, arguments of callbacks must be `const` for safety. Previous sketches can not be compiled as is, so please add `const` to the arguments of callbacks.**
+
 ### ArtnetSender
 
 ```C++
@@ -143,24 +148,29 @@ void setup()
     FastLED.addLeds<NEOPIXEL, PIN_LED>(&leds, NUM_LEDS);
 
     artnet.begin();
-    artnet.subscribe(universe, [](uint8_t* data, uint16_t size)
-    {
-        // artnet data size per packet is 512 max
-        // so there is max 170 pixel per packet (per universe)
-        for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel)
-        {
-            size_t idx = pixel * 3;
-            leds[pixel].r = data[idx + 0];
-            leds[pixel].g = data[idx + 1];
-            leds[pixel].b = data[idx + 2];
-        }
-        FastLED.show();
-    });
+
+    // if Artnet packet comes to this universe, forward them to fastled directly
+    artnet.forward(universe, leds, NUM_LEDS);
+
+    // this can be achieved manually as follows
+    // artnet.subscribe(universe, [](uint8_t* data, uint16_t size)
+    // {
+    //     // artnet data size per packet is 512 max
+    //     // so there is max 170 pixel per packet (per universe)
+    //     for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel)
+    //     {
+    //         size_t idx = pixel * 3;
+    //         leds[pixel].r = data[idx + 0];
+    //         leds[pixel].g = data[idx + 1];
+    //         leds[pixel].b = data[idx + 2];
+    //     }
+    // });
 }
 
 void loop()
 {
     artnet.parse(); // check if artnet packet has come and execute callback
+    FastLED.show();
 }
 ```
 
@@ -269,6 +279,8 @@ void unsubscribe(const uint32_t universe);
 void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe);
 void unsubscribe(); // for all packet of all universe
 void clear_subscribers(); // clear all callbacks
+inline void forward(const uint32_t universe, CRGB* leds, const uint16_t num);
+inline void forward(const uint8_t net, const uint8_t subnet, const uint8_t universe, CRGB* leds, const uint16_t num);
 ```
 
 ## Supported Platform
