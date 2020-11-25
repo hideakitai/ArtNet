@@ -16,8 +16,7 @@ const uint16_t size = 512;
 uint8_t data[size];
 uint8_t value = 0;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
@@ -27,24 +26,21 @@ void setup()
     Serial.println("set subscriber");
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [](uint8_t* data, uint16_t size)
-    {
+    artnet.subscribe(universe, [](const uint8_t* data, const uint16_t size) {
         Serial.print("artnet data (universe : ");
         Serial.print(universe);
         Serial.print(", size = ");
         Serial.print(size);
         Serial.print(") :");
-        for (size_t i = 0; i < size; ++i)
-        {
-            Serial.print(data[i]); Serial.print(",");
+        for (size_t i = 0; i < size; ++i) {
+            Serial.print(data[i]);
+            Serial.print(",");
         }
         Serial.println();
     });
 
-
     // if Artnet packet comes, this function is called to every universe
-    artnet.subscribe([&](uint32_t univ, uint8_t* data, uint16_t size)
-    {
+    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
         Serial.print("ArtNet data has come to universe: ");
         Serial.println(univ);
     });
@@ -52,13 +48,12 @@ void setup()
     Serial.println("start");
 }
 
-void loop()
-{
-    artnet.parse(); // check if artnet packet has come and execute callback
+void loop() {
+    artnet.parse();  // check if artnet packet has come and execute callback
 
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
     artnet.set(universe, data, size);
-    artnet.streaming(); // automatically send set data in 40fps
+    artnet.streaming();  // automatically send set data in 40fps
 }

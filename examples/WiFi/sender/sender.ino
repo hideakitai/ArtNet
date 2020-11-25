@@ -15,24 +15,26 @@ const uint16_t size = 512;
 uint8_t data[size];
 uint8_t value = 0;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
 
     // WiFi stuff
     WiFi.begin(ssid, pwd);
     WiFi.config(ip, gateway, subnet);
-    while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(500); }
-    Serial.print("WiFi connected, IP = "); Serial.println(WiFi.localIP());
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+    }
+    Serial.print("WiFi connected, IP = ");
+    Serial.println(WiFi.localIP());
 
     artnet.begin(target_ip);
 }
 
-void loop()
-{
+void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
     artnet.set(universe, data, size);
-    artnet.streaming(); // automatically send set data in 40fps
+    artnet.streaming();  // automatically send set data in 40fps
 }

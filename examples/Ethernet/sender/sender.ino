@@ -12,26 +12,23 @@ const uint16_t size = 512;
 uint8_t data[size];
 uint8_t value = 0;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
     Ethernet.begin(mac, ip);
     artnet.begin(target_ip);
 
-
     Serial.println("start");
     Serial.println(UDP_TX_PACKET_MAX_SIZE);
 }
 
-void loop()
-{
+void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
     artnet.set(universe, data, size);
-    artnet.streaming(); // automatically send set data in 40fps
+    artnet.streaming();  // automatically send set data in 40fps
 
     // Serial.println("loop");
 }
