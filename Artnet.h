@@ -368,7 +368,9 @@ namespace arx {
             }
 
         protected:
-            void attach(S& s) { stream = &s; }
+            void attach(S& s) {
+                stream = &s;
+            }
 
         private:
             inline bool checkID() const {
