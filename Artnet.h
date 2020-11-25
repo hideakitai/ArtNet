@@ -10,63 +10,48 @@
 #include "util/ArxTypeTraits/ArxTypeTraits.h"
 #include "util/ArxContainer/ArxContainer.h"
 
-#if defined(ESP_PLATFORM)\
- || defined(ESP8266)\
- || defined(ARDUINO_AVR_UNO_WIFI_REV2)\
- || defined(ARDUINO_SAMD_MKRWIFI1010)\
- || defined(ARDUINO_SAMD_MKRVIDOR4000)\
- || defined(ARDUINO_SAMD_MKR1000)\
- || defined(ARDUINO_SAMD_NANO_33_IOT)
-    #define ARTNET_ENABLE_WIFI
+#if defined(ESP_PLATFORM) || defined(ESP8266) || defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_SAMD_NANO_33_IOT)
+#define ARTNET_ENABLE_WIFI
 #endif
 
-#if defined(ESP8266)\
- || !defined(ARTNET_ENABLE_WIFI)
-    #define ARTNET_ENABLE_ETHER
+#if defined(ESP8266) || !defined(ARTNET_ENABLE_WIFI)
+#define ARTNET_ENABLE_ETHER
 #endif
 
-#if !defined (ARTNET_ENABLE_WIFI)\
- && !defined (ARTNET_ENABLE_ETHER)
-    #error THIS PLATFORM HAS NO WIFI OR ETHERNET OR NOT SUPPORTED ARCHITECTURE. PLEASE LET ME KNOW!
+#if !defined(ARTNET_ENABLE_WIFI) && !defined(ARTNET_ENABLE_ETHER)
+#error THIS PLATFORM HAS NO WIFI OR ETHERNET OR NOT SUPPORTED ARCHITECTURE. PLEASE LET ME KNOW!
 #endif
 
 #ifdef ARTNET_ENABLE_WIFI
-    #ifdef ESP_PLATFORM
-        #include <WiFi.h>
-        #include <WiFiUdp.h>
-    #elif defined (ESP8266)
-        #include <ESP8266WiFi.h>
-        #include <WiFiUdp.h>
-    #elif defined (ARDUINO_AVR_UNO_WIFI_REV2)\
-        || defined(ARDUINO_SAMD_MKRWIFI1010)\
-        || defined(ARDUINO_SAMD_MKRVIDOR4000)\
-        || defined(ARDUINO_SAMD_NANO_33_IOT)
-        #include <SPI.h>
-        #include <WiFiNINA.h>
-        #include <WiFiUdp.h>
-    #elif defined (ARDUINO_SAMD_MKR1000)
-        #include <SPI.h>
-        #include <WiFi101.h>
-        #include <WiFiUdp.h>
-    #endif
-#endif // ARTNET_ENABLE_WIFI
+#ifdef ESP_PLATFORM
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#elif defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_NANO_33_IOT)
+#include <SPI.h>
+#include <WiFiNINA.h>
+#include <WiFiUdp.h>
+#elif defined(ARDUINO_SAMD_MKR1000)
+#include <SPI.h>
+#include <WiFi101.h>
+#include <WiFiUdp.h>
+#endif
+#endif  // ARTNET_ENABLE_WIFI
 
 #ifdef ARTNET_ENABLE_ETHER
-    #include <Ethernet.h>
-    #include <EthernetUdp.h>
-    #include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
-#endif // ARTNET_ENABLE_ETHER
+#include <Ethernet.h>
+#include <EthernetUdp.h>
+#include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
+#endif  // ARTNET_ENABLE_ETHER
 
-
-namespace arx
-{
-    namespace artnet
-    {
+namespace arx {
+    namespace artnet {
         // Packet Summary : https://art-net.org.uk/structure/packet-summary-2/
         // Packet Definition : https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/
 
-        enum class OpCode : uint16_t
-        {
+        enum class OpCode : uint16_t {
             // Device Discovery
             Poll = 0x2000,
             PollReply = 0x2100,
@@ -105,8 +90,7 @@ namespace arx
 
         constexpr uint16_t OPC(OpCode op) { return static_cast<uint16_t>(op); }
 
-        enum class Index : uint16_t
-        {
+        enum class Index : uint16_t {
             ID = 0,
             OP_CODE_L = 8,
             OP_CODE_H = 9,
@@ -123,21 +107,21 @@ namespace arx
 
         constexpr uint16_t IDX(Index i) { return static_cast<uint16_t>(i); }
 
-        constexpr uint16_t DEFAULT_PORT { 6454 };
-        constexpr uint16_t HEADER_SIZE { 18 };
-        constexpr uint16_t PACKET_SIZE { 530 };
-        constexpr uint16_t PROTOCOL_VER { 0x0014 };
-        constexpr uint8_t ID_LENGTH { 8 };
-        constexpr char ID[ID_LENGTH] { "Art-Net" };
-        constexpr float DEFAULT_FPS { 40. };
-        constexpr uint32_t DEFAULT_INTERVAL_MS { (uint32_t)(1000. / DEFAULT_FPS) };
+        constexpr uint16_t DEFAULT_PORT{6454};
+        constexpr uint16_t HEADER_SIZE{18};
+        constexpr uint16_t PACKET_SIZE{530};
+        constexpr uint16_t PROTOCOL_VER{0x0014};
+        constexpr uint8_t ID_LENGTH{8};
+        constexpr char ID[ID_LENGTH]{"Art-Net"};
+        constexpr float DEFAULT_FPS{40.};
+        constexpr uint32_t DEFAULT_INTERVAL_MS{(uint32_t)(1000. / DEFAULT_FPS)};
 
-        static constexpr uint8_t NUM_PIXELS_PER_UNIV { 170 };
+        static constexpr uint8_t NUM_PIXELS_PER_UNIV{170};
 
         using CallbackAllType = std::function<void(uint32_t universe, uint8_t* data, uint16_t size)>;
         using CallbackType = std::function<void(uint8_t* data, uint16_t size)>;
 
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
         template <uint16_t SIZE>
         using Array = std::array<uint8_t, SIZE>;
         using CallbackMap = std::map<uint32_t, CallbackType>;
@@ -150,23 +134,21 @@ namespace arx
 #endif
 
         template <typename S>
-        class Sender_
-        {
+        class Sender_ {
             Array<PACKET_SIZE> packet;
             String ip;
-            uint16_t port {DEFAULT_PORT};
-            uint8_t target_net {0};
-            uint8_t target_subnet {0};
-            uint8_t target_universe {0};
-            uint8_t seq {0};
-            uint8_t phy {0};
+            uint16_t port{DEFAULT_PORT};
+            uint8_t target_net{0};
+            uint8_t target_subnet{0};
+            uint8_t target_universe{0};
+            uint8_t seq{0};
+            uint8_t phy{0};
 
-            uint32_t prev_send_ms {0};
+            uint32_t prev_send_ms{0};
             S* stream;
 
         public:
-
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
             Sender_() { packet.resize(PACKET_SIZE); }
 #endif
@@ -175,15 +157,13 @@ namespace arx
             void net(const uint8_t n) { target_net = n & 0x7F; }
             void subnet(const uint8_t s) { target_subnet = s & 0x0F; }
             void universe(const uint8_t u) { target_universe = u & 0x0F; }
-            void universe15bit(const uint8_t u)
-            {
+            void universe15bit(const uint8_t u) {
                 net((u >> 8) & 0xFF);
                 subnet((u >> 4) & 0x0F);
                 universe((u >> 0) & 0x0F);
             }
 
-            void set(const uint8_t* const data, const uint16_t size = 512)
-            {
+            void set(const uint8_t* const data, const uint16_t size = 512) {
                 packet[IDX(Index::PHYSICAL)] = phy;
                 packet[IDX(Index::NET)] = target_net;
                 packet[IDX(Index::SUBUNI)] = (target_subnet << 4) | target_universe;
@@ -192,52 +172,43 @@ namespace arx
                 memcpy((&packet[IDX(Index::DATA)]), data, size);
             }
 
-            void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512)
-            {
+            void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 universe15bit(universe_);
                 set(data, size);
             }
 
-            void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512)
-            {
+            void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 net(net_);
                 subnet(subnet_);
                 universe(universe_);
                 set(data, size);
             }
 
-            void set(const uint16_t ch, const uint8_t data)
-            {
+            void set(const uint16_t ch, const uint8_t data) {
                 packet[IDX(Index::DATA) + ch] = data;
             }
 
-            void send()
-            {
+            void send() {
                 packet[IDX(Index::SEQUENCE)] = seq++;
                 stream->beginPacket(ip.c_str(), port);
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
             }
-            void send(const uint8_t* const data, const uint16_t size = 512)
-            {
+            void send(const uint8_t* const data, const uint16_t size = 512) {
                 set(data, size);
                 send();
             }
-            void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512)
-            {
+            void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 set(universe_, data, size);
                 send();
             }
-            void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512)
-            {
+            void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 set(net_, subnet_, universe_, data, size);
                 send();
             }
 
-            void streaming()
-            {
-                if ((millis() - prev_send_ms) > DEFAULT_INTERVAL_MS)
-                {
+            void streaming() {
+                if ((millis() - prev_send_ms) > DEFAULT_INTERVAL_MS) {
                     send();
                     prev_send_ms = millis();
                 }
@@ -247,9 +218,7 @@ namespace arx
             uint8_t sequence() const { return seq; }
 
         protected:
-
-            void attach(S& s, const String& user_ip, const uint16_t user_port = DEFAULT_PORT)
-            {
+            void attach(S& s, const String& user_ip, const uint16_t user_port = DEFAULT_PORT) {
                 stream = &s;
                 ip = user_ip;
                 port = user_port;
@@ -261,10 +230,8 @@ namespace arx
             }
         };
 
-
         template <typename S>
-        class Receiver_
-        {
+        class Receiver_ {
             Array<PACKET_SIZE> packet;
             IPAddress remote_ip;
             uint16_t remote_port;
@@ -273,26 +240,22 @@ namespace arx
             S* stream;
 
         public:
-
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L // Have libstdc++11
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
             Receiver_() { packet.resize(PACKET_SIZE); }
 #endif
 
             virtual ~Receiver_() {}
 
-            bool parse()
-            {
+            bool parse() {
                 const size_t size = stream->parsePacket();
                 if (size <= HEADER_SIZE) return false;
 
                 uint8_t d[size];
                 stream->read(d, size);
 
-                if (checkID(d))
-                {
-                    if (opcode(d) == OPC(OpCode::Dmx))
-                    {
+                if (checkID(d)) {
+                    if (opcode(d) == OPC(OpCode::Dmx)) {
                         memcpy(packet.data(), d, size);
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
@@ -308,151 +271,122 @@ namespace arx
             inline const IPAddress& ip() const { return remote_ip; }
             inline uint16_t port() const { return remote_port; }
 
-            inline String id() const
-            {
+            inline String id() const {
                 String str;
                 for (uint8_t i = 0; i < ID_LENGTH; ++i) str += packet[IDX(Index::ID) + i];
                 return str;
             }
-            inline uint16_t opcode() const
-            {
+            inline uint16_t opcode() const {
                 return (packet[IDX(Index::OP_CODE_H)] << 8) | packet[IDX(Index::OP_CODE_L)];
             }
-            inline uint16_t opcode(const uint8_t* p) const
-            {
+            inline uint16_t opcode(const uint8_t* p) const {
                 return (p[IDX(Index::OP_CODE_H)] << 8) | p[IDX(Index::OP_CODE_L)];
             }
-            inline uint16_t version() const
-            {
+            inline uint16_t version() const {
                 return (packet[IDX(Index::PROTOCOL_VER_H)] << 8) | packet[IDX(Index::PROTOCOL_VER_L)];
             }
-            inline uint8_t sequence() const
-            {
+            inline uint8_t sequence() const {
                 return packet[IDX(Index::SEQUENCE)];
             }
-            inline uint8_t physical() const
-            {
+            inline uint8_t physical() const {
                 return packet[IDX(Index::PHYSICAL)];
             }
-            inline uint8_t net() const
-            {
+            inline uint8_t net() const {
                 return packet[IDX(Index::NET)] & 0x7F;
             }
-            inline uint8_t subnet() const
-            {
+            inline uint8_t subnet() const {
                 return (packet[IDX(Index::SUBUNI)] >> 4) & 0x0F;
             }
-            inline uint8_t universe() const
-            {
+            inline uint8_t universe() const {
                 return packet[IDX(Index::SUBUNI)] & 0x0F;
             }
-            inline uint16_t universe15bit() const
-            {
+            inline uint16_t universe15bit() const {
                 return (packet[IDX(Index::NET)] << 8) | packet[IDX(Index::SUBUNI)];
             }
-            inline uint16_t length() const
-            {
+            inline uint16_t length() const {
                 return (packet[IDX(Index::LENGTH_H)] << 8) | packet[IDX(Index::LENGTH_L)];
             }
-            inline uint16_t size() const
-            {
+            inline uint16_t size() const {
                 return length();
             }
-            inline uint8_t* data()
-            {
+            inline uint8_t* data() {
                 return &(packet[HEADER_SIZE]);
             }
-            inline uint8_t data(const uint16_t i) const
-            {
+            inline uint8_t data(const uint16_t i) const {
                 return packet[HEADER_SIZE + i];
             }
 
             template <typename F>
             inline auto subscribe(const uint32_t universe, F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
             }
             template <typename F>
             inline auto subscribe(const uint32_t universe, F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
             }
             template <typename F>
             inline auto subscribe(F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 callback_all = arx::function_traits<F>::cast(func);
             }
             template <typename F>
             inline auto subscribe(F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 callback_all = arx::function_traits<F>::cast(func);
             }
             template <typename F>
             inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
                 subscribe(u, func);
             }
             template <typename F>
             inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value>
-            {
+                -> std::enable_if_t<arx::is_callable<F>::value> {
                 uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
                 subscribe(u, func);
             }
 
-            inline void unsubscribe(const uint32_t universe)
-            {
+            inline void unsubscribe(const uint32_t universe) {
                 auto it = callbacks.find(universe);
                 if (it != callbacks.end())
                     callbacks.erase(it);
             }
-            inline void unsubscribe()
-            {
+            inline void unsubscribe() {
                 callback_all = nullptr;
             }
-            inline void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe)
-            {
+            inline void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe) {
                 uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
                 unsubscribe(u);
             }
 
-            inline void clear_subscribers()
-            {
+            inline void clear_subscribers() {
                 unsubscribe();
                 callbacks.clear();
             }
 
         protected:
-
             void attach(S& s) { stream = &s; }
 
         private:
-
-            inline bool checkID() const
-            {
+            inline bool checkID() const {
                 const char* idptr = reinterpret_cast<const char*>(packet.data());
                 return !strcmp(ID, idptr);
             }
-            inline bool checkID(const uint8_t* p) const
-            {
+            inline bool checkID(const uint8_t* p) const {
                 const char* idptr = reinterpret_cast<const char*>(p);
                 return !strcmp(ID, idptr);
             }
         };
 
         template <typename S>
-        class Manager : public Sender_<S>, public Receiver_<S>
-        {
+        class Manager : public Sender_<S>, public Receiver_<S> {
             S stream;
+
         public:
-            void begin(const String& send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT)
-            {
+            void begin(const String& send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT) {
                 stream.begin(recv_port);
                 this->Sender_<S>::attach(stream, send_ip, send_port);
                 this->Receiver_<S>::attach(stream);
@@ -460,40 +394,38 @@ namespace arx
         };
 
         template <typename S>
-        class Sender : public Sender_<S>
-        {
+        class Sender : public Sender_<S> {
             S stream;
+
         public:
-            void begin(const String& ip, const uint16_t port = DEFAULT_PORT)
-            {
+            void begin(const String& ip, const uint16_t port = DEFAULT_PORT) {
                 stream.begin(DEFAULT_PORT);
                 this->Sender_<S>::attach(stream, ip, port);
             }
         };
 
         template <typename S>
-        class Receiver : public Receiver_<S>
-        {
+        class Receiver : public Receiver_<S> {
             S stream;
+
         public:
-            void begin(const uint16_t port = DEFAULT_PORT)
-            {
+            void begin(const uint16_t port = DEFAULT_PORT) {
                 stream.begin(port);
                 this->Receiver_<S>::attach(stream);
             }
         };
-    }
-}
+    }  // namespace artnet
+}  // namespace arx
 
 #ifdef ARTNET_ENABLE_WIFI
-    using ArtnetWiFi = arx::artnet::Manager<WiFiUDP>;
-    using ArtnetWiFiSender = arx::artnet::Sender<WiFiUDP>;
-    using ArtnetWiFiReceiver = arx::artnet::Receiver<WiFiUDP>;
+using ArtnetWiFi = arx::artnet::Manager<WiFiUDP>;
+using ArtnetWiFiSender = arx::artnet::Sender<WiFiUDP>;
+using ArtnetWiFiReceiver = arx::artnet::Receiver<WiFiUDP>;
 #endif
 #ifdef ARTNET_ENABLE_ETHER
-    using Artnet = arx::artnet::Manager<EthernetUDP>;
-    using ArtnetSender = arx::artnet::Sender<EthernetUDP>;
-    using ArtnetReceiver = arx::artnet::Receiver<EthernetUDP>;
+using Artnet = arx::artnet::Manager<EthernetUDP>;
+using ArtnetSender = arx::artnet::Sender<EthernetUDP>;
+using ArtnetReceiver = arx::artnet::Receiver<EthernetUDP>;
 #endif
 
-#endif // ARDUINO_ARTNET_H
+#endif  // ARDUINO_ARTNET_H
