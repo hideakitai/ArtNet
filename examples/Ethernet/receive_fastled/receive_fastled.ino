@@ -1,5 +1,5 @@
+#include <FastLED.h>  // include FastLED *before* Artnet
 #include <Artnet.h>
-#include <FastLED.h>
 
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
@@ -13,8 +13,7 @@ uint32_t universe = 1;
 CRGB leds[NUM_LEDS];
 const uint8_t PIN_LED_DATA = 3;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(2000);
 
@@ -23,24 +22,26 @@ void setup()
     Ethernet.begin(mac, ip);
     artnet.begin();
 
+    // if Artnet packet comes to this universe, forward them to fastled directly
+    artnet.forward(universe, leds, NUM_LEDS);
+
+    // this can be achieved manually as follows
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [&](uint8_t* data, uint16_t size)
-    {
-        // set led
-        // artnet data size per packet is 512 max
-        // so there is max 170 pixel per packet (per universe)
-        for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel)
-        {
-            size_t idx = pixel * 3;
-            leds[pixel].r = data[idx + 0];
-            leds[pixel].g = data[idx + 1];
-            leds[pixel].b = data[idx + 2];
-        }
-        FastLED.show();
-    });
+    // artnet.subscribe(universe, [&](uint8_t* data, uint16_t size)
+    // {
+    //     // set led
+    //     // artnet data size per packet is 512 max
+    //     // so there is max 170 pixel per packet (per universe)
+    //     for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel) {
+    //         size_t idx = pixel * 3;
+    //         leds[pixel].r = data[idx + 0];
+    //         leds[pixel].g = data[idx + 1];
+    //         leds[pixel].b = data[idx + 2];
+    //     }
+    // });
 }
 
-void loop()
-{
-    artnet.parse(); // check if artnet packet has come and execute callback
+void loop() {
+    artnet.parse();  // check if artnet packet has come and execute callback
+    FastLED.show();
 }
