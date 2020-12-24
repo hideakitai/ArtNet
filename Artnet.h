@@ -249,10 +249,11 @@ namespace arx {
 
             bool parse() {
                 const size_t size = stream->parsePacket();
-                if (size <= HEADER_SIZE) return false;
+                if (size == 0) return false;
 
                 uint8_t d[size];
                 stream->read(d, size);
+                if (size <= HEADER_SIZE) return false; // discard packet if incomplete
 
                 if (checkID(d)) {
                     if (opcode(d) == OPC(OpCode::Dmx)) {
