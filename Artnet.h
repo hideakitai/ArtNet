@@ -85,7 +85,9 @@ namespace arx {
             DirectoryReply = 0x9B00,
             FileTnMaster = 0xF400,
             FileFnMaster = 0xF500,
-            FileFnReply = 0xF600
+            FileFnReply = 0xF600,
+            // N/A
+            NA = 0x0000,
         };
 
         constexpr uint16_t OPC(OpCode op) { return static_cast<uint16_t>(op); }
@@ -133,6 +135,47 @@ namespace arx {
         using namespace arx;
 #endif
 
+        union ArtPollReply {
+            struct {
+                uint8_t id[8];            // 8
+                uint16_t op_code;         // 10
+                uint8_t ip[4];            // 14
+                uint16_t port;            // 16
+                uint8_t ver_h;            // 17
+                uint8_t ver_l;            // 18
+                uint8_t net_sw;           // 19
+                uint8_t sub_sw;           // 20
+                uint8_t oem_h;            // 21
+                uint8_t oem_l;            // 22
+                uint8_t ubea_ver;         // 23
+                uint8_t status_1;         // 24
+                uint8_t esta_man_l;       // 25
+                uint8_t esta_man_h;       // 26
+                uint8_t short_name[18];   // 44
+                uint8_t long_name[64];    // 108
+                uint8_t node_report[64];  // 172
+                uint8_t num_ports_h;      // 173
+                uint8_t num_ports_l;      // 174
+                uint8_t port_types[4];    // 178
+                uint8_t good_input[4];    // 182
+                uint8_t good_output[4];   // 186
+                uint8_t sw_in[4];         // 190
+                uint8_t sw_out[4];        // 194
+                uint8_t sw_video;         // 195
+                uint8_t sw_macro;         // 196
+                uint8_t sw_remote;        // 197
+                uint8_t spare[3];         // 200
+                uint8_t style;            // 201
+                uint8_t mac_h;            // 202
+                uint8_t mac[4];           // 206
+                uint8_t mac_l;            // 207
+                uint8_t bind_ip[4];       // 211
+                uint8_t bind_index;       // 212
+                uint8_t status_2;         // 213
+                uint8_t filler[8][26];    // 421
+            };
+            uint8_t b[421];
+        };
         template <typename S>
         class Sender_ {
             Array<PACKET_SIZE> packet;
@@ -215,6 +258,66 @@ namespace arx {
             }
 
             void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
+
+            // void poll_reply(const IPAddress& remote_ip, const uint16_t remote_port) {
+            void poll_reply() {
+                ArtPollReply r;
+                for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ID[i]);
+                r.op_code = (uint16_t)OpCode::PollReply;
+#ifdef ARTNET_ENABLE_WIFI
+                IPAddress my_ip = WiFi.localIP();
+#endif
+#ifdef ARTNET_ENABLE_ETHER
+                IPAddress my_ip = Ethernet.localIP();
+#endif
+                for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
+                r.port = DEFAULT_PORT;
+                r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
+                r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
+                r.net_sw = 0;       // TODO:
+                r.sub_sw = 0;       // TODO:
+                r.oem_h = 0;        // https://github.com/tobiasebsen/ArtNode/blob/master/src/Art-NetOemCodes.h
+                r.oem_l = 0xFF;     // OemUnknown
+                r.ubea_ver = 0;     // UBEA not programmed
+                r.status_1 = 0x00;  // Unknown / Normal
+                r.esta_man_l = 0;   // No EATA manufacture code
+                r.esta_man_h = 0;   // No ESTA manufacture code
+                char short_name[18] = "Arduino ArtNet";
+                memcpy(r.short_name, short_name, sizeof(short_name));
+                char long_name[64] = "Arduino ArtNet Protocol by hideakitai/ArtNet";
+                memcpy(r.long_name, long_name, sizeof(long_name));
+                static size_t counts = 0;
+                char node_report[64];
+                sprintf(node_report, "#0001 [%d] Arduino ArtNet enabled", counts++);
+                memcpy(r.node_report, node_report, sizeof(node_report));
+                r.num_ports_h = 0;  // Reserved
+                r.num_ports_l = 1;  // This library implements only 1 port
+                for (size_t i = 0; i < 4; ++i) {
+                    r.port_types[i] = 0xC0;   // I/O available by DMX512
+                    r.good_input[i] = 0x80;   // Data received without error
+                    r.good_output[i] = 0x80;  // Data transmittedj without error
+                    r.sw_in[i] = 0;           // TODO:
+                    r.sw_out[i] = 0;          // TODO:
+                }
+                r.sw_video = 0;   // Video display shows local data
+                r.sw_macro = 0;   // No support for macro key inputs
+                r.sw_remote = 0;  // No support for remote trigger inputs
+                memset(r.spare, 0x00, 3);
+                r.style = 0x00;  // A DMX to / from Art-Net device
+                r.mac_h = 0;     // Do not supply mac address
+                memset(r.mac, 0x00, 4);
+                r.mac_l = 0;
+                for (size_t i = 0; i < 4; ++i) r.bind_ip[i] = my_ip[i];
+                r.bind_index = 0;
+                r.status_2 = 0x08;  // sACN capable (maybe)
+                memset(r.filler, 0x00, 208);
+
+                static const IPAddress DIRECTED_BROADCAST_ADDR(2, 255, 255, 255);
+                stream->beginPacket(DIRECTED_BROADCAST_ADDR, DEFAULT_PORT);
+                stream->write(r.b, 421);
+                stream->endPacket();
+            }
+
             uint8_t sequence() const { return seq; }
 
         protected:
@@ -247,29 +350,42 @@ namespace arx {
 
             virtual ~Receiver_() {}
 
-            bool parse() {
+            OpCode parse() {
                 const size_t size = stream->parsePacket();
-                if (size == 0) return false;
+                if (size == 0) return OpCode::NA;
 
                 uint8_t d[size];
                 stream->read(d, size);
-                if (size <= HEADER_SIZE) return false; // discard packet if incomplete
+                if (size <= HEADER_SIZE) return OpCode::NA;  // discard packet if incomplete
 
                 if (checkID(d)) {
-                    if (opcode(d) == OPC(OpCode::Dmx)) {
-                        memcpy(packet.data(), d, size);
-                        remote_ip = stream->S::remoteIP();
-                        remote_port = (uint16_t)stream->S::remotePort();
-                        if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
-                        for (auto& c : callbacks)
-                            if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
-                        return true;
+                    switch (opcode(d)) {
+                        case OPC(OpCode::Dmx): {
+                            memcpy(packet.data(), d, size);
+                            remote_ip = stream->S::remoteIP();
+                            remote_port = (uint16_t)stream->S::remotePort();
+                            if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
+                            for (auto& c : callbacks)
+                                if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
+                            return OpCode::Dmx;
+                        }
+                        case OPC(OpCode::Poll): {
+                            remote_ip = stream->S::remoteIP();
+                            remote_port = (uint16_t)stream->S::remotePort();
+                            return OpCode::Poll;
+                        }
+                        default: {
+                            return OpCode::NA;
+                        }
                     }
                 }
-                return false;
+                return OpCode::NA;
             }
 
-            inline const IPAddress& ip() const { return remote_ip; }
+            inline const IPAddress&
+            ip() const {
+                return remote_ip;
+            }
             inline uint16_t port() const { return remote_port; }
 
             inline String id() const {
@@ -400,7 +516,7 @@ namespace arx {
                 const char* idptr = reinterpret_cast<const char*>(p);
                 return !strcmp(ID, idptr);
             }
-        };
+        };  // namespace artnet
 
         template <typename S>
         class Manager : public Sender_<S>, public Receiver_<S> {
@@ -411,6 +527,22 @@ namespace arx {
                 stream.begin(recv_port);
                 this->Sender_<S>::attach(stream, send_ip, send_port);
                 this->Receiver_<S>::attach(stream);
+            }
+
+            void parse() {
+                OpCode op_code = this->Receiver_<S>::parse();
+                switch (op_code) {
+                    case OpCode::Poll: {
+                        // this->Sender_<S>::poll_reply(
+                        //     this->Receiver_<S>::ip(),
+                        //     this->Receiver_<S>::port());
+                        this->Sender_<S>::poll_reply();
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
             }
         };
 
