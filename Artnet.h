@@ -109,7 +109,7 @@ namespace arx {
 
         constexpr uint16_t IDX(Index i) { return static_cast<uint16_t>(i); }
 
-        constexpr uint16_t DEFAULT_PORT{6454};
+        constexpr uint16_t DEFAULT_PORT{6454};  // 0x1936
         constexpr uint16_t HEADER_SIZE{18};
         constexpr uint16_t PACKET_SIZE{530};
         constexpr uint16_t PROTOCOL_VER{0x0014};
@@ -137,44 +137,44 @@ namespace arx {
 
         union ArtPollReply {
             struct {
-                uint8_t id[8];            // 8
-                uint16_t op_code;         // 10
-                uint8_t ip[4];            // 14
-                uint16_t port;            // 16
-                uint8_t ver_h;            // 17
-                uint8_t ver_l;            // 18
-                uint8_t net_sw;           // 19
-                uint8_t sub_sw;           // 20
-                uint8_t oem_h;            // 21
-                uint8_t oem_l;            // 22
-                uint8_t ubea_ver;         // 23
-                uint8_t status_1;         // 24
-                uint8_t esta_man_l;       // 25
-                uint8_t esta_man_h;       // 26
-                uint8_t short_name[18];   // 44
-                uint8_t long_name[64];    // 108
-                uint8_t node_report[64];  // 172
-                uint8_t num_ports_h;      // 173
-                uint8_t num_ports_l;      // 174
-                uint8_t port_types[4];    // 178
-                uint8_t good_input[4];    // 182
-                uint8_t good_output[4];   // 186
-                uint8_t sw_in[4];         // 190
-                uint8_t sw_out[4];        // 194
-                uint8_t sw_video;         // 195
-                uint8_t sw_macro;         // 196
-                uint8_t sw_remote;        // 197
-                uint8_t spare[3];         // 200
-                uint8_t style;            // 201
-                uint8_t mac_h;            // 202
-                uint8_t mac[4];           // 206
-                uint8_t mac_l;            // 207
-                uint8_t bind_ip[4];       // 211
-                uint8_t bind_index;       // 212
-                uint8_t status_2;         // 213
-                uint8_t filler[8][26];    // 421
+                uint8_t id[8];
+                uint8_t op_code_l;
+                uint8_t op_code_h;
+                uint8_t ip[4];
+                uint8_t port_l;
+                uint8_t port_h;
+                uint8_t ver_h;
+                uint8_t ver_l;
+                uint8_t net_sw;
+                uint8_t sub_sw;
+                uint8_t oem_h;
+                uint8_t oem_l;
+                uint8_t ubea_ver;
+                uint8_t status_1;
+                uint8_t esta_man_l;
+                uint8_t esta_man_h;
+                uint8_t short_name[18];
+                uint8_t long_name[64];
+                uint8_t node_report[64];
+                uint8_t num_ports_h;
+                uint8_t num_ports_l;
+                uint8_t port_types[4];
+                uint8_t good_input[4];
+                uint8_t good_output[4];
+                uint8_t sw_in[4];
+                uint8_t sw_out[4];
+                uint8_t sw_video;
+                uint8_t sw_macro;
+                uint8_t sw_remote;
+                uint8_t spare[3];
+                uint8_t style;
+                uint8_t mac[6];
+                uint8_t bind_ip[4];
+                uint8_t bind_index;
+                uint8_t status_2;
+                uint8_t filler[26];
             };
-            uint8_t b[421];
+            uint8_t b[239];
         };
         template <typename S>
         class Sender_ {
@@ -263,15 +263,19 @@ namespace arx {
             void poll_reply() {
                 ArtPollReply r;
                 for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ID[i]);
-                r.op_code = (uint16_t)OpCode::PollReply;
+                r.op_code_l = ((uint16_t)OpCode::PollReply >> 0) & 0x00FF;
+                r.op_code_h = ((uint16_t)OpCode::PollReply >> 8) & 0x00FF;
 #ifdef ARTNET_ENABLE_WIFI
                 IPAddress my_ip = WiFi.localIP();
+                IPAddress my_subnet = WiFi.subnetMask();
 #endif
 #ifdef ARTNET_ENABLE_ETHER
                 IPAddress my_ip = Ethernet.localIP();
+                IPAddress my_subnet = Ethernet.subnetMask();
 #endif
                 for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
-                r.port = DEFAULT_PORT;
+                r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
+                r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
                 r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
                 r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
                 r.net_sw = 0;       // TODO:
@@ -303,18 +307,16 @@ namespace arx {
                 r.sw_macro = 0;   // No support for macro key inputs
                 r.sw_remote = 0;  // No support for remote trigger inputs
                 memset(r.spare, 0x00, 3);
-                r.style = 0x00;  // A DMX to / from Art-Net device
-                r.mac_h = 0;     // Do not supply mac address
-                memset(r.mac, 0x00, 4);
-                r.mac_l = 0;
+                r.style = 0x00;          // A DMX to / from Art-Net device
+                memset(r.mac, 0x00, 6);  // Do not supply mac address
                 for (size_t i = 0; i < 4; ++i) r.bind_ip[i] = my_ip[i];
                 r.bind_index = 0;
                 r.status_2 = 0x08;  // sACN capable (maybe)
-                memset(r.filler, 0x00, 208);
+                memset(r.filler, 0x00, 26);
 
-                static const IPAddress DIRECTED_BROADCAST_ADDR(2, 255, 255, 255);
-                stream->beginPacket(DIRECTED_BROADCAST_ADDR, DEFAULT_PORT);
-                stream->write(r.b, 421);
+                static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
+                stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+                stream->write(r.b, sizeof(ArtPollReply));
                 stream->endPacket();
             }
 
@@ -356,7 +358,6 @@ namespace arx {
 
                 uint8_t d[size];
                 stream->read(d, size);
-                if (size <= HEADER_SIZE) return OpCode::NA;  // discard packet if incomplete
 
                 if (checkID(d)) {
                     switch (opcode(d)) {
@@ -375,6 +376,8 @@ namespace arx {
                             return OpCode::Poll;
                         }
                         default: {
+                            Serial.print("Unsupported OpCode: ");
+                            Serial.println(opcode(d), HEX);
                             return OpCode::NA;
                         }
                     }
@@ -533,9 +536,6 @@ namespace arx {
                 OpCode op_code = this->Receiver_<S>::parse();
                 switch (op_code) {
                     case OpCode::Poll: {
-                        // this->Sender_<S>::poll_reply(
-                        //     this->Receiver_<S>::ip(),
-                        //     this->Receiver_<S>::port());
                         this->Sender_<S>::poll_reply();
                         break;
                     }
