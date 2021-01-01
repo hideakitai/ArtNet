@@ -9,7 +9,7 @@ const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetWiFi artnet;
 const String target_ip = "192.168.1.200";
-uint32_t universe = 1;
+uint8_t universe = 1;  // 0 - 15
 
 const uint16_t size = 512;
 uint8_t data[size];
@@ -29,6 +29,8 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin(target_ip);
+    // artnet.subscribe_net(0);     // optionally you can change
+    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, this function is called
     artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size) {

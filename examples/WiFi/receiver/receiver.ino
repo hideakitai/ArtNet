@@ -8,8 +8,8 @@ const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetWiFiReceiver artnet;
-uint32_t universe1 = 1;
-uint32_t universe2 = 2;
+uint8_t universe1 = 1;  // 0 - 15
+uint8_t universe2 = 2;  // 0 - 15
 
 void callback(const uint8_t* data, const uint16_t size) {
     // you can also use pre-defined callbacks
@@ -29,6 +29,8 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
+    // artnet.subscribe_net(0);     // optionally you can change
+    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, this function (lambda) is called
     artnet.subscribe(universe1, [&](const uint8_t* data, const uint16_t size) {

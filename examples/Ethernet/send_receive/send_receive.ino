@@ -10,7 +10,7 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 Artnet artnet;
 const String target_ip = "192.168.0.200";
-uint32_t universe = 1;
+uint8_t universe = 1;  // 0 - 15
 
 const uint16_t size = 512;
 uint8_t data[size];
@@ -22,6 +22,8 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin(target_ip);
+    // artnet.subscribe_net(0);     // optionally you can change
+    // artnet.subscribe_subnet(0);  // optionally you can change
 
     Serial.println("set subscriber");
 

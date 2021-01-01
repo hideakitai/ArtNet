@@ -9,7 +9,7 @@ const IPAddress gateway(192, 168, 1, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetWiFiReceiver artnet;
-uint32_t universe = 1;
+uint8_t universe = 1;  // 0 - 15
 
 // FastLED
 #define NUM_LEDS 1
@@ -33,6 +33,8 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
+    // artnet.subscribe_net(0);     // optionally you can change
+    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, forward them to fastled directly
     artnet.forward(universe, leds, NUM_LEDS);

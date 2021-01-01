@@ -5,8 +5,8 @@ const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 ArtnetReceiver artnet;
-uint32_t universe1 = 1;
-uint32_t universe2 = 2;
+uint32_t universe1 = 1;  // 0 - 15
+uint32_t universe2 = 2;  // 0 - 15
 
 void callback(const uint8_t* data, const uint16_t size) {
     // you can also use pre-defined callbacks
@@ -17,6 +17,8 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
+    // artnet.subscribe_net(0);     // optionally you can change
+    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, this function is called
     artnet.subscribe(universe1, [&](const uint8_t* data, const uint16_t size) {
