@@ -131,7 +131,7 @@ namespace arx {
 #else
         template <uint16_t SIZE>
         using Array = arx::vector<uint8_t, SIZE>;
-        using CallbackMap = arx::map<uint32_t, CallbackType, 8>;
+        using CallbackMap = arx::map<uint32_t, CallbackType, 4>;
         using namespace arx;
 #endif
 
@@ -197,15 +197,6 @@ namespace arx {
 #endif
             virtual ~Sender_() {}
 
-            void net(const uint8_t n) { target_net = n & 0x7F; }
-            void subnet(const uint8_t s) { target_subnet = s & 0x0F; }
-            void universe(const uint8_t u) { target_universe = u & 0x0F; }
-            void universe15bit(const uint8_t u) {
-                net((u >> 8) & 0xFF);
-                subnet((u >> 4) & 0x0F);
-                universe((u >> 0) & 0x0F);
-            }
-
             void set(const uint8_t* const data, const uint16_t size = 512) {
                 packet[IDX(Index::PHYSICAL)] = phy;
                 packet[IDX(Index::NET)] = target_net;
@@ -216,14 +207,16 @@ namespace arx {
             }
 
             void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
-                universe15bit(universe_);
+                target_net = (universe_ >> 8) & 0x7F;
+                target_subnet = (universe_ >> 4) & 0x0F;
+                target_universe = universe_ & 0x0F;
                 set(data, size);
             }
 
             void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
-                net(net_);
-                subnet(subnet_);
-                universe(universe_);
+                target_net = net_ & 0x7F;
+                target_subnet = subnet_ & 0x0F;
+                target_universe = universe_ & 0x0F;
                 set(data, size);
             }
 
@@ -259,67 +252,6 @@ namespace arx {
 
             void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
 
-            // void poll_reply(const IPAddress& remote_ip, const uint16_t remote_port) {
-            void poll_reply() {
-                ArtPollReply r;
-                for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ID[i]);
-                r.op_code_l = ((uint16_t)OpCode::PollReply >> 0) & 0x00FF;
-                r.op_code_h = ((uint16_t)OpCode::PollReply >> 8) & 0x00FF;
-#ifdef ARTNET_ENABLE_WIFI
-                IPAddress my_ip = WiFi.localIP();
-                IPAddress my_subnet = WiFi.subnetMask();
-#endif
-#ifdef ARTNET_ENABLE_ETHER
-                IPAddress my_ip = Ethernet.localIP();
-                IPAddress my_subnet = Ethernet.subnetMask();
-#endif
-                for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
-                r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
-                r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
-                r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
-                r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
-                r.net_sw = 0;       // TODO:
-                r.sub_sw = 0;       // TODO:
-                r.oem_h = 0;        // https://github.com/tobiasebsen/ArtNode/blob/master/src/Art-NetOemCodes.h
-                r.oem_l = 0xFF;     // OemUnknown
-                r.ubea_ver = 0;     // UBEA not programmed
-                r.status_1 = 0x00;  // Unknown / Normal
-                r.esta_man_l = 0;   // No EATA manufacture code
-                r.esta_man_h = 0;   // No ESTA manufacture code
-                char short_name[18] = "Arduino ArtNet";
-                memcpy(r.short_name, short_name, sizeof(short_name));
-                char long_name[64] = "Arduino ArtNet Protocol by hideakitai/ArtNet";
-                memcpy(r.long_name, long_name, sizeof(long_name));
-                static size_t counts = 0;
-                char node_report[64];
-                sprintf(node_report, "#0001 [%d] Arduino ArtNet enabled", counts++);
-                memcpy(r.node_report, node_report, sizeof(node_report));
-                r.num_ports_h = 0;  // Reserved
-                r.num_ports_l = 1;  // This library implements only 1 port
-                for (size_t i = 0; i < 4; ++i) {
-                    r.port_types[i] = 0xC0;   // I/O available by DMX512
-                    r.good_input[i] = 0x80;   // Data received without error
-                    r.good_output[i] = 0x80;  // Data transmittedj without error
-                    r.sw_in[i] = 0;           // TODO:
-                    r.sw_out[i] = 0;          // TODO:
-                }
-                r.sw_video = 0;   // Video display shows local data
-                r.sw_macro = 0;   // No support for macro key inputs
-                r.sw_remote = 0;  // No support for remote trigger inputs
-                memset(r.spare, 0x00, 3);
-                r.style = 0x00;          // A DMX to / from Art-Net device
-                memset(r.mac, 0x00, 6);  // Do not supply mac address
-                for (size_t i = 0; i < 4; ++i) r.bind_ip[i] = my_ip[i];
-                r.bind_index = 0;
-                r.status_2 = 0x08;  // sACN capable (maybe)
-                memset(r.filler, 0x00, 26);
-
-                static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
-                stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
-                stream->write(r.b, sizeof(ArtPollReply));
-                stream->endPacket();
-            }
-
             uint8_t sequence() const { return seq; }
 
         protected:
@@ -340,6 +272,11 @@ namespace arx {
             Array<PACKET_SIZE> packet;
             IPAddress remote_ip;
             uint16_t remote_port;
+            uint8_t univ_net;
+            uint8_t univ_subnet;
+            String short_name{"Arduino ArtNet"};
+            String long_name{"Ardino ArtNet Protocol by hideakitai/ArtNet"};
+            String node_report{""};
             CallbackMap callbacks;
             CallbackAllType callback_all;
             S* stream;
@@ -373,6 +310,7 @@ namespace arx {
                         case OPC(OpCode::Poll): {
                             remote_ip = stream->S::remoteIP();
                             remote_port = (uint16_t)stream->S::remotePort();
+                            poll_reply();
                             return OpCode::Poll;
                         }
                         default: {
@@ -411,10 +349,10 @@ namespace arx {
             inline uint8_t physical() const {
                 return packet[IDX(Index::PHYSICAL)];
             }
-            inline uint8_t net() const {
+            uint8_t net() const {
                 return packet[IDX(Index::NET)] & 0x7F;
             }
-            inline uint8_t subnet() const {
+            uint8_t subnet() const {
                 return (packet[IDX(Index::SUBUNI)] >> 4) & 0x0F;
             }
             inline uint8_t universe() const {
@@ -436,15 +374,42 @@ namespace arx {
                 return packet[HEADER_SIZE + i];
             }
 
+            void subscribe_net(const uint8_t n) {
+                univ_net = n;
+            }
+
+            void subscribe_subnet(const uint8_t sn) {
+                univ_subnet = sn;
+            }
+
             template <typename F>
-            inline auto subscribe(const uint32_t universe, F&& func)
+            inline auto subscribe(const uint8_t universe, F&& func)
                 -> std::enable_if_t<arx::is_callable<F>::value> {
-                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                if (callbacks.size() >= 4) {
+                    Serial.println(F("too many callbacks"));
+                } else {
+                    if (universe > 0xF) {
+                        Serial.println(F("universe out of bounds"));
+                        return;
+                    } else {
+                        uint32_t u = ((uint32_t)univ_net << 8) | ((uint32_t)univ_subnet << 4) | (uint32_t)universe;
+                        callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
+                    }
+                }
             }
             template <typename F>
-            inline auto subscribe(const uint32_t universe, F* func)
+            inline auto subscribe(const uint8_t universe, F* func)
                 -> std::enable_if_t<arx::is_callable<F>::value> {
-                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                if (callbacks.size() >= 4) {
+                    Serial.println(F("too many callbacks"));
+                } else {
+                    if (universe > 0xF) {
+                        Serial.println(F("universe out of bounds"));
+                    } else {
+                        uint32_t u = ((uint32_t)univ_net << 8) | ((uint32_t)univ_subnet << 4) | (uint32_t)universe;
+                        callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
+                    }
+                }
             }
             template <typename F>
             inline auto subscribe(F&& func)
@@ -456,30 +421,14 @@ namespace arx {
                 -> std::enable_if_t<arx::is_callable<F>::value> {
                 callback_all = arx::function_traits<F>::cast(func);
             }
-            template <typename F>
-            inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F&& func)
-                -> std::enable_if_t<arx::is_callable<F>::value> {
-                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
-                subscribe(u, func);
-            }
-            template <typename F>
-            inline auto subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, F* func)
-                -> std::enable_if_t<arx::is_callable<F>::value> {
-                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
-                subscribe(u, func);
-            }
 
-            inline void unsubscribe(const uint32_t universe) {
+            inline void unsubscribe(const uint8_t universe) {
                 auto it = callbacks.find(universe);
                 if (it != callbacks.end())
                     callbacks.erase(it);
             }
             inline void unsubscribe() {
                 callback_all = nullptr;
-            }
-            inline void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe) {
-                uint32_t u = ((uint32_t)net << 8) | ((uint32_t)subnet << 4) | (uint32_t)universe;
-                unsubscribe(u);
             }
 
             inline void clear_subscribers() {
@@ -504,6 +453,17 @@ namespace arx {
                 forward(u, leds, num);
             }
 #endif
+            void shortname(const String& sn) {
+                short_name = sn;
+            }
+
+            void longname(const String& ln) {
+                long_name = ln;
+            }
+
+            void nodereport(const String& nr) {
+                node_report = nr;
+            }
 
         protected:
             void attach(S& s) {
@@ -519,6 +479,73 @@ namespace arx {
                 const char* idptr = reinterpret_cast<const char*>(p);
                 return !strcmp(ID, idptr);
             }
+
+            void poll_reply() {
+                ArtPollReply r;
+                for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ID[i]);
+                r.op_code_l = ((uint16_t)OpCode::PollReply >> 0) & 0x00FF;
+                r.op_code_h = ((uint16_t)OpCode::PollReply >> 8) & 0x00FF;
+#ifdef ARTNET_ENABLE_WIFI
+                IPAddress my_ip = WiFi.localIP();
+                IPAddress my_subnet = WiFi.subnetMask();
+                WiFi.macAddress(r.mac);
+#endif
+#ifdef ARTNET_ENABLE_ETHER
+                IPAddress my_ip = Ethernet.localIP();
+                IPAddress my_subnet = Ethernet.subnetMask();
+                Ethernet.MACAddress(r.mac);
+#endif
+                for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
+                r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
+                r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
+                r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
+                r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
+                r.oem_h = 0;        // https://github.com/tobiasebsen/ArtNode/blob/master/src/Art-NetOemCodes.h
+                r.oem_l = 0xFF;     // OemUnknown
+                r.ubea_ver = 0;     // UBEA not programmed
+                r.status_1 = 0x00;  // Unknown / Normal
+                r.esta_man_l = 0;   // No EATA manufacture code
+                r.esta_man_h = 0;   // No ESTA manufacture code
+                memset(r.short_name, 0, 18);
+                memset(r.long_name, 0, 64);
+                memset(r.node_report, 0, 64);
+                memcpy(r.short_name, short_name.c_str(), short_name.length());
+                memcpy(r.long_name, long_name.c_str(), long_name.length());
+                memcpy(r.node_report, node_report.c_str(), node_report.length());
+                r.num_ports_h = 0;                 // Reserved
+                r.num_ports_l = callbacks.size();  // This library implements only 4 port
+                memset(r.sw_in, 0, 4);
+                memset(r.sw_out, 0, 4);
+                memset(r.port_types, 0, 4);
+                memset(r.good_input, 0, 4);
+                memset(r.good_output, 0, 4);
+                size_t i = 0;
+                for (const auto& pair : callbacks) {
+                    r.net_sw = (pair.first >> 8) & 0x7F;  // all callbacks have same value
+                    r.sub_sw = (pair.first >> 4) & 0x0F;
+                    r.sw_in[i] = pair.first & 0x0F;
+                    r.sw_out[i] = i;          // dummy: output port is flexible
+                    r.port_types[i] = 0xC0;   // I/O available by DMX512
+                    r.good_input[i] = 0x80;   // Data received without error
+                    r.good_output[i] = 0x80;  // Data transmitted without error
+                    if (++i >= 4) break;
+                }
+                r.sw_video = 0;   // Video display shows local data
+                r.sw_macro = 0;   // No support for macro key inputs
+                r.sw_remote = 0;  // No support for remote trigger inputs
+                memset(r.spare, 0x00, 3);
+                r.style = 0x00;  // A DMX to / from Art-Net device
+                for (size_t i = 0; i < 4; ++i) r.bind_ip[i] = my_ip[i];
+                r.bind_index = 0;
+                r.status_2 = 0x08;  // sACN capable
+                memset(r.filler, 0x00, 26);
+
+                static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
+                stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+                stream->write(r.b, sizeof(ArtPollReply));
+                stream->endPacket();
+            }
+
         };  // namespace artnet
 
         template <typename S>
@@ -533,16 +560,7 @@ namespace arx {
             }
 
             void parse() {
-                OpCode op_code = this->Receiver_<S>::parse();
-                switch (op_code) {
-                    case OpCode::Poll: {
-                        this->Sender_<S>::poll_reply();
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
+                this->Receiver_<S>::parse();
             }
         };
 
