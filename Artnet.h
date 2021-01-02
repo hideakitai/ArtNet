@@ -206,32 +206,32 @@ namespace arx {
                 packet[IDX(Index::DATA) + ch] = data;
             }
 
-            void streaming(const String& ip, const uint32_t universe_, const uint16_t port = DEFAULT_PORT) {
+            void streaming(const String& ip, const uint32_t universe_) {
                 if (intervals.find(universe_) == intervals.end()) {
                     intervals.insert(make_pair(universe_, millis()));
                 }
                 uint32_t now = millis();
                 if (now >= intervals[universe_] + DEFAULT_INTERVAL_MS) {
                     set_universe(universe_);
-                    send_packet(ip, port);
+                    send_packet(ip);
                     intervals[universe_] = now;
                 }
             }
-            void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint16_t port = DEFAULT_PORT) {
+            void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_) {
                 uint32_t u = ((uint32_t)net_ << 8) | ((uint32_t)subnet_ << 4) | (uint32_t)universe_;
-                streaming(ip, u, port);
+                streaming(ip, u);
             }
 
             // one-line sender
-            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
+            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 set_universe(universe_);
                 streaming_data(data, size);
-                send_packet(ip, port);
+                send_packet(ip);
             }
-            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
+            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
                 set_universe(net_, subnet_, universe_);
                 streaming_data(data, size);
-                send_packet(ip, port);
+                send_packet(ip);
             }
 
             void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
@@ -248,14 +248,14 @@ namespace arx {
                 packet[IDX(Index::PROTOCOL_VER_L)] = (PROTOCOL_VER >> 0) & 0x00FF;
             }
 
-            void send_packet(const String& ip, const uint16_t port = DEFAULT_PORT) {
+            void send_packet(const String& ip) {
                 packet[IDX(Index::SEQUENCE)] = seq++;
                 packet[IDX(Index::PHYSICAL)] = phy;
                 packet[IDX(Index::NET)] = target_net;
                 packet[IDX(Index::SUBUNI)] = (target_subnet << 4) | target_universe;
                 packet[IDX(Index::LENGTH_H)] = (512 >> 8) & 0xFF;
                 packet[IDX(Index::LENGTH_L)] = (512 >> 0) & 0xFF;
-                stream->beginPacket(ip.c_str(), port);
+                stream->beginPacket(ip.c_str(), DEFAULT_PORT);
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
             }
