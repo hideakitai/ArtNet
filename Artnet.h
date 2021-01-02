@@ -126,11 +126,13 @@ namespace arx {
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
         template <uint16_t SIZE>
         using Array = std::array<uint8_t, SIZE>;
+        using IntervalMap = std::map<uint32_t, uint32_t>;
         using CallbackMap = std::map<uint32_t, CallbackType>;
         using namespace std;
 #else
         template <uint16_t SIZE>
         using Array = arx::vector<uint8_t, SIZE>;
+        using IntervalMap = arx::map<uint32_t, uint32_t>;
         using CallbackMap = arx::map<uint32_t, CallbackType, 4>;
         using namespace arx;
 #endif
@@ -176,6 +178,7 @@ namespace arx {
             };
             uint8_t b[239];
         };
+
         template <typename S>
         class Sender_ {
             Array<PACKET_SIZE> packet;
@@ -185,7 +188,7 @@ namespace arx {
             uint8_t seq{0};
             uint8_t phy{0};
 
-            uint32_t prev_send_ms{0};
+            IntervalMap intervals;
             S* stream;
 
         public:
@@ -195,57 +198,40 @@ namespace arx {
 #endif
             virtual ~Sender_() {}
 
-            void set(const uint8_t* const data, const uint16_t size = 512) {
-                packet[IDX(Index::PHYSICAL)] = phy;
-                packet[IDX(Index::NET)] = target_net;
-                packet[IDX(Index::SUBUNI)] = (target_subnet << 4) | target_universe;
-                packet[IDX(Index::LENGTH_H)] = (size >> 8) & 0xFF;
-                packet[IDX(Index::LENGTH_L)] = (size >> 0) & 0xFF;
+            // streaming packet
+            void streaming_data(const uint8_t* const data, const uint16_t size) {
                 memcpy((&packet[IDX(Index::DATA)]), data, size);
             }
-
-            void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
-                target_net = (universe_ >> 8) & 0x7F;
-                target_subnet = (universe_ >> 4) & 0x0F;
-                target_universe = universe_ & 0x0F;
-                set(data, size);
-            }
-
-            void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
-                target_net = net_ & 0x7F;
-                target_subnet = subnet_ & 0x0F;
-                target_universe = universe_ & 0x0F;
-                set(data, size);
-            }
-
-            void set(const uint16_t ch, const uint8_t data) {
+            void streaming_data(const uint16_t ch, const uint8_t data) {
                 packet[IDX(Index::DATA) + ch] = data;
             }
 
-            void send(const String& ip, const uint16_t port = DEFAULT_PORT) {
-                packet[IDX(Index::SEQUENCE)] = seq++;
-                stream->beginPacket(ip.c_str(), port);
-                stream->write(packet.data(), packet.size());
-                stream->endPacket();
+            void streaming(const String& ip, const uint32_t universe_, const uint16_t port = DEFAULT_PORT) {
+                if (intervals.find(universe_) == intervals.end()) {
+                    intervals.insert(make_pair(universe_, millis()));
+                }
+                uint32_t now = millis();
+                if (now >= intervals[universe_] + DEFAULT_INTERVAL_MS) {
+                    set_universe(universe_);
+                    send_packet(ip, port);
+                    intervals[universe_] = now;
+                }
             }
-            void send(const String& ip, uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
-                set(data, size);
-                send(ip, port);
-            }
-            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
-                set(universe_, data, size);
-                send(ip, port);
-            }
-            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
-                set(net_, subnet_, universe_, data, size);
-                send(ip, port);
+            void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint16_t port = DEFAULT_PORT) {
+                uint32_t u = ((uint32_t)net_ << 8) | ((uint32_t)subnet_ << 4) | (uint32_t)universe_;
+                streaming(ip, u, port);
             }
 
-            void streaming(const String& ip, const uint16_t port = DEFAULT_PORT) {
-                if (millis() >= prev_send_ms + DEFAULT_INTERVAL_MS) {
-                    send(ip, port);
-                    prev_send_ms = millis();
-                }
+            // one-line sender
+            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
+                set_universe(universe_);
+                streaming_data(data, size);
+                send_packet(ip, port);
+            }
+            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
+                set_universe(net_, subnet_, universe_);
+                streaming_data(data, size);
+                send_packet(ip, port);
             }
 
             void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
@@ -260,6 +246,29 @@ namespace arx {
                 packet[IDX(Index::OP_CODE_L)] = (OPC(OpCode::Dmx) >> 0) & 0x00FF;
                 packet[IDX(Index::PROTOCOL_VER_H)] = (PROTOCOL_VER >> 8) & 0x00FF;
                 packet[IDX(Index::PROTOCOL_VER_L)] = (PROTOCOL_VER >> 0) & 0x00FF;
+            }
+
+            void send_packet(const String& ip, const uint16_t port = DEFAULT_PORT) {
+                packet[IDX(Index::SEQUENCE)] = seq++;
+                packet[IDX(Index::PHYSICAL)] = phy;
+                packet[IDX(Index::NET)] = target_net;
+                packet[IDX(Index::SUBUNI)] = (target_subnet << 4) | target_universe;
+                packet[IDX(Index::LENGTH_H)] = (512 >> 8) & 0xFF;
+                packet[IDX(Index::LENGTH_L)] = (512 >> 0) & 0xFF;
+                stream->beginPacket(ip.c_str(), port);
+                stream->write(packet.data(), packet.size());
+                stream->endPacket();
+            }
+
+            void set_universe(const uint32_t universe_) {
+                target_net = (universe_ >> 8) & 0x7F;
+                target_subnet = (universe_ >> 4) & 0x0F;
+                target_universe = universe_ & 0x0F;
+            }
+            void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_) {
+                target_net = net_ & 0x7F;
+                target_subnet = subnet_ & 0x0F;
+                target_universe = universe_ & 0x0F;
             }
         };
 
