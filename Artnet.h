@@ -234,7 +234,7 @@ namespace arx {
                 send_packet(ip);
             }
 
-            void physical(const uint8_t i) const { phy = constrain(i, 0, 3); }
+            void physical(const uint8_t i) { phy = constrain(i, 0, 3); }
 
             uint8_t sequence() const { return seq; }
 
