@@ -207,10 +207,10 @@ namespace arx {
             }
 
             void streaming(const String& ip, const uint32_t universe_) {
-                if (intervals.find(universe_) == intervals.end()) {
-                    intervals.insert(make_pair(universe_, millis()));
-                }
                 uint32_t now = millis();
+                if (intervals.find(universe_) == intervals.end()) {
+                    intervals.insert(make_pair(universe_, now));
+                }
                 if (now >= intervals[universe_] + DEFAULT_INTERVAL_MS) {
                     set_universe(universe_);
                     send_packet(ip);
