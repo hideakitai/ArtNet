@@ -18,6 +18,7 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
+    // artnet.begin(net, subnet); // optionally you can change
 
     Serial.println("start");
     Serial.println(UDP_TX_PACKET_MAX_SIZE);
@@ -27,6 +28,7 @@ void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
-    artnet.set(universe, data, size);
-    artnet.streaming(target_ip);  // automatically send set data in 40fps
+    artnet.streaming_data(data, size);
+    artnet.streaming(target_ip, universe);  // automatically send set data in 40fps
+    // artnet.streaming(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
 }
