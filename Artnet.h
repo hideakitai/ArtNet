@@ -223,12 +223,12 @@ namespace arx {
             }
 
             // one-line sender
-            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
+            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size) {
                 set_universe(universe_);
                 streaming_data(data, size);
                 send_packet(ip);
             }
-            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
+            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size) {
                 set_universe(net_, subnet_, universe_);
                 streaming_data(data, size);
                 send_packet(ip);
