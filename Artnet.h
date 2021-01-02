@@ -268,8 +268,8 @@ namespace arx {
             Array<PACKET_SIZE> packet;
             IPAddress remote_ip;
             uint16_t remote_port;
-            uint8_t univ_net;
-            uint8_t univ_subnet;
+            uint8_t net_switch;  // net of universe
+            uint8_t sub_switch;  // subnet of universe
             String short_name{"Arduino ArtNet"};
             String long_name{"Ardino ArtNet Protocol by hideakitai/ArtNet"};
             String node_report{""};
@@ -319,10 +319,7 @@ namespace arx {
                 return OpCode::NA;
             }
 
-            inline const IPAddress&
-            ip() const {
-                return remote_ip;
-            }
+            inline const IPAddress& ip() const { return remote_ip; }
             inline uint16_t port() const { return remote_port; }
 
             inline String id() const {
@@ -370,14 +367,6 @@ namespace arx {
                 return packet[HEADER_SIZE + i];
             }
 
-            void subscribe_net(const uint8_t n) {
-                univ_net = n;
-            }
-
-            void subscribe_subnet(const uint8_t sn) {
-                univ_subnet = sn;
-            }
-
             template <typename F>
             inline auto subscribe(const uint8_t universe, F&& func)
                 -> std::enable_if_t<arx::is_callable<F>::value> {
@@ -388,7 +377,7 @@ namespace arx {
                         Serial.println(F("universe out of bounds"));
                         return;
                     } else {
-                        uint32_t u = ((uint32_t)univ_net << 8) | ((uint32_t)univ_subnet << 4) | (uint32_t)universe;
+                        uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
                         callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
                     }
                 }
@@ -402,7 +391,7 @@ namespace arx {
                     if (universe > 0xF) {
                         Serial.println(F("universe out of bounds"));
                     } else {
-                        uint32_t u = ((uint32_t)univ_net << 8) | ((uint32_t)univ_subnet << 4) | (uint32_t)universe;
+                        uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
                         callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
                     }
                 }
@@ -458,8 +447,18 @@ namespace arx {
             }
 
         protected:
-            void attach(S& s) {
+            void attach(S& s, const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0) {
                 stream = &s;
+                if (subscribe_net > 128) {
+                    Serial.println("Net must be < 128");
+                } else {
+                    net_switch = subscribe_net;
+                }
+                if (subscribe_subnet > 16) {
+                    Serial.println("Subnet must be < 16");
+                } else {
+                    sub_switch = subscribe_subnet;
+                }
             }
 
         private:
@@ -511,10 +510,10 @@ namespace arx {
                 memset(r.port_types, 0, 4);
                 memset(r.good_input, 0, 4);
                 memset(r.good_output, 0, 4);
+                r.net_sw = net_switch & 0x7F;
+                r.sub_sw = sub_switch & 0x0F;
                 size_t i = 0;
                 for (const auto& pair : callbacks) {
-                    r.net_sw = (pair.first >> 8) & 0x7F;  // all callbacks have same value
-                    r.sub_sw = (pair.first >> 4) & 0x0F;
                     r.sw_in[i] = pair.first & 0x0F;
                     r.sw_out[i] = i;          // dummy: output port is flexible
                     r.port_types[i] = 0xC0;   // I/O available by DMX512
@@ -545,10 +544,10 @@ namespace arx {
             S stream;
 
         public:
-            void begin(const uint16_t recv_port = DEFAULT_PORT) {
+            void begin(const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0, const uint16_t recv_port = DEFAULT_PORT) {
                 stream.begin(recv_port);
                 this->Sender_<S>::attach(stream);
-                this->Receiver_<S>::attach(stream);
+                this->Receiver_<S>::attach(stream, subscribe_net, subscribe_subnet);
             }
 
             void parse() {
@@ -572,9 +571,9 @@ namespace arx {
             S stream;
 
         public:
-            void begin(const uint16_t recv_port = DEFAULT_PORT) {
+            void begin(const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0, const uint16_t recv_port = DEFAULT_PORT) {
                 stream.begin(recv_port);
-                this->Receiver_<S>::attach(stream);
+                this->Receiver_<S>::attach(stream, subscribe_net, subscribe_subnet);
             }
         };
     }  // namespace artnet
