@@ -17,7 +17,7 @@ void setup() {
     delay(2000);
 
     Ethernet.begin(mac, ip);
-    artnet.begin(target_ip);
+    artnet.begin();
 
     Serial.println("start");
     Serial.println(UDP_TX_PACKET_MAX_SIZE);
@@ -28,7 +28,5 @@ void loop() {
     memset(data, value, size);
 
     artnet.set(universe, data, size);
-    artnet.streaming();  // automatically send set data in 40fps
-
-    // Serial.println("loop");
+    artnet.streaming(target_ip);  // automatically send set data in 40fps
 }

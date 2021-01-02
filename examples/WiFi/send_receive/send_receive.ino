@@ -28,7 +28,7 @@ void setup() {
     Serial.print("WiFi connected, IP = ");
     Serial.println(WiFi.localIP());
 
-    artnet.begin(target_ip);
+    artnet.begin();
     // artnet.subscribe_net(0);     // optionally you can change
     // artnet.subscribe_subnet(0);  // optionally you can change
 
@@ -60,5 +60,5 @@ void loop() {
     memset(data, value, size);
 
     artnet.set(universe, data, size);
-    artnet.streaming();  // automatically send set data in 40fps
+    artnet.streaming(target_ip);  // automatically send set data in 40fps
 }
