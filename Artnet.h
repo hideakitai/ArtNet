@@ -179,8 +179,6 @@ namespace arx {
         template <typename S>
         class Sender_ {
             Array<PACKET_SIZE> packet;
-            String ip;
-            uint16_t port{DEFAULT_PORT};
             uint8_t target_net{0};
             uint8_t target_subnet{0};
             uint8_t target_universe{0};
@@ -224,28 +222,28 @@ namespace arx {
                 packet[IDX(Index::DATA) + ch] = data;
             }
 
-            void send() {
+            void send(const String& ip, const uint16_t port = DEFAULT_PORT) {
                 packet[IDX(Index::SEQUENCE)] = seq++;
                 stream->beginPacket(ip.c_str(), port);
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
             }
-            void send(const uint8_t* const data, const uint16_t size = 512) {
+            void send(const String& ip, uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
                 set(data, size);
-                send();
+                send(ip, port);
             }
-            void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512) {
+            void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
                 set(universe_, data, size);
-                send();
+                send(ip, port);
             }
-            void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512) {
+            void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512, const uint16_t port = DEFAULT_PORT) {
                 set(net_, subnet_, universe_, data, size);
-                send();
+                send(ip, port);
             }
 
-            void streaming() {
-                if ((millis() - prev_send_ms) > DEFAULT_INTERVAL_MS) {
-                    send();
+            void streaming(const String& ip, const uint16_t port = DEFAULT_PORT) {
+                if (millis() >= prev_send_ms + DEFAULT_INTERVAL_MS) {
+                    send(ip, port);
                     prev_send_ms = millis();
                 }
             }
@@ -255,10 +253,8 @@ namespace arx {
             uint8_t sequence() const { return seq; }
 
         protected:
-            void attach(S& s, const String& user_ip, const uint16_t user_port = DEFAULT_PORT) {
+            void attach(S& s) {
                 stream = &s;
-                ip = user_ip;
-                port = user_port;
                 for (size_t i = 0; i < ID_LENGTH; i++) packet[IDX(Index::ID) + i] = static_cast<uint8_t>(ID[i]);
                 packet[IDX(Index::OP_CODE_H)] = (OPC(OpCode::Dmx) >> 8) & 0x00FF;
                 packet[IDX(Index::OP_CODE_L)] = (OPC(OpCode::Dmx) >> 0) & 0x00FF;
@@ -553,9 +549,9 @@ namespace arx {
             S stream;
 
         public:
-            void begin(const String& send_ip, const uint16_t send_port = DEFAULT_PORT, const uint16_t recv_port = DEFAULT_PORT) {
+            void begin(const uint16_t recv_port = DEFAULT_PORT) {
                 stream.begin(recv_port);
-                this->Sender_<S>::attach(stream, send_ip, send_port);
+                this->Sender_<S>::attach(stream);
                 this->Receiver_<S>::attach(stream);
             }
 
@@ -569,9 +565,9 @@ namespace arx {
             S stream;
 
         public:
-            void begin(const String& ip, const uint16_t port = DEFAULT_PORT) {
+            void begin() {
                 stream.begin(DEFAULT_PORT);
-                this->Sender_<S>::attach(stream, ip, port);
+                this->Sender_<S>::attach(stream);
             }
         };
 
@@ -580,8 +576,8 @@ namespace arx {
             S stream;
 
         public:
-            void begin(const uint16_t port = DEFAULT_PORT) {
-                stream.begin(port);
+            void begin(const uint16_t recv_port = DEFAULT_PORT) {
+                stream.begin(recv_port);
                 this->Receiver_<S>::attach(stream);
             }
         };
