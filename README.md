@@ -2,11 +2,35 @@
 
 Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 
+**NOTE : BREAKING API CHANGES (v0.2.0 or later)**
+
 ## Feature
 
-- support Art-Net with both Ethernet and WiFi
-- register multiple callbacks depending on universe
-- flexible net/subnet/universe setting
+- Art-Net with both Ethernet and WiFi
+- Support a lot of boards which can use Ethernet or WiFi
+- Multiple receiver callbacks depending on universe
+- Mutilple destination streaming with sender
+- One-line send to desired destination
+- Flexible net/subnet/universe setting
+- Easy data forwarding to [FastLED](https://github.com/FastLED/FastLED)
+
+
+## Supported Platforms
+
+#### WiFi
+
+- ESP32
+- ESP8266
+- Arduino Uno WiFi Rev2
+- Arduino MKR VIDOR 4000
+- Arduino MKR WiFi 1010
+- Arduino MKR WiFi 1000
+- Arduino Nano 33 IoT
+
+#### Ethernet
+
+- ESP8266
+- Almost all platforms without WiFi
 
 
 ## Usage
@@ -14,113 +38,95 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 This library has following Art-Net controller options.
 Please use them depending on the situation.
 
-- ArtnetSender
 - ArtnetReveiver
+- ArtnetSender
 - Artnet (Integrated Sender/Receiver)
 
-
-### Warning
-
-**From v0.1.11, arguments of callbacks must be `const` for safety. Previous sketches can not be compiled as is, so please add `const` to the arguments of callbacks.**
-
-### ArtnetSender
-
-```C++
-#include <Artnet.h>
-
-// declarations for Ethernet/WiFi
-
-ArtnetSender artnet;
-
-void setup()
-{
-    // setup Ethernet/WiFi...
-
-    artnet.begin("127.0.0.1"); // set destination ip
-}
-
-void loop()
-{
-    // change send data as you want
-
-    artnet.set(universe, data_ptr, size);
-    artnet.streaming(); // automatically send set data in 40fps
-}
-```
 
 ### ArtnetReceiver
 
 ```C++
 #include <Artnet.h>
-
-// declarations for Ethernet/WiFi
-
 ArtnetReceiver artnet;
 
-void callback(const uint8_t* data, const uint16_t size)
-{
+void callback(const uint8_t* data, const uint16_t size) {
     // you can also use pre-defined callbacks
 }
 
-void setup()
-{
+void setup() {
     // setup Ethernet/WiFi...
 
     artnet.begin(); // waiting for Art-Net in default port
+    // artnet.begin(net, subnet); // optionally you can set net and subnet here
 
-    // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe1, [](const uint8_t* data, const uint16_t size)
-    {
-        // use received data[], and size
+    artnet.subscribe(universe1, [](const uint8_t* data, const uint16_t size) {
+        // if Artnet packet comes to this universe(0-15), this function is called
     });
-
-    // you can also use pre-defined callbacks
-    artnet.subscribe(universe2, callback);
+    artnet.subscribe(universe2, callback);  // you can also use pre-defined callbacks
 }
 
-void loop()
-{
+void loop() {
     artnet.parse(); // check if artnet packet has come and execute callback
 }
+```
 
+### ArtnetSender
+
+```C++
+#include <Artnet.h>
+ArtnetSender artnet;
+
+void setup() {
+    // setup Ethernet/WiFi...
+
+    artnet.begin();
+}
+
+void loop() {
+    // change send data as you want
+
+    artnet.send("127.0.0.1", universe15bit, data_ptr, size); // one-line send
+    // artnet.send("127.0.0.1", net, subnet, univ, data_ptr, size); // or you can set net and subnet
+
+    artnet.streaming_data(data_ptr, size);
+    artnet.streaming("127.0.0.1", universe15bit); // automatically send set data in 40fps (15bit universe)
+    // artnet.streaming("127.0.0.1", net, subnet, univ); // or you can set net and subnet here
+}
 ```
 
 ### Artnet (Integrated Sender/Receiver)
 
 ```C++
 #include <Artnet.h>
-
-// declarations for Ethernet/WiFi
-
 Artnet artnet;
 
 void setup()
 {
     // setup Ethernet/WiFi...
 
-    artnet.begin("127.0.0.1"); // send to localhost and listen to default port
+    artnet.begin(); // send to localhost and listen to default port
+    // artnet.begin(net, subnet); // optionally you can set net and subnet here
 
-    // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size)
-    {
-        // do something with data coming to universe
+    artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
+        // if Artnet packet comes to this universe, this function is called
     });
 
-    // if Artnet packet comes, this function is called to every universe
-    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size)
-    {
-        // do something with data coming to all universe
+    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
+        // if Artnet packet comes, this function is called to every universe
     });
 }
 
-void loop()
-{
+void loop() {
     artnet.parse(); // check if artnet packet has come and execute callback
 
     // change send data as you want
 
-    artnet.set(universe, data, size); // set send data
-    artnet.streaming(); // automatically send set data in 40fps
+    artnet.send("127.0.0.1", universe15bit, data_ptr, size); // one-line send
+    // artnet.send("127.0.0.1", net, subnet, univ, data_ptr, size); // or you can set net and subnet
+
+    artnet.streaming_data(data_ptr, size);
+    artnet.streaming("127.0.0.1", universe15bit); // automatically send set data in 40fps (15bit universe)
+    // artnet.streaming("127.0.0.1", net, subnet, univ); // or you can set net and subnet here
 }
 ```
 
@@ -130,9 +136,6 @@ void loop()
 
 ``` C++
 #include <Artnet.h>
-
-// declarations for Ethernet/WiFi
-
 ArtnetReceiver artnet;
 
 // FastLED
@@ -140,15 +143,13 @@ ArtnetReceiver artnet;
 CRGB leds[NUM_LEDS];
 const uint8_t PIN_LED_DATA = 3;
 
-void setup()
-{
+void setup() {
     // setup Ethernet/WiFi...
 
     // setup FastLED
     FastLED.addLeds<NEOPIXEL, PIN_LED>(&leds, NUM_LEDS);
 
     artnet.begin();
-
     // if Artnet packet comes to this universe, forward them to fastled directly
     artnet.forward(universe, leds, NUM_LEDS);
 
@@ -167,8 +168,7 @@ void setup()
     // });
 }
 
-void loop()
-{
+void loop() {
     artnet.parse(); // check if artnet packet has come and execute callback
     FastLED.show();
 }
@@ -177,85 +177,87 @@ void loop()
 
 ## Other Settings
 
-### Net, Sub-Net, Universe, and Universe(15bit)
+### Subscribing Callbacks with Net, Sub-Net and Universe as you like
 
-You can set Net, Sub-Net, Universe and Universe(15bit) flexibly.
-
-#### Sender
-
-```C++
-// set separately
-artent.net(n);
-artent.subnet(s);
-artent.universe(u);
-artnet.set(data, size);
-
-// set as 15bit universe
-artent.universe15bit(u);
-artnet.set(data, size);
-
-// set with data and size
-artnet.set(universe15bit, data, size);
-artnet.set(net, subnet, universe, data, size);
-```
-
-#### Receiver
+- You can set Net (0-127) and Sub-Net (0-15) like `artnet.begin(net, subnet)`
+- Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
+- Callbacks are limited to 4 universes (depending on the spec of Art-Net)
 
 ```C++
-artnet.subscribe(universe15bit, function);
-artnet.subscribe(net, subnet, universe, function);
+artnet.begin(net, subnet); // net and subnet can be set only once
+artnet.subscribe(univ1, callback1); // 4 callbacks can be set
+artnet.subscribe(univ2, callback2); // these universes are reported to
+artnet.subscribe(univ3, callback3); // Art-Net controller if it polls
+artnet.subscribe(univ4, callback4); // Art-Net devices
 ```
 
-### One Time Sending (Not Streaming)
+### Sending Art-Net to Net, Sub-Net and Universe as you like
 
-In Sender class, you can also send Art-Net packet once.
-This sends only 1 packet (NOT streaming).
+#### One-line sender
 
 ```C++
-artnet.send(data, size);
-artnet.send(universe15bit, data, size);
-artnet.send(net, subnet, universe, data, size);
+artnet.send(ip, univ15bit, data, size);         // use 15bit universer or
+artnet.send(ip, net, subnet, univ, data, size); // net, subnet, and universe
 ```
 
-### Set Non-Default Port
+#### Streaming
 
 ```C++
-// ArtnetSender
-artnet.begin(ip);       // default
-artnet.begin(ip, port); // set your own
-// ArtnetReceiver
-artnet.begin();     // default
-artnet.begin(port); // set your own
-// Artnet (integrated)
-artnet.begin(ip);                       // default send/receiver
-artnet.begin(ip, send_port, recv_port); // set your own
+artnet.streaming_data(data, size);       // set data first
+artnet.streaming(ip, univ15bit);         // stream to 15bit universe or
+artnet.streaming(ip, net, subnet, univ); // net, subnet, and universe
 ```
+
+
+### ArtPollReply Setting
+
+- This library supports `ArtPoll` and `ArtPollReply`
+- `ArtPoll` is automatically parsed and sends `ArtPollReply`
+- `net_sw` `sub_sw` `sw_in` etc. are set automatically based on registerd callbacks
+- You can configure the information of `ArtPollReply` as follows
+  - `void shortname(const String& sn)`
+  - `void longname(const String& ln)`
+  - `void nodereport(const String& nr)`
+
 
 ## APIs
 
 ### ArtnetSender
 
 ```C++
-void net(const uint8_t n);
-void subnet(const uint8_t s);
-void universe(const uint8_t u);
-void universe15bit(const uint8_t u);
-void set(const uint8_t* const data, const uint16_t size = 512);
-void set(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512);
-void set(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512);
-void send();
-void send(const uint8_t* const data, const uint16_t size = 512);
-void send(const uint32_t universe_, const uint8_t* const data, const uint16_t size = 512);
-void send(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size = 512);
-void streaming();
-void physical(const uint8_t i) const;
+// streaming packet
+void streaming_data(const uint8_t* const data, const uint16_t size);
+void streaming_data(const uint16_t ch, const uint8_t data);
+void streaming(const String& ip, const uint32_t universe_);
+void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_);
+// one-line sender
+void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size);
+void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size);
+// others
+void physical(const uint8_t i);
 uint8_t sequence() const;
 ```
 
 ### ArtnetReceiver
 
 ```C++
-bool parse();
+OpCode parse();
+// subscribers
+template <typename F> inline auto subscribe(const uint8_t universe, F&& func);
+template <typename F> inline auto subscribe(const uint8_t universe, F* func);
+template <typename F> inline auto subscribe(F&& func);
+template <typename F> inline auto subscribe(F* func);
+// for FastLED
+inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num);
+// unsubscribe
+inline void unsubscribe(const uint8_t universe);
+inline void unsubscribe();
+inline void clear_subscribers();
+// ArtPollReply information
+void shortname(const String& sn);
+void longname(const String& ln);
+void nodereport(const String& nr);
+// others
 inline const IPAddress& ip() const;
 uint16_t port() const;
 String id() const;
@@ -272,37 +274,7 @@ uint16_t length() const;
 uint16_t size() const;
 uint8_t* data();
 uint8_t data(const uint16_t i) const;
-void subscribe(const uint32_t universe, const CallbackType& func);
-void subscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe, const CallbackType& func);
-void subscribe(const CallbackAllType& func); // for all packet of all universe
-void unsubscribe(const uint32_t universe);
-void unsubscribe(const uint8_t net, const uint8_t subnet, const uint8_t universe);
-void unsubscribe(); // for all packet of all universe
-void clear_subscribers(); // clear all callbacks
-inline void forward(const uint32_t universe, CRGB* leds, const uint16_t num);
-inline void forward(const uint8_t net, const uint8_t subnet, const uint8_t universe, CRGB* leds, const uint16_t num);
 ```
-
-## Supported Platform
-
-This library currently supports following platforms and interfaces.
-Please feel free to send PR or request for more board support!
-
-#### WiFi
-
-- ESP32
-- ESP8266
-- Arduino Uno WiFi Rev2
-- Arduino MKR VIDOR 4000
-- Arduino MKR WiFi 1010
-- Arduino MKR WiFi 1000
-- Arduino Nano 33 IoT
-
-#### Ethernet
-
-- ESP8266
-- Almost all platforms without WiFi
-
 
 ### Note
 
