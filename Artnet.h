@@ -14,7 +14,7 @@
 #define ARTNET_ENABLE_WIFI
 #endif
 
-#if defined(ESP8266) || !defined(ARTNET_ENABLE_WIFI)
+#if !defined(ARTNET_ENABLE_WIFI)
 #define ARTNET_ENABLE_ETHER
 #endif
 
