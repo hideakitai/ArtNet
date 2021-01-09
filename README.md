@@ -29,7 +29,6 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 
 #### Ethernet
 
-- ESP8266
 - Almost all platforms without WiFi
 
 
