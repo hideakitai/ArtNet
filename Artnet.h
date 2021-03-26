@@ -255,6 +255,9 @@ namespace arx {
                 packet[IDX(Index::SUBUNI)] = (target_subnet << 4) | target_universe;
                 packet[IDX(Index::LENGTH_H)] = (512 >> 8) & 0xFF;
                 packet[IDX(Index::LENGTH_L)] = (512 >> 0) & 0xFF;
+#ifdef ARTNET_ENABLE_WIFI
+                if (WiFi.status() != WL_CONNECTED) return;
+#endif
                 stream->beginPacket(ip.c_str(), DEFAULT_PORT);
                 stream->write(packet.data(), packet.size());
                 stream->endPacket();
@@ -295,6 +298,9 @@ namespace arx {
             virtual ~Receiver_() {}
 
             OpCode parse() {
+#ifdef ARTNET_ENABLE_WIFI
+                if (WiFi.status() != WL_CONNECTED) return OpCode::NA;
+#endif
                 const size_t size = stream->parsePacket();
                 if (size == 0) return OpCode::NA;
 
