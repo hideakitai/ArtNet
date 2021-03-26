@@ -181,6 +181,7 @@ void loop() {
 - You can set Net (0-127) and Sub-Net (0-15) like `artnet.begin(net, subnet)`
 - Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
 - Callbacks are limited to 4 universes (depending on the spec of Art-Net)
+- These universes (targets of the callbacks) are reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply` automatically
 
 ```C++
 artnet.begin(net, subnet); // net and subnet can be set only once
@@ -188,6 +189,15 @@ artnet.subscribe(univ1, callback1); // 4 callbacks can be set
 artnet.subscribe(univ2, callback2); // these universes are reported to
 artnet.subscribe(univ3, callback3); // Art-Net controller if it polls
 artnet.subscribe(univ4, callback4); // Art-Net devices
+```
+
+Or you can register callbacks based on 15 bit universe. But these universes are not reflected to `ArtPollReply` automatically.
+
+```C++
+artnet.subscribe15bit(univ15bit1, callback1); // 4 callbacks can be set
+artnet.subscribe15bit(univ15bit2, callback2); // these universes are NOT reported to
+artnet.subscribe15bit(univ15bit3, callback3); // Art-Net controller if it polls
+artnet.subscribe15bit(univ15bit4, callback4); // Art-Net devices
 ```
 
 ### Sending Art-Net to Net, Sub-Net and Universe as you like

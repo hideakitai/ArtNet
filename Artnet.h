@@ -412,6 +412,24 @@ namespace arx {
                 }
             }
             template <typename F>
+            inline auto subscribe15bit(const uint16_t universe, F&& func)
+                -> std::enable_if_t<arx::is_callable<F>::value> {
+                if (callbacks.size() >= 4) {
+                    Serial.println(F("too many callbacks"));
+                } else {
+                    callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                }
+            }
+            template <typename F>
+            inline auto subscribe15bit(const uint16_t universe, F* func)
+                -> std::enable_if_t<arx::is_callable<F>::value> {
+                if (callbacks.size() >= 4) {
+                    Serial.println(F("too many callbacks"));
+                } else {
+                    callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                }
+            }
+            template <typename F>
             inline auto subscribe(F&& func)
                 -> std::enable_if_t<arx::is_callable<F>::value> {
                 callback_all = arx::function_traits<F>::cast(func);
