@@ -158,7 +158,6 @@ PRs are welcome!
 
 - [Packetizer](https://github.com/hideakitai/Packetizer)
 - [MsgPack](https://github.com/hideakitai/MsgPack)
-- [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer)
 - [ArduinoOSC](https://github.com/hideakitai/ArduinoOSC)
 - [ArtNet](https://github.com/hideakitai/ArtNet)
 - [Tween](https://github.com/hideakitai/Tween)

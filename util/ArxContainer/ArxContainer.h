@@ -179,10 +179,10 @@ namespace arx {
         T& operator[] (size_t index) { return get(head_ + (int)index); }
 
         iterator begin() { return ptr(head_); }
-        iterator end() { return (queue_ + tail_); }
+        iterator end() { return (queue_ + tail_ + 1); }
 
         const_iterator begin() const { return (const_iterator)ptr(head_); }
-        const_iterator end() const { return (const_iterator)(queue_ + tail_); }
+        const_iterator end() const { return (const_iterator)(queue_ + tail_ + 1); }
 
         iterator erase(iterator p)
         {
