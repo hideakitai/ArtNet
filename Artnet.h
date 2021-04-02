@@ -14,7 +14,7 @@
 #define ARTNET_ENABLE_WIFI
 #endif
 
-#if !defined(ARTNET_ENABLE_WIFI)
+#if defined(ESP_PLATFORM) || defined(ESP8266) || !defined(ARTNET_ENABLE_WIFI)
 #define ARTNET_ENABLE_ETHER
 #endif
 
@@ -509,16 +509,9 @@ namespace artnet {
             for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ID[i]);
             r.op_code_l = ((uint16_t)OpCode::PollReply >> 0) & 0x00FF;
             r.op_code_h = ((uint16_t)OpCode::PollReply >> 8) & 0x00FF;
-#ifdef ARTNET_ENABLE_WIFI
-            IPAddress my_ip = WiFi.localIP();
-            IPAddress my_subnet = WiFi.subnetMask();
-            WiFi.macAddress(r.mac);
-#endif
-#ifdef ARTNET_ENABLE_ETHER
-            IPAddress my_ip = Ethernet.localIP();
-            IPAddress my_subnet = Ethernet.subnetMask();
-            Ethernet.MACAddress(r.mac);
-#endif
+            IPAddress my_ip = localIP();
+            IPAddress my_subnet = subnetMask();
+            macAddress(r.mac);
             for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
             r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
             r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
@@ -570,6 +563,40 @@ namespace artnet {
             stream->endPacket();
         }
 
+        template <typename T = S>
+        auto localIP()
+            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+            return WiFi.localIP();
+        }
+        template <typename T = S>
+        auto localIP()
+            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
+            return Ethernet.localIP();
+        }
+
+        template <typename T = S>
+        auto subnetMask()
+            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+            return WiFi.subnetMask();
+        }
+        template <typename T = S>
+        auto subnetMask()
+            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
+            return Ethernet.subnetMask();
+        }
+
+        template <typename T = S>
+        auto macAddress(uint8_t* mac)
+            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
+            WiFi.macAddress(mac);
+        }
+        template <typename T = S>
+        auto macAddress(uint8_t* mac)
+            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value> {
+#ifndef ESP8266
+            Ethernet.MACAddress(mac);
+#endif
+        }
     };  // namespace artnet
 
     template <typename S>
