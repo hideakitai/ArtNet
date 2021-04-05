@@ -162,7 +162,6 @@ PRs are welcome!
 - [ArtNet](https://github.com/hideakitai/ArtNet)
 - [Tween](https://github.com/hideakitai/Tween)
 - [TimeProfiler](https://github.com/hideakitai/TimeProfiler)
-- [SceneManager](https://github.com/hideakitai/SceneManager)
 - [TaskManager](https://github.com/hideakitai/TaskManager)
 - [ArxStringUtils](https://github.com/hideakitai/ArxStringUtils)
 - [Debouncer](https://github.com/hideakitai/Debouncer)
