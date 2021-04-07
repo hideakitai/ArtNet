@@ -25,6 +25,8 @@
 
 #else  // Do not have libstdc++11
 
+#include <limits.h>
+
 #ifndef ARX_VECTOR_DEFAULT_SIZE
 #define ARX_VECTOR_DEFAULT_SIZE 16
 #endif  // ARX_VECTOR_DEFAULT_SIZE
@@ -48,25 +50,176 @@ namespace container {
 
 template <typename T, size_t N>
 class RingBuffer {
+    class Iterator {
+        friend RingBuffer<T, N>;
+
+        T* ptr {nullptr};  // pointer to the first element
+        int pos {0};
+
+        Iterator() {}
+        Iterator(T* ptr, int pos)
+        : ptr(ptr), pos(pos) {}
+
+    public:
+        Iterator(const Iterator& it) {
+            this->ptr = it.ptr;
+            this->pos = it.pos;
+        }
+
+        Iterator(Iterator&& it) {
+            this->ptr = container::detail::move(it.ptr);
+            this->pos = container::detail::move(it.pos);
+        }
+
+        int index() const {
+            if (pos >= 0)
+                return pos % N;
+            else
+                return N - (abs(pos) % (N + 1));
+        }
+
+        int index_with_offset(const int i) const {
+            const int p = pos + i;
+            if (p >= 0)
+                return p % N;
+            else
+                return N - (abs(p) % (N + 1));
+        }
+
+        T& operator*() {
+            return *(ptr + index());
+        }
+        const T& operator*() const {
+            return *(ptr + index());
+        }
+        T* operator->() {
+            return ptr + index();
+        }
+        const T* operator->() const {
+            return ptr + index();
+        }
+
+        Iterator operator+(const Iterator& rhs) {
+            Iterator it(this->ptr, this->pos + rhs.pos);
+            return it;
+        }
+        Iterator operator+(const int n) {
+            Iterator it(this->ptr, this->pos + n);
+            return it;
+        }
+        Iterator operator-(const Iterator& rhs) {
+            Iterator it(this->ptr, this->pos - rhs.pos);
+            return it;
+        }
+        Iterator operator-(const int n) {
+            Iterator it(this->ptr, this->pos - n);
+            return it;
+        }
+        Iterator& operator+=(const Iterator& rhs) {
+            this->pos += rhs.pos;
+            return *this;
+        }
+        Iterator& operator+=(const int n) {
+            this->pos += n;
+            return *this;
+        }
+        Iterator& operator-=(const Iterator& rhs) {
+            this->pos -= rhs.pos;
+            return *this;
+        }
+        Iterator& operator-=(const int n) {
+            this->pos -= n;
+            return *this;
+        }
+
+        // prefix increment/decrement
+        Iterator& operator++() {
+            ++pos;
+            return *this;
+        }
+        Iterator& operator--() {
+            --pos;
+            return *this;
+        }
+        // postfix increment/decrement
+        Iterator operator++(int) {
+            Iterator it = *this;
+            ++pos;
+            return it;
+        }
+        Iterator operator--(int) {
+            Iterator it = *this;
+            --pos;
+            return it;
+        }
+
+        Iterator& operator=(const Iterator& rhs) {
+            this->ptr = rhs.ptr;
+            this->pos = rhs.pos;
+            return *this;
+        }
+        Iterator& operator=(Iterator&& rhs) {
+            this->ptr = container::detail::move(rhs.ptr);
+            this->pos = container::detail::move(rhs.pos);
+            return *this;
+        }
+
+        bool operator==(const Iterator& rhs) const {
+            return (rhs.ptr == ptr) && (rhs.pos == pos);
+        }
+        bool operator!=(const Iterator& rhs) const {
+            return !(*this == rhs);
+        }
+        bool operator<(const Iterator& rhs) const {
+            return pos < rhs.pos;
+        }
+        bool operator<=(const Iterator& rhs) const {
+            return pos <= rhs.pos;
+        }
+        bool operator>(const Iterator& rhs) const {
+            return pos > rhs.pos;
+        }
+        bool operator>=(const Iterator& rhs) const {
+            return pos >= rhs.pos;
+        }
+
+    private:
+        int raw_pos() const {
+            return pos;
+        }
+
+        void set(const int i) {
+            pos = i;
+        }
+
+        void reset() {
+            pos = 0;
+        }
+    };
+
 protected:
-    T queue_[N + 1];  // add +1 size not to access invalid pointer for end()
-    int head_ {0};
-    int tail_ {0};
+    friend class Iterator;
+
+    T queue_[N];
+    Iterator head_;
+    Iterator tail_;
 
 public:
+    using iterator = Iterator;
+    using const_iterator = const Iterator;
+
     RingBuffer()
     : queue_()
-    , head_ {0}
-    , tail_ {0} {
+    , head_(queue_, 0)
+    , tail_(queue_, 0) {
     }
 
     RingBuffer(std::initializer_list<T> lst)
     : queue_()
-    , head_(0)
-    , tail_(0) {
+    , head_(queue_, 0)
+    , tail_(queue_, 0) {
         for (auto it = lst.begin(); it != lst.end(); ++it) {
-            queue_[tail_] = *it;
-            ++tail_;
+            push_back(*it);
         }
     }
 
@@ -104,52 +257,55 @@ public:
 
     virtual ~RingBuffer() {}
 
-    using iterator = T*;
-    using const_iterator = const T*;
-
     size_t capacity() const { return N; };
-    size_t size() const { return tail_ - head_; }
+    size_t size() const { return abs(tail_.raw_pos() - head_.raw_pos()); }
     inline const T* data() const { return &(get(head_)); }
     T* data() { return &(get(head_)); }
     bool empty() const { return tail_ == head_; }
     void clear() {
-        head_ = 0;
-        tail_ = 0;
+        head_.reset();
+        tail_.reset();
     }
 
-    void pop() { pop_front(); }
+    void pop() {
+        pop_front();
+    }
     void pop_front() {
         if (size() == 0) return;
         if (size() == 1)
             clear();
         else
-            head_++;
+            increment_head();
     }
     void pop_back() {
         if (size() == 0) return;
         if (size() == 1)
             clear();
         else
-            tail_--;
+            decrement_tail();
     }
 
-    void push(const T& data) { push_back(data); }
-    void push(T&& data) { push_back(data); }
+    void push(const T& data) {
+        push_back(data);
+    }
+    void push(T&& data) {
+        push_back(data);
+    }
     void push_back(const T& data) {
-        get(tail_++) = data;
-        if (size() > N) ++head_;
+        get(tail_) = data;
+        increment_tail();
     };
     void push_back(T&& data) {
-        get(tail_++) = data;
-        if (size() > N) ++head_;
+        get(tail_) = data;
+        increment_tail();
     };
     void push_front(const T& data) {
-        get(head_--) = data;
-        if (size() > N) --tail_;
+        get(head_) = data;
+        decrement_head();
     };
     void push_front(T&& data) {
-        get(head_--) = data;
-        if (size() > N) --tail_;
+        get(head_) = data;
+        decrement_head();
     };
     void emplace(const T& data) { push(data); }
     void emplace(T&& data) { push(data); }
@@ -159,24 +315,26 @@ public:
     const T& front() const { return get(head_); };
     T& front() { return get(head_); };
 
-    const T& back() const { return get(tail_ - 1); }
-    T& back() { return get(tail_ - 1); }
+    const T& back() const { return get(size() - 1); }
+    T& back() { return get(size() - 1); }
 
-    const T& operator[](size_t index) const { return get(head_ + (int)index); }
-    T& operator[](size_t index) { return get(head_ + (int)index); }
+    const T& operator[](size_t index) const { return get((int)index); }
+    T& operator[](size_t index) { return get((int)index); }
 
-    iterator begin() { return ptr(head_); }
-    iterator end() { return (iterator)(queue_ + tail_); }
+    iterator begin() { return empty() ? Iterator() : head_; }
+    iterator end() { return empty() ? Iterator() : tail_; }
+    const_iterator begin() const { return empty() ? Iterator() : head_; }
+    const_iterator end() const { return empty() ? Iterator() : tail_; }
 
-    const_iterator begin() const { return (const_iterator)ptr(head_); }
-    const_iterator end() const { return (const_iterator)(queue_ + tail_); }
+    iterator erase(const iterator& p) {
+        if (!is_valid(p)) return end();
 
-    iterator erase(iterator p) {
-        if (p == end()) return p;
-        for (T* pos = p; pos != end(); ++pos)
-            *pos = *(pos + 1);
-        --tail_;
-        return p;
+        iterator it_last = begin() + size() - 1;
+        for (iterator it = p; it != it_last; ++it)
+            *it = *(it + 1);
+        *it_last = T();
+        decrement_tail();
+        return empty() ? end() : p;
     }
 
     void resize(size_t sz) {
@@ -190,8 +348,8 @@ public:
 
     void assign(const_iterator first, const_iterator end) {
         clear();
-        const char* p = first;
-        while (p != end) push(*p++);
+        iterator it = first;
+        while (it != end) push(*(it++));
     }
 
     void shrink_to_fit() {
@@ -207,52 +365,81 @@ public:
         if (pos != end()) {
             size_t sz = 0;
             {
-                iterator it = (iterator)first;
-                for (; it != last; ++it) ++sz;
+                for (iterator it = first; it != last; ++it) ++sz;
             }
             iterator it = end() + sz - 1;
-            for (int i = sz; i > 0; --i, --it) {
+            for (int i = sz; i > 0; --i, --it)
                 *it = *(it - sz);
-            }
-            it = (iterator)pos;
-            for (size_t i = 0; i < sz; ++i) {
+            it = pos;
+            for (size_t i = 0; i < sz; ++i)
                 *it = *(first + i);
-            }
         } else {
-            iterator it = (iterator)first;
-            for (; it != last; ++it) {
+            for (iterator it = first; it != last; ++it)
                 push_back(*it);
-            }
         }
     }
 
 private:
-    T& get(const int i) {
-        if (i >= 0)
-            return queue_[i % N];
-        else
-            return queue_[N - abs(i % N)];
+    T& get(const Iterator& it) {
+        return queue_[it.index()];
+    }
+    const T& get(const Iterator& it) const {
+        return queue_[it.index()];
+    }
+    T& get(const int index) {
+        return queue_[head_.index_with_offset(index)];
+    }
+    const T& get(const int index) const {
+        return queue_[head_.index_with_offset(index)];
     }
 
-    const T& get(const int i) const {
-        if (i >= 0)
-            return queue_[i % N];
-        else
-            return queue_[N - abs(i % N)];
+    T* ptr(const Iterator& it) {
+        return (T*)(queue_ + it.index());
+    }
+    const T* ptr(const Iterator& it) const {
+        return (T*)(queue_ + it.index());
+    }
+    T* ptr(const int index) {
+        return (T*)(queue_ + head_.index_with_offset(index));
+    }
+    const T* ptr(const int index) const {
+        return (T*)(queue_ + head_.index_with_offset(index));
     }
 
-    T* ptr(const int i) {
-        if (i >= 0)
-            return (T*)(queue_ + i % N);
-        else
-            return (T*)(queue_ + N - abs(i % N));
+    void increment_head() {
+        ++head_;
+        resolve_overflow();
+    }
+    void increment_tail() {
+        ++tail_;
+        resolve_overflow();
+        if (size() > N)
+            increment_head();
+    }
+    void decrement_head() {
+        --head_;
+        resolve_overflow();
+        if (size() > N)
+            decrement_tail();
+    }
+    void decrement_tail() {
+        --tail_;
+        resolve_overflow();
     }
 
-    const T* ptr(const int i) const {
-        if (i >= 0)
-            return (T*)(queue_ + i % N);
-        else
-            return (T*)(queue_ + N - abs(i % N));
+    void resolve_overflow() {
+        if (empty())
+            clear();
+        else if (head_.raw_pos() > tail_.raw_pos()) {
+            // the same value will be obtained regardless of which of the head tail overflows
+            int len = (INT_MAX - head_.raw_pos()) + (tail_.raw_pos() - INT_MIN);
+            clear();
+            tail_.set(len);
+        }
+    }
+
+    bool is_valid(const iterator& it) {
+        return (it.raw_pos() >= head_.raw_pos()) && (it.raw_pos() < tail_.raw_pos());
     }
 };
 
@@ -271,6 +458,9 @@ bool operator!=(const RingBuffer<T, N>& x, const RingBuffer<T, N>& y) {
 
 template <typename T, size_t N = ARX_VECTOR_DEFAULT_SIZE>
 struct vector : public RingBuffer<T, N> {
+    using iterator = typename RingBuffer<T, N>::iterator;
+    using const_iterator = typename RingBuffer<T, N>::const_iterator;
+
     vector()
     : RingBuffer<T, N>() {}
     vector(std::initializer_list<T> lst)
@@ -306,6 +496,9 @@ private:
 
 template <typename T, size_t N = ARX_DEQUE_DEFAULT_SIZE>
 struct deque : public RingBuffer<T, N> {
+    using iterator = typename RingBuffer<T, N>::iterator;
+    using const_iterator = typename RingBuffer<T, N>::const_iterator;
+
     deque()
     : RingBuffer<T, N>() {}
     deque(std::initializer_list<T> lst)
@@ -366,18 +559,19 @@ template <class Key, class T, size_t N = ARX_MAP_DEFAULT_SIZE>
 struct map : public RingBuffer<pair<Key, T>, N> {
     using iterator = typename RingBuffer<pair<Key, T>, N>::iterator;
     using const_iterator = typename RingBuffer<pair<Key, T>, N>::const_iterator;
+    using base = RingBuffer<pair<Key, T>, N>;
 
     map()
-    : RingBuffer<pair<Key, T>, N>() {}
+    : base() {}
     map(std::initializer_list<pair<Key, T> > lst)
-    : RingBuffer<pair<Key, T>, N>(lst) {}
+    : base(lst) {}
 
     // copy
     map(const map& r)
-    : RingBuffer<pair<Key, T>, N>(r) {}
+    : base(r) {}
 
     map& operator=(const map& r) {
-        RingBuffer<pair<Key, T>, N>::operator=(r);
+        base::operator=(r);
         return *this;
     }
 
@@ -386,7 +580,7 @@ struct map : public RingBuffer<pair<Key, T>, N> {
     : RingBuffer<T, N>(r) {}
 
     map& operator=(map&& r) {
-        RingBuffer<pair<Key, T>, N>::operator=(r);
+        base::operator=(r);
         return *this;
     }
 
@@ -416,20 +610,20 @@ struct map : public RingBuffer<pair<Key, T>, N> {
         if (it == this->end()) {
             this->push(make_pair(key, t));
             b = true;
-            it = this->end() - 1;
+            it = this->begin() + this->size() - 1;
         }
         return {it, b};
     }
 
     pair<iterator, bool> insert(const pair<Key, T>& p) {
         bool b {false};
-        const_iterator it = find(p.first);
+        iterator it = find(p.first);
         if (it == this->end()) {
             this->push(p);
             b = true;
-            it = this->end() - 1;
+            it = this->begin() + this->size() - 1;
         }
-        return {(iterator)it, b};
+        return {it, b};
     }
 
     pair<iterator, bool> emplace(const Key& key, const T& t) {
@@ -454,18 +648,15 @@ struct map : public RingBuffer<pair<Key, T>, N> {
         return find(key)->second;
     }
 
-    iterator erase(const iterator it) {
+    iterator erase(const iterator& it) {
         iterator i = (iterator)find(it->first);
-        if (i != this->end()) {
-            return this->erase(i);
-        }
-        return this->end();
+        return base::erase(i);
     }
 
     iterator erase(const size_t index) {
         if (index < this->size()) {
             iterator it = this->begin() + index;
-            return this->erase(it);
+            erase(it);
         }
         return this->end();
     }
@@ -479,20 +670,20 @@ struct map : public RingBuffer<pair<Key, T>, N> {
     }
 
 private:
-    using RingBuffer<pair<Key, T>, N>::capacity;
-    using RingBuffer<pair<Key, T>, N>::data;
-    using RingBuffer<pair<Key, T>, N>::pop;
-    using RingBuffer<pair<Key, T>, N>::pop_front;
-    using RingBuffer<pair<Key, T>, N>::pop_back;
-    using RingBuffer<pair<Key, T>, N>::push;
-    using RingBuffer<pair<Key, T>, N>::push_back;
-    using RingBuffer<pair<Key, T>, N>::push_front;
-    using RingBuffer<pair<Key, T>, N>::emplace_back;
-    using RingBuffer<pair<Key, T>, N>::front;
-    using RingBuffer<pair<Key, T>, N>::back;
-    using RingBuffer<pair<Key, T>, N>::resize;
-    using RingBuffer<pair<Key, T>, N>::assign;
-    using RingBuffer<pair<Key, T>, N>::shrink_to_fit;
+    using base::assign;
+    using base::back;
+    using base::capacity;
+    using base::data;
+    using base::emplace_back;
+    using base::front;
+    using base::pop;
+    using base::pop_back;
+    using base::pop_front;
+    using base::push;
+    using base::push_back;
+    using base::push_front;
+    using base::resize;
+    using base::shrink_to_fit;
 };
 
 }  // namespace arx
