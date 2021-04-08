@@ -348,8 +348,13 @@ public:
 
     void assign(const_iterator first, const_iterator end) {
         clear();
-        iterator it = first;
-        while (it != end) push(*(it++));
+        while (first != end) push(*(first++));
+    }
+
+    void assign(const T* first, const T* end) {
+        clear();
+        // T* it = first;
+        while (first != end) push(*(first++));
     }
 
     void shrink_to_fit() {
@@ -375,6 +380,24 @@ public:
                 *it = *(first + i);
         } else {
             for (iterator it = first; it != last; ++it)
+                push_back(*it);
+        }
+    }
+
+    void insert(const_iterator pos, const T* first, const T* last) {
+        if (pos != end()) {
+            size_t sz = 0;
+            {
+                for (const T* it = first; it != last; ++it) ++sz;
+            }
+            iterator it = end() + sz - 1;
+            for (int i = sz; i > 0; --i, --it)
+                *it = *(it - sz);
+            it = pos;
+            for (size_t i = 0; i < sz; ++i)
+                *it = *(first + i);
+        } else {
+            for (const T* it = first; it != last; ++it)
                 push_back(*it);
         }
     }
