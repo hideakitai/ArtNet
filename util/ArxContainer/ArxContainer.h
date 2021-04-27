@@ -676,6 +676,11 @@ struct map : public RingBuffer<pair<Key, T>, N> {
         return base::erase(i);
     }
 
+    iterator erase(const Key& key) {
+        iterator i = find(key);
+        return base::erase(i);
+    }
+
     iterator erase(const size_t index) {
         if (index < this->size()) {
             iterator it = this->begin() + index;
