@@ -43,6 +43,20 @@ Please use them depending on the situation.
 - ArtnetSender
 - Artnet (Integrated Sender/Receiver)
 
+### Include Artnet
+
+Please include `#include "Artnet.h` first.
+
+If you use the board which has both `WiFi` and `Ethernet`, you can't use `#include <Artnet.h>`. Please replace it with `#include <ArtnetWiFi.h>` or `#include <ArtnetEther.h>` depending on the interface you want to use.
+
+```C++
+// For the boards which can use ether WiFi or Ethernet
+#include <Artnet.h>
+// OR use WiFi on the board which can use both WiFi and Ethernet
+#include <ArtnetWiFi.h>
+// OR use Ethenet on the board which can use both WiFi and Ethernet
+#include <ArtnetEther.h>
+```
 
 ### ArtnetReceiver
 
