@@ -7,8 +7,8 @@
 // Packet Definition : https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/
 
 #include <Arduino.h>
-#include "util/ArxTypeTraits/ArxTypeTraits.h"
-#include "util/ArxContainer/ArxContainer.h"
+#include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"
+#include "Artnet/util/ArxContainer/ArxContainer.h"
 
 #if defined(ESP_PLATFORM) || defined(ESP8266) || defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_SAMD_NANO_33_IOT)
 #define ARTNET_ENABLE_WIFI
@@ -43,7 +43,7 @@
 #ifdef ARTNET_ENABLE_ETHER
 #include <Ethernet.h>
 #include <EthernetUdp.h>
-#include "util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
+#include "Artnet/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
 #endif  // ARTNET_ENABLE_ETHER
 
 namespace arx {
