@@ -1,5 +1,10 @@
 #include <FastLED.h>  // include FastLED *before* Artnet
-#include <Artnet.h>
+
+// Please include ArtnetWiFi.h to use Artnet on the platform
+// which can use both WiFi and Ethernet
+#include <ArtnetWiFi.h>
+// this is also valid for other platforms which can use only WiFi
+// #include <Artnet.h>
 
 // WiFi stuff
 const char* ssid = "your-ssid";

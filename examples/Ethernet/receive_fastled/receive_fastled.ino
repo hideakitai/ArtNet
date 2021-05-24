@@ -1,5 +1,10 @@
 #include <FastLED.h>  // include FastLED *before* Artnet
-#include <Artnet.h>
+
+// Please include ArtnetEther.h to use Artnet on the platform
+// which can use both WiFi and Ethernet
+#include <ArtnetEther.h>
+// this is also valid for other platforms which can use only Ethernet
+// #include <Artnet.h>
 
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
