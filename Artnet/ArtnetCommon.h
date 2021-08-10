@@ -338,9 +338,9 @@ namespace artnet {
             return packet[HEADER_SIZE + i];
         }
 
-        template <typename F>
-        inline auto subscribe(const uint8_t universe, F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        template <typename Fn>
+        inline auto subscribe(const uint8_t universe, Fn&& func)
+            -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 Serial.println(F("too many callbacks"));
             } else {
@@ -349,13 +349,13 @@ namespace artnet {
                     return;
                 } else {
                     uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-                    callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
+                    callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
                 }
             }
         }
-        template <typename F>
-        inline auto subscribe(const uint8_t universe, F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        template <typename Fn>
+        inline auto subscribe(const uint8_t universe, Fn* func)
+            -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 Serial.println(F("too many callbacks"));
             } else {
@@ -363,26 +363,26 @@ namespace artnet {
                     Serial.println(F("universe out of bounds"));
                 } else {
                     uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-                    callbacks.insert(make_pair(u, arx::function_traits<F>::cast(func)));
+                    callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
                 }
             }
         }
-        template <typename F>
-        inline auto subscribe15bit(const uint16_t universe, F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        template <typename Fn>
+        inline auto subscribe15bit(const uint16_t universe, Fn&& func)
+            -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 Serial.println(F("too many callbacks"));
             } else {
-                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
             }
         }
-        template <typename F>
-        inline auto subscribe15bit(const uint16_t universe, F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        template <typename Fn>
+        inline auto subscribe15bit(const uint16_t universe, Fn* func)
+            -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 Serial.println(F("too many callbacks"));
             } else {
-                callbacks.insert(make_pair(universe, arx::function_traits<F>::cast(func)));
+                callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
             }
         }
         template <typename F>
