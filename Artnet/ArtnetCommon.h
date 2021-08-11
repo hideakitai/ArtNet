@@ -284,7 +284,7 @@ namespace artnet {
                         break;
                     }
                     default: {
-                        Serial.print("Unsupported OpCode: ");
+                        Serial.print(F("Unsupported OpCode: "));
                         Serial.println(opcode(d), HEX);
                         op_code = OpCode::NA;
                         break;
@@ -444,12 +444,12 @@ namespace artnet {
         void attach(S& s, const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0) {
             stream = &s;
             if (subscribe_net > 128) {
-                Serial.println("Net must be < 128");
+                Serial.println(F("Net must be < 128"));
             } else {
                 net_switch = subscribe_net;
             }
             if (subscribe_subnet > 16) {
-                Serial.println("Subnet must be < 16");
+                Serial.println(F("Subnet must be < 16"));
             } else {
                 sub_switch = subscribe_subnet;
             }
