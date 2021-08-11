@@ -260,9 +260,10 @@ namespace artnet {
             const size_t size = stream->parsePacket();
             if (size == 0) return OpCode::NA;
 
-            uint8_t d[size];
+            uint8_t* d = new uint8_t[size];
             stream->read(d, size);
 
+            OpCode op_code = OpCode::NA;
             if (checkID(d)) {
                 switch (opcode(d)) {
                     case OPC(OpCode::Dmx): {
@@ -272,22 +273,26 @@ namespace artnet {
                         if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
                         for (auto& c : callbacks)
                             if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
-                        return OpCode::Dmx;
+                        op_code = OpCode::Dmx;
+                        break;
                     }
                     case OPC(OpCode::Poll): {
                         remote_ip = stream->S::remoteIP();
                         remote_port = (uint16_t)stream->S::remotePort();
                         poll_reply();
-                        return OpCode::Poll;
+                        op_code = OpCode::Poll;
+                        break;
                     }
                     default: {
                         Serial.print("Unsupported OpCode: ");
                         Serial.println(opcode(d), HEX);
-                        return OpCode::NA;
+                        op_code = OpCode::NA;
+                        break;
                     }
                 }
             }
-            return OpCode::NA;
+            delete[] d;
+            return op_code;
         }
 
         inline const IPAddress& ip() const { return remote_ip; }
