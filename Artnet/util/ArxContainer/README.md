@@ -1,6 +1,6 @@
 # ArxContainer
 
-C++ container-like classes (`vector`, `deque`, `map` etc.) for Arduino which cannot use STL
+C++ container-like classes (`vector`, `array`, `deque`, `map` etc.) for Arduino which cannot use STL
 
 ## Note
 
@@ -13,6 +13,7 @@ C++ container-like classes (`vector`, `deque`, `map` etc.) for Arduino which can
 ## Supported Container Types
 
 - `vector`
+- `array`
 - `map` (`pair`)
 - `deque`
 
@@ -46,6 +47,24 @@ for (size_t i = 0; i < vs.size(); ++i)
 // range-based access
 for (const auto& v : vs)
     Serial.println(v);
+```
+
+### array
+
+```C++
+// initialize with initializer_list
+arx::array<int, 3> arr {1, 2, 3};
+
+// fill
+arr.fill(123);
+
+// index access
+for (size_t i = 0; i < arr.size(); ++i)
+    Serial.println(arr[i]);
+
+// range-based access
+for (const auto& a : arr)
+    Serial.println(a);
 ```
 
 ### map
@@ -118,6 +137,9 @@ for(auto& b : buffer)
 namespace arx {
     template <typename T, size_t N = ARX_VECTOR_DEFAULT_SIZE>
     struct vector : public RingBuffer<T, N>
+
+    template <typename T, size_t N>
+    struct array : public RingBuffer<T, N>
 
     template <class Key, class T, size_t N = ARX_MAP_DEFAULT_SIZE>
     struct map : public RingBuffer<pair<Key, T>, N>
