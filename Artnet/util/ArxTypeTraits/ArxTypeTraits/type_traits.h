@@ -50,8 +50,10 @@ namespace arx { namespace stdx {
     template <> constexpr char numeric_limits<char>::max() { return CHAR_MAX; }
     template <> constexpr signed char numeric_limits<signed char>::max() { return SCHAR_MAX; }
     template <> constexpr unsigned char numeric_limits<unsigned char>::max() { return UCHAR_MAX; }
+#ifndef ARDUINO_spresense_ast
     template <> constexpr wchar_t numeric_limits<wchar_t>::max() { return WCHAR_MAX; }
     // template <> constexpr char8_t numeric_limits<char8_t>::max() { return UCHAR_MAX; }
+#endif
     template <> constexpr char16_t numeric_limits<char16_t>::max() { return UINT_LEAST16_MAX; }
     template <> constexpr char32_t numeric_limits<char32_t>::max() { return UINT_LEAST32_MAX; }
     template <> constexpr short numeric_limits<short>::max() { return SHRT_MAX; }
@@ -70,8 +72,10 @@ namespace arx { namespace stdx {
     template <> constexpr char numeric_limits<char>::min() { return CHAR_MIN; }
     template <> constexpr signed char numeric_limits<signed char>::min() { return SCHAR_MIN; }
     template <> constexpr unsigned char numeric_limits<unsigned char>::min() { return 0; }
+#ifndef ARDUINO_spresense_ast
     template <> constexpr wchar_t numeric_limits<wchar_t>::min() { return WCHAR_MIN; }
     // template <> constexpr char8_t numeric_limits<char8_t>::min() { return 0; }
+#endif
     template <> constexpr char16_t numeric_limits<char16_t>::min() { return 0; }
     template <> constexpr char32_t numeric_limits<char32_t>::min() { return 0; }
     template <> constexpr short numeric_limits<short>::min() { return SHRT_MIN; }
@@ -602,7 +606,7 @@ namespace arx { // others
                 return static_cast<function_type>(f);
             }
         };
-    };
+    }
     template <typename T>
     struct function_traits : public function_traits<decltype(&T::operator())> {};
     template <typename class_type, typename ret, typename ... arguments>

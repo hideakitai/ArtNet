@@ -99,6 +99,7 @@ C++ type_traits for Arduino which cannot use it as default
 - [MsgPack](https://github.com/hideakitai/MsgPack)
 - [MsgPacketizer](https://github.com/hideakitai/MsgPacketizer)
 - [ArduinoOSC](https://github.com/hideakitai/ArduinoOSC)
+- [ArtNet](https://github.com/hideakitai/ArtNet)
 - [PollingTimer](https://github.com/hideakitai/PollingTimer)
 - [Tween](https://github.com/hideakitai/Tween)
 - [ArxStringUtils](https://github.com/hideakitai/ArxStringUtils)
