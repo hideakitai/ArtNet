@@ -14,7 +14,6 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 - Flexible net/subnet/universe setting
 - Easy data forwarding to [FastLED](https://github.com/FastLED/FastLED)
 
-
 ## Supported Platforms
 
 #### WiFi
@@ -32,7 +31,6 @@ Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
 - ESP32
 - ESP8266
 - Almost all platforms without WiFi
-
 
 ## Usage
 
@@ -145,11 +143,9 @@ void loop() {
 }
 ```
 
-
 ### Artnet Receiver + FastLED
 
-
-``` C++
+```C++
 #include <Artnet.h>
 ArtnetReceiver artnet;
 
@@ -188,7 +184,6 @@ void loop() {
     FastLED.show();
 }
 ```
-
 
 ## Other Settings
 
@@ -233,7 +228,6 @@ artnet.streaming(ip, univ15bit);         // stream to 15bit universe or
 artnet.streaming(ip, net, subnet, univ); // net, subnet, and universe
 ```
 
-
 ### ArtPollReply Setting
 
 - This library supports `ArtPoll` and `ArtPollReply`
@@ -243,7 +237,6 @@ artnet.streaming(ip, net, subnet, univ); // net, subnet, and universe
   - `void shortname(const String& sn)`
   - `void longname(const String& ln)`
   - `void nodereport(const String& nr)`
-
 
 ## APIs
 
@@ -307,20 +300,17 @@ uint8_t data(const uint16_t i) const;
 
 Some boards without enough memory (e.g. Uno, Nano, etc.) may not be able to use integrated sender/receiver because of the lack of enough memory. Please consider to use more powerful board or to use only sender OR receiver.
 
-
 ## Reference
 
 - [Spec (Art-Net 4)](http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf)
 - [Packet Summary](https://art-net.org.uk/structure/packet-summary-2/)
 - [Packet Definition](https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/)
 
-
 ## Embedded Libraries
 
 - [ArxContainer v0.4.0](https://github.com/hideakitai/ArxContainer)
 - [ArxTypeTraits v0.2.3](https://github.com/hideakitai/ArxTypeTraits)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
-
 
 ## License
 
