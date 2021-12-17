@@ -46,7 +46,9 @@ namespace artnet {
         NA = 0x0000,
     };
 
-    constexpr uint16_t OPC(OpCode op) { return static_cast<uint16_t>(op); }
+    constexpr uint16_t OPC(OpCode op) {
+        return static_cast<uint16_t>(op);
+    }
 
     enum class Index : uint16_t {
         ID = 0,
@@ -63,7 +65,9 @@ namespace artnet {
         DATA = 18
     };
 
-    constexpr uint16_t IDX(Index i) { return static_cast<uint16_t>(i); }
+    constexpr uint16_t IDX(Index i) {
+        return static_cast<uint16_t>(i);
+    }
 
     constexpr uint16_t DEFAULT_PORT {6454};  // 0x1936
     constexpr uint16_t HEADER_SIZE {18};
@@ -150,7 +154,9 @@ namespace artnet {
     public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
-        Sender_() { packet.resize(PACKET_SIZE); }
+        Sender_() {
+            packet.resize(PACKET_SIZE);
+        }
 #endif
         virtual ~Sender_() {}
 
@@ -184,15 +190,25 @@ namespace artnet {
             streaming_data(data, size);
             send_packet(ip);
         }
-        void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size) {
+        void send(
+            const String& ip,
+            const uint8_t net_,
+            const uint8_t subnet_,
+            const uint8_t universe_,
+            const uint8_t* const data,
+            const uint16_t size) {
             set_universe(net_, subnet_, universe_);
             streaming_data(data, size);
             send_packet(ip);
         }
 
-        void physical(const uint8_t i) { phy = constrain(i, 0, 3); }
+        void physical(const uint8_t i) {
+            phy = constrain(i, 0, 3);
+        }
 
-        uint8_t sequence() const { return seq; }
+        uint8_t sequence() const {
+            return seq;
+        }
 
     protected:
         void attach(S& s) {
@@ -249,7 +265,9 @@ namespace artnet {
     public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
-        Receiver_() { packet.resize(PACKET_SIZE); }
+        Receiver_() {
+            packet.resize(PACKET_SIZE);
+        }
 #endif
 
         virtual ~Receiver_() {}
@@ -298,8 +316,12 @@ namespace artnet {
             return op_code;
         }
 
-        inline const IPAddress& ip() const { return remote_ip; }
-        inline uint16_t port() const { return remote_port; }
+        inline const IPAddress& ip() const {
+            return remote_ip;
+        }
+        inline uint16_t port() const {
+            return remote_port;
+        }
 
         inline String id() const {
             String str;
@@ -347,8 +369,7 @@ namespace artnet {
         }
 
         template <typename Fn>
-        inline auto subscribe(const uint8_t universe, Fn&& func)
-            -> std::enable_if_t<arx::is_callable<Fn>::value> {
+        inline auto subscribe(const uint8_t universe, Fn&& func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 if (b_verbose) {
                     Serial.println(F("too many callbacks"));
@@ -366,8 +387,7 @@ namespace artnet {
             }
         }
         template <typename Fn>
-        inline auto subscribe(const uint8_t universe, Fn* func)
-            -> std::enable_if_t<arx::is_callable<Fn>::value> {
+        inline auto subscribe(const uint8_t universe, Fn* func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
                 if (b_verbose) {
                     Serial.println(F("too many callbacks"));
@@ -406,20 +426,17 @@ namespace artnet {
             }
         }
         template <typename F>
-        inline auto subscribe(F&& func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        inline auto subscribe(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
             callback_all = arx::function_traits<F>::cast(func);
         }
         template <typename F>
-        inline auto subscribe(F* func)
-            -> std::enable_if_t<arx::is_callable<F>::value> {
+        inline auto subscribe(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
             callback_all = arx::function_traits<F>::cast(func);
         }
 
         inline void unsubscribe(const uint8_t universe) {
             auto it = callbacks.find(universe);
-            if (it != callbacks.end())
-                callbacks.erase(it);
+            if (it != callbacks.end()) callbacks.erase(it);
         }
         inline void unsubscribe() {
             callback_all = nullptr;
@@ -551,36 +568,30 @@ namespace artnet {
 
 #ifdef ARTNET_ENABLE_WIFI
         template <typename T = S>
-        auto localIP()
-            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+        auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
             return WiFi.localIP();
         }
         template <typename T = S>
-        auto subnetMask()
-            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+        auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
             return WiFi.subnetMask();
         }
         template <typename T = S>
-        auto macAddress(uint8_t* mac)
-            -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
+        auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
             WiFi.macAddress(mac);
         }
 #endif  // ARTNET_ENABLE_WIFI
 
 #ifdef ARTNET_ENABLE_ETHER
         template <typename T = S>
-        auto localIP()
-            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
+        auto localIP() -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
             return Ethernet.localIP();
         }
         template <typename T = S>
-        auto subnetMask()
-            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
+        auto subnetMask() -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
             return Ethernet.subnetMask();
         }
         template <typename T = S>
-        auto macAddress(uint8_t* mac)
-            -> std::enable_if_t<std::is_same<T, EthernetUDP>::value> {
+        auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, EthernetUDP>::value> {
 #ifndef ESP8266
             Ethernet.MACAddress(mac);
 #endif
@@ -593,7 +604,10 @@ namespace artnet {
         S stream;
 
     public:
-        void begin(const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0, const uint16_t recv_port = DEFAULT_PORT) {
+        void begin(
+            const uint8_t subscribe_net = 0,
+            const uint8_t subscribe_subnet = 0,
+            const uint16_t recv_port = DEFAULT_PORT) {
             stream.begin(recv_port);
             this->Sender_<S>::attach(stream);
             this->Receiver_<S>::attach(stream, subscribe_net, subscribe_subnet);
@@ -620,7 +634,10 @@ namespace artnet {
         S stream;
 
     public:
-        void begin(const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0, const uint16_t recv_port = DEFAULT_PORT) {
+        void begin(
+            const uint8_t subscribe_net = 0,
+            const uint8_t subscribe_subnet = 0,
+            const uint16_t recv_port = DEFAULT_PORT) {
             stream.begin(recv_port);
             this->Receiver_<S>::attach(stream, subscribe_net, subscribe_subnet);
         }
