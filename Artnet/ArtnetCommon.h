@@ -244,6 +244,7 @@ namespace artnet {
         CallbackMap callbacks;
         CallbackAllType callback_all;
         S* stream;
+        bool b_verbose {false};
 
     public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
@@ -284,8 +285,10 @@ namespace artnet {
                         break;
                     }
                     default: {
-                        Serial.print(F("Unsupported OpCode: "));
-                        Serial.println(opcode(d), HEX);
+                        if (b_verbose) {
+                            Serial.print(F("Unsupported OpCode: "));
+                            Serial.println(opcode(d), HEX);
+                        }
                         op_code = OpCode::NA;
                         break;
                     }
@@ -347,10 +350,14 @@ namespace artnet {
         inline auto subscribe(const uint8_t universe, Fn&& func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
-                Serial.println(F("too many callbacks"));
+                if (b_verbose) {
+                    Serial.println(F("too many callbacks"));
+                }
             } else {
                 if (universe > 0xF) {
-                    Serial.println(F("universe out of bounds"));
+                    if (b_verbose) {
+                        Serial.println(F("universe out of bounds"));
+                    }
                     return;
                 } else {
                     uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
@@ -362,10 +369,14 @@ namespace artnet {
         inline auto subscribe(const uint8_t universe, Fn* func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
-                Serial.println(F("too many callbacks"));
+                if (b_verbose) {
+                    Serial.println(F("too many callbacks"));
+                }
             } else {
                 if (universe > 0xF) {
-                    Serial.println(F("universe out of bounds"));
+                    if (b_verbose) {
+                        Serial.println(F("universe out of bounds"));
+                    }
                 } else {
                     uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
                     callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
@@ -376,7 +387,9 @@ namespace artnet {
         inline auto subscribe15bit(const uint16_t universe, Fn&& func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
-                Serial.println(F("too many callbacks"));
+                if (b_verbose) {
+                    Serial.println(F("too many callbacks"));
+                }
             } else {
                 callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
             }
@@ -385,7 +398,9 @@ namespace artnet {
         inline auto subscribe15bit(const uint16_t universe, Fn* func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
             if (callbacks.size() >= 4) {
-                Serial.println(F("too many callbacks"));
+                if (b_verbose) {
+                    Serial.println(F("too many callbacks"));
+                }
             } else {
                 callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
             }
@@ -418,7 +433,9 @@ namespace artnet {
 #ifdef FASTLED_VERSION
         inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num) {
             subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
-                if (size < num * 3) Serial.println(F("ERROR: Too many LEDs to forward"));
+                if (size < num * 3) {
+                    Serial.println(F("ERROR: Too many LEDs to forward"));
+                }
                 for (size_t pixel = 0; pixel < num; ++pixel) {
                     size_t idx = pixel * 3;
                     leds[pixel].r = data[idx + 0];
@@ -440,16 +457,24 @@ namespace artnet {
             node_report = nr;
         }
 
+        void verbose(const bool b) {
+            b_verbose = b;
+        }
+
     protected:
         void attach(S& s, const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0) {
             stream = &s;
             if (subscribe_net > 128) {
-                Serial.println(F("Net must be < 128"));
+                if (b_verbose) {
+                    Serial.println(F("Net must be < 128"));
+                }
             } else {
                 net_switch = subscribe_net;
             }
             if (subscribe_subnet > 16) {
-                Serial.println(F("Subnet must be < 16"));
+                if (b_verbose) {
+                    Serial.println(F("Subnet must be < 16"));
+                }
             } else {
                 sub_switch = subscribe_subnet;
             }

@@ -282,6 +282,8 @@ inline void clear_subscribers();
 void shortname(const String& sn);
 void longname(const String& ln);
 void nodereport(const String& nr);
+// option
+void verbose(const bool b);
 // others
 inline const IPAddress& ip() const;
 uint16_t port() const;
