@@ -34,13 +34,13 @@ void setup() {
 
     // this can be achieved manually as follows
     // if Artnet packet comes to this universe, this function is called
-    // artnet.subscribe(universe, [&](uint8_t* data, uint16_t size)
+    // artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size)
     // {
     //     // set led
     //     // artnet data size per packet is 512 max
     //     // so there is max 170 pixel per packet (per universe)
     //     for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel) {
-    //         size_t idx = pixel * 3;
+    //         const size_t idx = pixel * 3;
     //         leds[pixel].r = data[idx + 0];
     //         leds[pixel].g = data[idx + 1];
     //         leds[pixel].b = data[idx + 2];
