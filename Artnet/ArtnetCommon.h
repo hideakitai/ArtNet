@@ -581,6 +581,21 @@ namespace artnet {
         }
 #endif  // ARTNET_ENABLE_WIFI
 
+#ifdef ARTNET_ENABLE_ETH
+        template <typename T = S>
+        auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+            return ETH.localIP();
+        }
+        template <typename T = S>
+        auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+            return ETH.subnetMask();
+        }
+        template <typename T = S>
+        auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
+            ETH.macAddress(mac);
+        }
+#endif  // ARTNET_ENABLE_ETH
+
 #ifdef ARTNET_ENABLE_ETHER
         template <typename T = S>
         auto localIP() -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress> {
