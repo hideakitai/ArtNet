@@ -228,7 +228,9 @@ namespace artnet {
             packet[IDX(Index::LENGTH_H)] = (512 >> 8) & 0xFF;
             packet[IDX(Index::LENGTH_L)] = (512 >> 0) & 0xFF;
 #ifdef ARTNET_ENABLE_WIFI
-            if (WiFi.status() != WL_CONNECTED) return;
+            if( WiFi.getMode() != WIFI_AP ) {
+                if (WiFi.status() != WL_CONNECTED) return;
+            }
 #endif
             stream->beginPacket(ip.c_str(), DEFAULT_PORT);
             stream->write(packet.data(), packet.size());
@@ -274,7 +276,9 @@ namespace artnet {
 
         OpCode parse() {
 #ifdef ARTNET_ENABLE_WIFI
-            if (WiFi.status() != WL_CONNECTED) return OpCode::NA;
+            if( WiFi.getMode() != WIFI_AP ) {
+                if (WiFi.status() != WL_CONNECTED) return OpCode::NA;
+            }
 #endif
             const size_t size = stream->parsePacket();
             if (size == 0) return OpCode::NA;
@@ -569,15 +573,39 @@ namespace artnet {
 #ifdef ARTNET_ENABLE_WIFI
         template <typename T = S>
         auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
-            return WiFi.localIP();
+            if( WiFi.getMode() == WIFI_AP ) {
+                return WiFi.softAPIP();
+            } else {
+                return WiFi.localIP();
+            }
         }
         template <typename T = S>
         auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
-            return WiFi.subnetMask();
+            if( WiFi.getMode() == WIFI_AP ) {
+                uint8_t prefix = WiFi.softAPSubnetCIDR();
+                uint32_t netmask = 0xFFFFFFFF << (32 - prefix);
+  
+                // Create IPAddress variable from netmask
+                IPAddress netmaskIP((uint8_t*)&netmask);
+                return netmaskIP;
+            } else {
+                return WiFi.subnetMask();
+            }
         }
         template <typename T = S>
         auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
-            WiFi.macAddress(mac);
+            if( WiFi.getMode() == WIFI_AP ) {
+                // Get the MAC address as a String
+                String macString = WiFi.softAPmacAddress();
+
+                // Convert the MAC address String to a uint8_t array
+                for( int i = 0; i < 6; ++i ) {
+                    String byteString = macString.substring(i * 3, i * 3 + 2);
+                    mac[i] = strtoul( byteString.c_str(), NULL, 16 );
+                }
+            } else {
+                WiFi.macAddress(mac);
+            }
         }
 #endif  // ARTNET_ENABLE_WIFI
 
