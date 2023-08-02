@@ -72,7 +72,7 @@ namespace artnet {
     constexpr uint16_t DEFAULT_PORT {6454};  // 0x1936
     constexpr uint16_t HEADER_SIZE {18};
     constexpr uint16_t PACKET_SIZE {530};
-    constexpr uint16_t PROTOCOL_VER {0x0e};
+    constexpr uint16_t PROTOCOL_VER {14}; // 0x000E
     constexpr uint8_t ID_LENGTH {8};
     constexpr char ID[ID_LENGTH] {"Art-Net"};
     constexpr float DEFAULT_FPS {40.};
