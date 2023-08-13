@@ -1,12 +1,9 @@
-// Please include ArtnetEther.h to use Artnet on the platform
-// which can use both WiFi and Ethernet
-#include <ArtnetEther.h>
-// this is also valid for other platforms which can use only Ethernet
-// #include <Artnet.h>
+#include <ArtnetETH.h>
 
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
-uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
+const IPAddress gateway(192, 168, 0, 1);
+const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetSender artnet;
 const String target_ip = "192.168.0.200";
@@ -20,7 +17,8 @@ void setup() {
     Serial.begin(115200);
     delay(2000);
 
-    Ethernet.begin(mac, ip);
+    ETH.begin();
+    ETH.config(ip, gateway, subnet);
     artnet.begin();
     // artnet.begin(net, subnet); // optionally you can change
 
