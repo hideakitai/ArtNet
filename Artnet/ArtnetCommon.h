@@ -228,8 +228,15 @@ namespace artnet {
             packet[IDX(Index::LENGTH_H)] = (512 >> 8) & 0xFF;
             packet[IDX(Index::LENGTH_L)] = (512 >> 0) & 0xFF;
 #ifdef ARTNET_ENABLE_WIFI
-            if( WiFi.getMode() != WIFI_AP ) {
-                if (WiFi.status() != WL_CONNECTED) return;
+            auto status = WiFi.status();
+            auto is_connected = status == WL_CONNECTED;
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
+            bool is_ap_active = WiFi.getMode() == WIFI_AP;
+#else
+            bool is_ap_active = status == WL_AP_CONNECTED;
+#endif
+            if (!is_connected && !is_ap_active) {
+                return;
             }
 #endif
             stream->beginPacket(ip.c_str(), DEFAULT_PORT);
@@ -276,8 +283,15 @@ namespace artnet {
 
         OpCode parse() {
 #ifdef ARTNET_ENABLE_WIFI
-            if( WiFi.getMode() != WIFI_AP ) {
-                if (WiFi.status() != WL_CONNECTED) return OpCode::NA;
+            auto status = WiFi.status();
+            auto is_connected = status == WL_CONNECTED;
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
+            bool is_ap_active = WiFi.getMode() == WIFI_AP;
+#else
+            bool is_ap_active = status == WL_AP_CONNECTED;
+#endif
+            if (!is_connected && !is_ap_active) {
+                return OpCode::NA;
             }
 #endif
             const size_t size = stream->parsePacket();
@@ -573,27 +587,39 @@ namespace artnet {
 #ifdef ARTNET_ENABLE_WIFI
         template <typename T = S>
         auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
             if( WiFi.getMode() == WIFI_AP ) {
                 return WiFi.softAPIP();
             } else {
                 return WiFi.localIP();
             }
+#else
+            return WiFi.localIP();
+#endif
         }
         template <typename T = S>
         auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
+#if defined(ARDUINO_ARCH_ESP32)
             if( WiFi.getMode() == WIFI_AP ) {
                 return WiFi.softAPSubnetMask();
             } else {
                 return WiFi.subnetMask();
             }
+#else
+            return WiFi.subnetMask();
+#endif
         }
         template <typename T = S>
         auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
             if( WiFi.getMode() == WIFI_AP ) {
                 WiFi.softAPmacAddress(mac);
             } else {
                 WiFi.macAddress(mac);
             }
+#else
+            WiFi.macAddress(mac);
+#endif
         }
 #endif  // ARTNET_ENABLE_WIFI
 
