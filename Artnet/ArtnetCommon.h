@@ -582,12 +582,7 @@ namespace artnet {
         template <typename T = S>
         auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress> {
             if( WiFi.getMode() == WIFI_AP ) {
-                uint8_t prefix = WiFi.softAPSubnetCIDR();
-                uint32_t netmask = 0xFFFFFFFF << (32 - prefix);
-  
-                // Create IPAddress variable from netmask
-                IPAddress netmaskIP((uint8_t*)&netmask);
-                return netmaskIP;
+                return WiFi.softAPSubnetMask();
             } else {
                 return WiFi.subnetMask();
             }
@@ -595,14 +590,7 @@ namespace artnet {
         template <typename T = S>
         auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value> {
             if( WiFi.getMode() == WIFI_AP ) {
-                // Get the MAC address as a String
-                String macString = WiFi.softAPmacAddress();
-
-                // Convert the MAC address String to a uint8_t array
-                for( int i = 0; i < 6; ++i ) {
-                    String byteString = macString.substring(i * 3, i * 3 + 2);
-                    mac[i] = strtoul( byteString.c_str(), NULL, 16 );
-                }
+                WiFi.softAPmacAddress(mac);
             } else {
                 WiFi.macAddress(mac);
             }
