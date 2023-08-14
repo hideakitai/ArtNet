@@ -2,7 +2,7 @@
 #ifndef ARTNET_ETH_H
 #define ARTNET_ETH_H
 
-#define ARTNET_ENABLE_ETH
+#define ARTNET_ENABLE_ETHER
 
 #include <Arduino.h>
 #include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"

@@ -1,6 +1,7 @@
 // Please include ArtnetEther.h to use Artnet on the platform
 // which can use both WiFi and Ethernet
 #include <ArtnetEther.h>
+// #include <ArtnetNativeEther.h>  // only for Teensy 4.1
 // this is also valid for other platforms which can use only Ethernet
 // #include <Artnet.h>
 
