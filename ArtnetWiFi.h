@@ -4,7 +4,7 @@
 
 #if defined(ESP_PLATFORM) || defined(ESP8266) || defined(ARDUINO_AVR_UNO_WIFI_REV2)                             \
     || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_MKR1000) \
-    || defined(ARDUINO_SAMD_NANO_33_IOT)
+    || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_RASPBERRY_PI_PICO_W)
 #define ARTNET_ENABLE_WIFI
 #endif
 
@@ -12,7 +12,7 @@
 #include <Arduino.h>
 #include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"
 #include "Artnet/util/ArxContainer/ArxContainer.h"
-#ifdef ESP_PLATFORM
+#if defined(ESP_PLATFORM) || defined(ARDUINO_ARCH_RP2040)
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #elif defined(ESP8266)
