@@ -468,10 +468,19 @@ namespace artnet {
 #ifdef FASTLED_VERSION
         inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num) {
             subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
-                if (size < num * 3) {
-                    Serial.println(F("ERROR: Too many LEDs to forward"));
+                size_t n;
+                if (num <= size / 3) {
+                    // OK: requested number of LEDs is less than received data size
+                    n = num;
+                } else {
+                    n = size / 3;
+                    Serial.println(F("WARN: ArtNet packet size is less than requested LED numbers to forward"));
+                    Serial.print(F("      requested: "));
+                    Serial.print(num * 3);
+                    Serial.print(F("      received : "));
+                    Serial.println(size);
                 }
-                for (size_t pixel = 0; pixel < num; ++pixel) {
+                for (size_t pixel = 0; pixel < n; ++pixel) {
                     size_t idx = pixel * 3;
                     leds[pixel].r = data[idx + 0];
                     leds[pixel].g = data[idx + 1];
