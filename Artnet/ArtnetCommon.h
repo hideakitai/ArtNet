@@ -79,6 +79,7 @@ namespace artnet {
     constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
 
     static constexpr uint8_t NUM_PIXELS_PER_UNIV {170};
+    static constexpr size_t NUM_POLLREPLY_PUBLIC_PORT_LIMIT {4};
 
     using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
     using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
@@ -93,7 +94,7 @@ namespace artnet {
     template <uint16_t SIZE>
     using Array = arx::vector<uint8_t, SIZE>;
     using IntervalMap = arx::map<uint32_t, uint32_t>;
-    using CallbackMap = arx::map<uint32_t, CallbackType, 4>;
+    using CallbackMap = arx::map<uint32_t, CallbackType, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
     using namespace arx;
 #endif
 
@@ -120,11 +121,11 @@ namespace artnet {
             uint8_t node_report[64];
             uint8_t num_ports_h;
             uint8_t num_ports_l;
-            uint8_t port_types[4];
-            uint8_t good_input[4];
-            uint8_t good_output[4];
-            uint8_t sw_in[4];
-            uint8_t sw_out[4];
+            uint8_t port_types[NUM_POLLREPLY_PUBLIC_PORT_LIMIT];
+            uint8_t good_input[NUM_POLLREPLY_PUBLIC_PORT_LIMIT];
+            uint8_t good_output[NUM_POLLREPLY_PUBLIC_PORT_LIMIT];
+            uint8_t sw_in[NUM_POLLREPLY_PUBLIC_PORT_LIMIT];
+            uint8_t sw_out[NUM_POLLREPLY_PUBLIC_PORT_LIMIT];
             uint8_t sw_video;
             uint8_t sw_macro;
             uint8_t sw_remote;
@@ -388,60 +389,36 @@ namespace artnet {
 
         template <typename Fn>
         inline auto subscribe(const uint8_t universe, Fn&& func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
-            if (callbacks.size() >= 4) {
+            if (universe > 0xF) {
                 if (b_verbose) {
-                    Serial.println(F("too many callbacks"));
+                    Serial.println(F("universe out of bounds"));
                 }
+                return;
             } else {
-                if (universe > 0xF) {
-                    if (b_verbose) {
-                        Serial.println(F("universe out of bounds"));
-                    }
-                    return;
-                } else {
-                    uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-                    callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
-                }
+                uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
+                callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
             }
         }
         template <typename Fn>
         inline auto subscribe(const uint8_t universe, Fn* func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
-            if (callbacks.size() >= 4) {
+            if (universe > 0xF) {
                 if (b_verbose) {
-                    Serial.println(F("too many callbacks"));
+                    Serial.println(F("universe out of bounds"));
                 }
             } else {
-                if (universe > 0xF) {
-                    if (b_verbose) {
-                        Serial.println(F("universe out of bounds"));
-                    }
-                } else {
-                    uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-                    callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
-                }
+                uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
+                callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
             }
         }
         template <typename Fn>
         inline auto subscribe15bit(const uint16_t universe, Fn&& func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
-            if (callbacks.size() >= 4) {
-                if (b_verbose) {
-                    Serial.println(F("too many callbacks"));
-                }
-            } else {
-                callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
-            }
+            callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
         }
         template <typename Fn>
         inline auto subscribe15bit(const uint16_t universe, Fn* func)
             -> std::enable_if_t<arx::is_callable<Fn>::value> {
-            if (callbacks.size() >= 4) {
-                if (b_verbose) {
-                    Serial.println(F("too many callbacks"));
-                }
-            } else {
-                callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
-            }
+            callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
         }
         template <typename F>
         inline auto subscribe(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
@@ -560,7 +537,7 @@ namespace artnet {
             memcpy(r.long_name, long_name.c_str(), long_name.length());
             memcpy(r.node_report, node_report.c_str(), node_report.length());
             r.num_ports_h = 0;                 // Reserved
-            r.num_ports_l = callbacks.size();  // This library implements only 4 port
+            r.num_ports_l = (callbacks.size() > NUM_POLLREPLY_PUBLIC_PORT_LIMIT) ? NUM_POLLREPLY_PUBLIC_PORT_LIMIT : callbacks.size();
             memset(r.sw_in, 0, 4);
             memset(r.sw_out, 0, 4);
             memset(r.port_types, 0, 4);
@@ -575,7 +552,7 @@ namespace artnet {
                 r.port_types[i] = 0xC0;   // I/O available by DMX512
                 r.good_input[i] = 0x80;   // Data received without error
                 r.good_output[i] = 0x80;  // Data transmitted without error
-                if (++i >= 4) break;
+                if (++i >= NUM_POLLREPLY_PUBLIC_PORT_LIMIT) break;
             }
             r.sw_video = 0;   // Video display shows local data
             r.sw_macro = 0;   // No support for macro key inputs
