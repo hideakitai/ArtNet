@@ -1,6 +1,6 @@
 # ArtNet
 
-Art-Net Sender/Receiver for Arduino (Ethernet, WiFi)
+[Art-Net](https://en.wikipedia.org/wiki/Art-Net) Sender/Receiver for Arduino (Ethernet, WiFi)
 
 **NOTE : BREAKING API CHANGES (v0.2.0 or later)**
 
