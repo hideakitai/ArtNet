@@ -22,6 +22,7 @@
 - ESP8266
 - Raspberry Pi Pico W
 - Arduino Uno WiFi Rev2
+- Arduino Uno R4 WiFi
 - Arduino MKR VIDOR 4000
 - Arduino MKR WiFi 1010
 - Arduino MKR WiFi 1000
