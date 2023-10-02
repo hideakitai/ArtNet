@@ -1,0 +1,232 @@
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - .git*
+      - '**.md'
+      - '*.properties'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - .git*
+      - '**.md'
+      - '*.properties'
+
+jobs:
+  build-wifi:
+    name: 'Build Test (WiFi): ${{matrix.board.arch}}:${{matrix.board.name}}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: esp8266
+            arch: esp8266
+            name: generic
+          - vendor: esp32
+            arch: esp32
+            name: esp32
+          - vendor: esp32
+            arch: esp32
+            name: esp32s3
+          - vendor: esp32
+            arch: esp32
+            name: esp32c3
+          - vendor: rp2040
+            arch: rp2040
+            name: rpipicow
+        include:
+          - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+            board:
+              vendor: esp8266
+          - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+            board:
+              vendor: esp32
+          - index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            board:
+              vendor: rp2040
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/WiFi
+          libraries: |
+            - source-path: ./
+            - name: WiFi
+            - name: FastLED
+          verbose: true
+
+  build-wifinina:
+    name: 'Build Test (WiFiNINA): ${{matrix.board.arch}}:${{matrix.board.name}}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: arduino
+            arch: megaavr
+            name: uno2018
+          - vendor: arduino
+            arch: samd
+            name: mkrvidor4000
+          - vendor: arduino
+            arch: samd
+            name: mkrwifi1010
+          - vendor: arduino
+            arch: samd
+            name: nano_33_iot
+        include:
+          - index: https://downloads.arduino.cc/packages/package_index.json
+            board:
+              vendor: arduino
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/WiFi/receiver
+            - examples/WiFi/sender
+          libraries: |
+            - source-path: ./
+            - name: WiFiNINA
+            - name: VidorPeripherals
+            - name: FastLED
+          verbose: true
+
+  build-ethernet:
+    name: 'Build Test (Ethernet): ${{matrix.board.arch}}:${{matrix.board.name}}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: arduino
+            arch: avr
+            name: uno
+          - vendor: arduino
+            arch: megaavr
+            name: uno2018
+          - vendor: arduino
+            arch: samd
+            name: mkrvidor4000
+          - vendor: arduino
+            arch: samd
+            name: mkrwifi1010
+          - vendor: arduino
+            arch: samd
+            name: mkr1000
+          - vendor: arduino
+            arch: samd
+            name: nano_33_iot
+          - vendor: esp8266
+            arch: esp8266
+            name: generic
+          - vendor: esp32
+            arch: esp32
+            name: esp32
+          - vendor: esp32
+            arch: esp32
+            name: esp32s3
+          - vendor: esp32
+            arch: esp32
+            name: esp32c3
+          - vendor: rp2040
+            arch: rp2040
+            name: rpipicow
+          - vendor: teensy
+            arch: avr
+            name: teensy35
+          - vendor: teensy
+            arch: avr
+            name: teensy36
+          - vendor: teensy
+            arch: avr
+            name: teensy41
+        include:
+          - index: https://downloads.arduino.cc/packages/package_index.json
+            board:
+              vendor: arduino
+          - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+            board:
+              vendor: esp8266
+          - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+            board:
+              vendor: esp32
+          - index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            board:
+              vendor: rp2040
+          - index: https://www.pjrc.com/teensy/package_teensy_index.json
+            board:
+              vendor: teensy
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/Ethernet/receiver
+            - examples/Ethernet/sender
+          libraries: |
+            - source-path: ./
+            - name: Ethernet
+            - name: FastLED
+          verbose: true
+
+  build-eth:
+    name: 'Build Test (ETH): ${{matrix.board.arch}}:${{matrix.board.name}}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: esp32
+            arch: esp32
+            name: esp32
+          - vendor: esp32
+            arch: esp32
+            name: esp32s3
+          - vendor: esp32
+            arch: esp32
+            name: esp32c3
+        include:
+          - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+            board:
+              vendor: esp32
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/ETH
+          libraries: |
+            - source-path: ./
+            - name: FastLED
+          verbose: true
