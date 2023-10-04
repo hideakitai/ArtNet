@@ -63,6 +63,8 @@ jobs:
             - examples/WiFi
           libraries: |
             - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
             - name: WiFi
             - name: FastLED
           verbose: true
@@ -105,6 +107,8 @@ jobs:
             - examples/WiFi/sender
           libraries: |
             - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
             - name: WiFiNINA
             - name: VidorPeripherals
             - name: FastLED
@@ -190,6 +194,8 @@ jobs:
             - examples/Ethernet/sender
           libraries: |
             - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
             - name: Ethernet
             - name: FastLED
           verbose: true
@@ -228,5 +234,7 @@ jobs:
             - examples/ETH
           libraries: |
             - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
             - name: FastLED
           verbose: true

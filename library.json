@@ -14,5 +14,10 @@
     "version": "0.2.12",
     "license": "MIT",
     "frameworks": "*",
-    "platforms": "*"
+    "platforms": "*",
+    "dependencies":
+    {
+        "hideakitai/ArxContainer": "*",
+        "hideakitai/ArxTypeTraits": "*"
+    }
 }

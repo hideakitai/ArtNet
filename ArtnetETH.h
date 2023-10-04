@@ -5,8 +5,8 @@
 #define ARTNET_ENABLE_ETH
 
 #include <Arduino.h>
-#include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"
-#include "Artnet/util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 #include <ETH.h>
 #include <WiFiUdp.h>
 #include "Artnet/ArtnetCommon.h"

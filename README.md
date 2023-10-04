@@ -308,10 +308,13 @@ Some boards without enough memory (e.g. Uno, Nano, etc.) may not be able to use 
 - [Packet Summary](https://art-net.org.uk/structure/packet-summary-2/)
 - [Packet Definition](https://art-net.org.uk/structure/streaming-packets/artdmx-packet-definition/)
 
+## Dependent Libraries
+
+- [ArxContainer](https://github.com/hideakitai/ArxContainer)
+- [ArxTypeTraits](https://github.com/hideakitai/ArxTypeTraits)
+
 ## Embedded Libraries
 
-- [ArxContainer v0.4.0](https://github.com/hideakitai/ArxContainer)
-- [ArxTypeTraits v0.2.3](https://github.com/hideakitai/ArxTypeTraits)
 - [TeensyDirtySTLErrorSolution v0.1.0](https://github.com/hideakitai/TeensyDirtySTLErrorSolution)
 
 ## License

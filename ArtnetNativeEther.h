@@ -5,8 +5,8 @@
 #define ARTNET_ENABLE_ETHER
 
 #include <Arduino.h>
-#include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"
-#include "Artnet/util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 #include <NativeEthernet.h>
 #include <NativeEthernetUdp.h>
 #include "Artnet/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
