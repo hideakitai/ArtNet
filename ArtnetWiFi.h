@@ -10,8 +10,8 @@
 
 #ifdef ARTNET_ENABLE_WIFI
 #include <Arduino.h>
-#include "Artnet/util/ArxTypeTraits/ArxTypeTraits.h"
-#include "Artnet/util/ArxContainer/ArxContainer.h"
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
 #if defined(ESP_PLATFORM) || defined(ARDUINO_ARCH_RP2040)
 #include <WiFi.h>
 #include <WiFiUdp.h>
