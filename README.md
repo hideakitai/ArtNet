@@ -2,7 +2,15 @@
 
 [Art-Net](https://en.wikipedia.org/wiki/Art-Net) Sender/Receiver for Arduino (Ethernet, WiFi)
 
-**NOTE : BREAKING API CHANGES (v0.2.0 or later)**
+**NOTE (>= v0.2.0) : BREAKING API CHANGES (v0.2.0 or later)**
+
+**NOTE (>= v0.3.0) : DEPENDENT LIBRARIES REMOVED**
+
+If you have already installed this library, please follow:
+
+- Cloned from GitHub (manually): Please install dependent libraries manually
+- Installed from library manager: re-install this library from library manager
+  - Dependent libraries will be installed automatically
 
 ## Feature
 
