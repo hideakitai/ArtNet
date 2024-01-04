@@ -4,6 +4,7 @@
 
 #include "Common.h"
 #include "ArtDmx.h"
+#include "ArtTrigger.h"
 
 namespace art_net {
 
@@ -11,6 +12,7 @@ template <typename S>
 class Sender_ {
     Array<PACKET_SIZE> packet;
     artdmx::ArtDmx artdmx_ctx;
+    art_trigger::ArtTrigger art_trigger_ctx;
 
     IntervalMap intervals;
     S* stream;
@@ -78,6 +80,24 @@ public:
 
     uint8_t sequence() const {
         return artdmx_ctx.sequence();
+    }
+
+    // ArtTrigger
+    void set_oem(uint16_t oem) {
+        art_trigger_ctx.set_oem(oem);
+    }
+    void set_key(uint8_t key) {
+        art_trigger_ctx.set_key(key);
+    }
+    void set_oem(uint8_t subkey) {
+        art_trigger_ctx.set_subkey(subkey);
+    }
+    void set_payload(const uint8_t* const payload, uint16_t size) {
+        art_trigger_ctx.set_payload(packet.data(), payload, size);
+    }
+    void trigger(const String& ip) {
+        art_trigger_ctx.set_header(packet.data());
+        send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
     }
 
 protected:
