@@ -32,17 +32,17 @@ class ArtTrigger {
 public:
     void set_oem(uint16_t oem_)
     {
-        oem = oem_;
+        this->oem = oem_;
     }
 
     void set_key(uint8_t key_)
     {
-        key = key_;
+        this->key = key_;
     }
 
     void set_subkey(uint8_t subkey_)
     {
-        subkey = subkey_;
+        this->subkey = subkey_;
     }
 
     void set_header(uint8_t *packet)
@@ -54,15 +54,15 @@ public:
         packet[PROTOCOL_VER_L] = (PROTOCOL_VER >> 0) & 0x00FF;
         packet[FILTER_1] = 0;
         packet[FILTER_2] = 0;
-        packet[OEM_H] = (oem >> 8) & 0x00FF;
-        packet[OEM_L] = (oem >> 0) & 0x00FF;
-        packet[KEY] = key;
-        packet[SUB_KEY] = subkey;
+        packet[OEM_H] = (this->oem >> 8) & 0x00FF;
+        packet[OEM_L] = (this->oem >> 0) & 0x00FF;
+        packet[KEY] = this->key;
+        packet[SUB_KEY] = this->subkey;
     }
 
     void set_payload(uint8_t *packet, const uint8_t* const payload, uint16_t size)
     {
-        memcpy(packet, payload, size);
+        memcpy(packet + PAYLOAD, payload, size);
     }
 };
 
