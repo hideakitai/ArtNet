@@ -89,7 +89,7 @@ public:
     void set_key(uint8_t key) {
         art_trigger_ctx.set_key(key);
     }
-    void set_oem(uint8_t subkey) {
+    void set_subkey(uint8_t subkey) {
         art_trigger_ctx.set_subkey(subkey);
     }
     void set_payload(const uint8_t* const payload, uint16_t size) {

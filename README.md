@@ -269,7 +269,7 @@ uint8_t sequence() const;
 // ArtTrigger
 void set_oem(uint16_t oem);
 void set_key(uint8_t key);
-void set_oem(uint8_t subkey);
+void set_subkey(uint8_t subkey);
 void set_payload(const uint8_t* const payload, uint16_t size);
 // send ArtTrigger based on the config above
 void trigger(const String& ip);
