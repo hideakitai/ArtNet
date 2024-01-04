@@ -263,9 +263,16 @@ void send(const String& ip, const uint32_t universe_, const uint8_t* const data,
 void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size);
 // send arbitrary packet to the target
 void send_raw(const String& ip, uint16_t port, const uint8_t* const data, size_t size);
-// others
+// ArtDmx
 void physical(const uint8_t i);
 uint8_t sequence() const;
+// ArtTrigger
+void set_oem(uint16_t oem);
+void set_key(uint8_t key);
+void set_oem(uint8_t subkey);
+void set_payload(const uint8_t* const payload, uint16_t size);
+// send ArtTrigger based on the config above
+void trigger(const String& ip);
 ```
 
 ### ArtnetReceiver
