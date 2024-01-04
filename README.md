@@ -261,6 +261,8 @@ void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, cons
 // one-line sender
 void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size);
 void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size);
+// send arbitrary packet to the target
+void send_raw(const String& ip, uint16_t port, const uint8_t* const data, size_t size);
 // others
 void physical(const uint8_t i);
 uint8_t sequence() const;

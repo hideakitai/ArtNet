@@ -2,6 +2,11 @@
 #ifndef ARTNET_COMMON_H
 #define ARTNET_COMMON_H
 
+#include <ArxTypeTraits.h>
+#include <ArxContainer.h>
+#include <stdint.h>
+#include <stddef.h>
+
 namespace arx {
 namespace artnet {
     // Packet Summary : https://art-net.org.uk/structure/packet-summary-2/
@@ -172,7 +177,11 @@ namespace artnet {
         void streaming(const String& ip, const uint32_t universe_) {
             uint32_t now = millis();
             if (intervals.find(universe_) == intervals.end()) {
-                intervals.insert(make_pair(universe_, now));
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
+                intervals.insert(std::make_pair(universe_, now));
+#else
+                intervals.insert(arx::make_pair(universe_, now));
+#endif
             }
             if (now >= intervals[universe_] + DEFAULT_INTERVAL_MS) {
                 set_universe(universe_);
@@ -201,6 +210,12 @@ namespace artnet {
             set_universe(net_, subnet_, universe_);
             streaming_data(data, size);
             send_packet(ip);
+        }
+
+        void send_raw(const String& ip, uint16_t port, const uint8_t* const data, size_t size) {
+            stream->beginPacket(ip.c_str(), port);
+            stream->write(data, size);
+            stream->endPacket();
         }
 
         void physical(const uint8_t i) {
@@ -240,9 +255,7 @@ namespace artnet {
                 return;
             }
 #endif
-            stream->beginPacket(ip.c_str(), DEFAULT_PORT);
-            stream->write(packet.data(), packet.size());
-            stream->endPacket();
+            send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
         }
 
         void set_universe(const uint32_t universe_) {
