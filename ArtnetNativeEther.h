@@ -10,11 +10,10 @@
 #include <NativeEthernet.h>
 #include <NativeEthernetUdp.h>
 #include "Artnet/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
-#include "Artnet/ArtnetCommon.h"
+#include "Artnet/Manager.h"
 
-using Artnet = arx::artnet::Manager<EthernetUDP>;
-using ArtnetSender = arx::artnet::Sender<EthernetUDP>;
-using ArtnetReceiver = arx::artnet::Receiver<EthernetUDP>;
+using Artnet = art_net::Manager<EthernetUDP>;
+using ArtnetSender = art_net::Sender<EthernetUDP>;
+using ArtnetReceiver = art_net::Receiver<EthernetUDP>;
 
 #endif  // ARTNET_NATIVE_ETHER_H
-

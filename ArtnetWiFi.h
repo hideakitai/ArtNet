@@ -28,10 +28,11 @@
 #include <WiFi101.h>
 #include <WiFiUdp.h>
 #endif
-#include "Artnet/ArtnetCommon.h"
-using ArtnetWiFi = arx::artnet::Manager<WiFiUDP>;
-using ArtnetWiFiSender = arx::artnet::Sender<WiFiUDP>;
-using ArtnetWiFiReceiver = arx::artnet::Receiver<WiFiUDP>;
+#include "Artnet/Manager.h"
+
+using ArtnetWiFi = art_net::Manager<WiFiUDP>;
+using ArtnetWiFiSender = art_net::Sender<WiFiUDP>;
+using ArtnetWiFiReceiver = art_net::Receiver<WiFiUDP>;
 #endif  // ARTNET_ENABLE_WIFI
 
 #endif  // ARTNET_WIFI_H
