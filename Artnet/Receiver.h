@@ -319,7 +319,7 @@ private:
     }
     template <typename T = S>
     auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, EthernetUDP>::value> {
-#ifndef ESP8266
+#if !defined(ESP8266) && !defined(ARTNET_ETHER_IS_ENC28J60)
         Ethernet.MACAddress(mac);
 #endif
     }

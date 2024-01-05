@@ -3,6 +3,7 @@
 #define ARTNET_ETHER_H
 
 #define ARTNET_ENABLE_ETHER
+#define ARTNET_ETHER_IS_ENC28J60
 
 #include <Arduino.h>
 #include <ArxTypeTraits.h>
