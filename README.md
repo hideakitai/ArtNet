@@ -41,7 +41,7 @@ If you have already installed this library, please follow:
 - ESP32 (Ethernet and ETH)
 - ESP8266
 - Almost all platforms without WiFi
-- Raspberry Pi Pico with ENC28J60 (please read [Raspberry Pi Pico + ENC28J60](#raspberry-pi-pico-+-enc28j60))
+- Raspberry Pi Pico with ENC28J60 (please read following section)
 
 ##### Raspberry Pi Pico + ENC28J60
 
