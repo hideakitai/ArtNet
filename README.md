@@ -47,12 +47,12 @@ If you have already installed this library, please follow:
 
 When using the ENC28J60 controller with Raspberry Pi Pico (no wifi)
 
-- make sure to install the [EthernetENC](https://github.com/JAndrassy/EthernetENC)) library
+- make sure to install the [EthernetENC](https://github.com/JAndrassy/EthernetENC) library
 - simply replace `#include <Artnet.h>` with `#include <ArtnetEtherENC.h>`
 
-![Wiring Diagram](/pi-pico-enc28j60-wiring.svg)
-
 Default wiring diagram provided by [@tobiasvogel](https://github.com/tobiasvogel)
+
+![Wiring Diagram](/pi-pico-enc28j60-wiring.svg)
 
 ## Usage
 
