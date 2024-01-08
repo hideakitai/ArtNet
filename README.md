@@ -43,7 +43,8 @@ If you have already installed this library, please follow:
 - Almost all platforms without WiFi
 - Raspberry Pi Pico with ENC28J60 (please read following section)
 
-##### Raspberry Pi Pico + ENC28J60
+<details>
+  <summary>Notes for Raspberry Pi Pico with ENC28J60 (click to expand)</summary>
 
 When using the ENC28J60 controller with Raspberry Pi Pico (no wifi)
 
@@ -53,6 +54,7 @@ When using the ENC28J60 controller with Raspberry Pi Pico (no wifi)
 Default wiring diagram provided by [@tobiasvogel](https://github.com/tobiasvogel)
 
 ![Wiring Diagram](/pi-pico-enc28j60-wiring.svg)
+</details>
 
 ## Usage
 
