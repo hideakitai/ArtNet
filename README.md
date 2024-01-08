@@ -41,19 +41,15 @@ If you have already installed this library, please follow:
 - ESP32 (Ethernet and ETH)
 - ESP8266
 - Almost all platforms without WiFi
-- Raspberry Pi Pico with ENC28J60 (please read following section)
+- Anyplatform supported by ENC28J60 (please read following section)
 
 <details>
-  <summary>Notes for Raspberry Pi Pico with ENC28J60 (click to expand)</summary>
+  <summary>Notes for ENC28J60 ethernet controller (click to expand)</summary>
 
-When using the ENC28J60 controller with Raspberry Pi Pico (no wifi)
+When using the ENC28J60 controller
 
 - make sure to install the [EthernetENC](https://github.com/JAndrassy/EthernetENC) library
 - simply replace `#include <Artnet.h>` with `#include <ArtnetEtherENC.h>`
-
-Default wiring diagram provided by [@tobiasvogel](https://github.com/tobiasvogel)
-
-![Wiring Diagram](/pi-pico-enc28j60-wiring.svg)
 </details>
 
 ## Usage
@@ -215,12 +211,11 @@ void loop() {
 
 - You can set Net (0-127) and Sub-Net (0-15) like `artnet.begin(net, subnet)`
 - Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
-- Callbacks are limited to 4 universes (depending on the spec of Art-Net)
 - These universes (targets of the callbacks) are reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply` automatically
 
 ```C++
 artnet.begin(net, subnet); // net and subnet can be set only once
-artnet.subscribe(univ1, callback1); // 4 callbacks can be set
+artnet.subscribe(univ1, callback1); // callbacks can be set
 artnet.subscribe(univ2, callback2); // these universes are reported to
 artnet.subscribe(univ3, callback3); // Art-Net controller if it polls
 artnet.subscribe(univ4, callback4); // Art-Net devices
@@ -229,7 +224,7 @@ artnet.subscribe(univ4, callback4); // Art-Net devices
 Or you can register callbacks based on 15 bit universe. But these universes are not reflected to `ArtPollReply` automatically.
 
 ```C++
-artnet.subscribe15bit(univ15bit1, callback1); // 4 callbacks can be set
+artnet.subscribe15bit(univ15bit1, callback1); // callbacks can be set
 artnet.subscribe15bit(univ15bit2, callback2); // these universes are NOT reported to
 artnet.subscribe15bit(univ15bit3, callback3); // Art-Net controller if it polls
 artnet.subscribe15bit(univ15bit4, callback4); // Art-Net devices
