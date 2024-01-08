@@ -213,6 +213,8 @@ void loop() {
 - Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
 - These universes (targets of the callbacks) are reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply` automatically
 
+PortTypes, GoodInput/Output, SwIn, etc., are limited to 4 ports. If more than 4 callbacks are needed, it is better to subscribe to more than four and make public 4 of them
+
 ```C++
 artnet.begin(net, subnet); // net and subnet can be set only once
 artnet.subscribe(univ1, callback1); // callbacks can be set
