@@ -242,7 +242,7 @@ jobs:
           verbose: true
   build-etherenc:
     name: "Build Test (EtherENC): ${{matrix.board.arch}}:${{matrix.board.name}}"
-        runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
