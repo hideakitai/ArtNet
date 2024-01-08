@@ -41,6 +41,9 @@ If you have already installed this library, please follow:
 - ESP32 (Ethernet and ETH)
 - ESP8266
 - Almost all platforms without WiFi
+- Raspberry Pi Pico with ENC28J60 (please read [Raspberry Pi Pico + ENC28J60](#raspberry-pi-pico-+-enc28j60))
+
+https://github.com/Juddling/pi-pico-enc28j60
 
 ## Usage
 
@@ -318,6 +321,17 @@ uint8_t data(const uint16_t i) const;
 ### Note
 
 Some boards without enough memory (e.g. Uno, Nano, etc.) may not be able to use integrated sender/receiver because of the lack of enough memory. Please consider to use more powerful board or to use only sender OR receiver.
+
+#### Raspberry Pi Pico + ENC28J60
+
+When using the ENC28J60 controller with Raspberry Pi Pico (no wifi)
+
+- make sure to install the [EthernetENC](https://github.com/JAndrassy/EthernetENC)) library
+- simply replace `#include <Artnet.h>` with `#include <ArtnetEtherENC.h>`
+
+![Wiring Diagram](/pi-pico-enc28j60-wiring.svg)
+
+Default wiring diagram provided by [@tobiasvogel](https://github.com/tobiasvogel)
 
 ## Reference
 

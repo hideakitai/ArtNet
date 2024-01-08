@@ -240,3 +240,36 @@ jobs:
             - name: ArxTypeTraits
             - name: FastLED
           verbose: true
+  build-etherenc:
+    name: "Build Test (EtherENC): ${{matrix.board.arch}}:${{matrix.board.name}}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: rp2040
+            arch: rp2040
+            name: rpipico
+        include:
+          - index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            board:
+              vendor: rp2040
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/EthernetENC
+          libraries: |
+            - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
+            - name: FastLED
+            - name: EthernetENC
+          verbose: true
