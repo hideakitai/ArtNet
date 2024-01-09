@@ -305,7 +305,8 @@ jobs:
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
           sketch-paths: |
-            - examples/EthernetENC
+            - examples/EthernetENC/receiver
+            - examples/EthernetENC/sender
           libraries: |
             - source-path: ./
             - name: ArxContainer
