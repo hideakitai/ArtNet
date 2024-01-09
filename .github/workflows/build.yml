@@ -247,9 +247,10 @@ jobs:
       fail-fast: false
       matrix:
         board:
-          - vendor: arduino
-            arch: avr
-            name: uno
+          # temporarily disabled due to memory shortage in `sender` example
+          # - vendor: arduino
+          #   arch: avr
+          #   name: uno
           - vendor: arduino
             arch: megaavr
             name: uno2018
@@ -310,5 +311,5 @@ jobs:
             - name: ArxContainer
             - name: ArxTypeTraits
             - name: FastLED
-            - name: EthernetENC
+            - source-url: https://github.com/JAndrassy/EthernetENC.git
           verbose: true
