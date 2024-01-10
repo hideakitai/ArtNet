@@ -41,6 +41,16 @@ If you have already installed this library, please follow:
 - ESP32 (Ethernet and ETH)
 - ESP8266
 - Almost all platforms without WiFi
+- Any platform supported by ENC28J60 (please read following section)
+
+<details>
+  <summary>Notes for ENC28J60 ethernet controller (click to expand)</summary>
+
+When using the ENC28J60 controller
+
+- make sure to **clone** the [EthernetENC](https://github.com/JAndrassy/EthernetENC) library (version =< 2.0.4 doesn't support MAC address)
+- simply replace `#include <Artnet.h>` with `#include <ArtnetEtherENC.h>`
+</details>
 
 ## Usage
 
@@ -201,12 +211,13 @@ void loop() {
 
 - You can set Net (0-127) and Sub-Net (0-15) like `artnet.begin(net, subnet)`
 - Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
-- Callbacks are limited to 4 universes (depending on the spec of Art-Net)
 - These universes (targets of the callbacks) are reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply` automatically
+
+PortTypes, GoodInput/Output, SwIn, etc., are limited to 4 ports. Only the first four ports are reflected if you subscribe to more than four callbacks.
 
 ```C++
 artnet.begin(net, subnet); // net and subnet can be set only once
-artnet.subscribe(univ1, callback1); // 4 callbacks can be set
+artnet.subscribe(univ1, callback1); // callbacks can be set
 artnet.subscribe(univ2, callback2); // these universes are reported to
 artnet.subscribe(univ3, callback3); // Art-Net controller if it polls
 artnet.subscribe(univ4, callback4); // Art-Net devices
@@ -215,7 +226,7 @@ artnet.subscribe(univ4, callback4); // Art-Net devices
 Or you can register callbacks based on 15 bit universe. But these universes are not reflected to `ArtPollReply` automatically.
 
 ```C++
-artnet.subscribe15bit(univ15bit1, callback1); // 4 callbacks can be set
+artnet.subscribe15bit(univ15bit1, callback1); // callbacks can be set
 artnet.subscribe15bit(univ15bit2, callback2); // these universes are NOT reported to
 artnet.subscribe15bit(univ15bit3, callback3); // Art-Net controller if it polls
 artnet.subscribe15bit(univ15bit4, callback4); // Art-Net devices

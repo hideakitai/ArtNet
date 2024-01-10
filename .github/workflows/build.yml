@@ -240,3 +240,81 @@ jobs:
             - name: ArxTypeTraits
             - name: FastLED
           verbose: true
+
+  build-etherenc:
+    name: "Build Test (EtherENC): ${{matrix.board.arch}}:${{matrix.board.name}}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          # temporarily disabled due to memory shortage in `sender` example
+          # - vendor: arduino
+          #   arch: avr
+          #   name: uno
+          - vendor: arduino
+            arch: megaavr
+            name: uno2018
+          # temporarily disabled due to FastLED not supporting mkrvidor4000
+          # - vendor: arduino
+          #   arch: samd
+          #   name: mkrvidor4000
+          - vendor: arduino
+            arch: samd
+            name: mkrwifi1010
+          - vendor: arduino
+            arch: samd
+            name: mkr1000
+          - vendor: arduino
+            arch: samd
+            name: nano_33_iot
+          - vendor: esp8266
+            arch: esp8266
+            name: generic
+          - vendor: esp32
+            arch: esp32
+            name: esp32
+          - vendor: esp32
+            arch: esp32
+            name: esp32s3
+          - vendor: esp32
+            arch: esp32
+            name: esp32c3
+          - vendor: rp2040
+            arch: rp2040
+            name: rpipicow
+        include:
+          - index: https://downloads.arduino.cc/packages/package_index.json
+            board:
+              vendor: arduino
+          - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+            board:
+              vendor: esp8266
+          - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+            board:
+              vendor: esp32
+          - index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            board:
+              vendor: rp2040
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/EthernetENC/receive_fastled
+            - examples/EthernetENC/receiver
+            - examples/EthernetENC/send_receive
+            - examples/EthernetENC/sender
+          libraries: |
+            - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
+            - name: FastLED
+            - source-url: https://github.com/JAndrassy/EthernetENC.git
+          verbose: true
