@@ -312,5 +312,6 @@ jobs:
             - name: ArxContainer
             - name: ArxTypeTraits
             - name: FastLED
-            - source-url: https://github.com/JAndrassy/EthernetENC.git
+            - source-url: https://github.com/hideakitai/EthernetENC.git
+              version: fix/compile-error-on-esp32-github-actions
           verbose: true
