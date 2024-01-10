@@ -306,10 +306,11 @@ jobs:
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
           sketch-paths: |
-            - examples/EthernetENC/receive_fastled
             - examples/EthernetENC/receiver
             - examples/EthernetENC/send_receive
             - examples/EthernetENC/sender
+          # disabled due to FastLED not supporting mkrvidor4000
+          # - examples/EthernetENC/receive_fastled
           libraries: |
             - source-path: ./
             - name: ArxContainer
