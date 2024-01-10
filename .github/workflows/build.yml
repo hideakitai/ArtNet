@@ -248,11 +248,10 @@ jobs:
       fail-fast: false
       matrix:
         board:
-          # temporarily enabled to check if memory shortage in `sender` example still valid
-          - vendor: arduino
-            arch: avr
-            name: uno
-          # ----------------------
+          # temporarily disabled due to memory shortage in `sender` example
+          # - vendor: arduino
+          #   arch: avr
+          #   name: uno
           - vendor: arduino
             arch: megaavr
             name: uno2018
@@ -309,6 +308,8 @@ jobs:
           sketch-paths: |
             - examples/EthernetENC/receiver
             - examples/EthernetENC/sender
+            - examples/EthernetENC/receiver_fastled
+            - examples/EthernetENC/send_receive
           libraries: |
             - source-path: ./
             - name: ArxContainer
