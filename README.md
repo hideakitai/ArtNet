@@ -41,7 +41,7 @@ If you have already installed this library, please follow:
 - ESP32 (Ethernet and ETH)
 - ESP8266
 - Almost all platforms without WiFi
-- Anyplatform supported by ENC28J60 (please read following section)
+- Any platform supported by ENC28J60 (please read following section)
 
 <details>
   <summary>Notes for ENC28J60 ethernet controller (click to expand)</summary>
