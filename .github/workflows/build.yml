@@ -306,10 +306,10 @@ jobs:
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
           sketch-paths: |
+            - examples/EthernetENC/receive_fastled
             - examples/EthernetENC/receiver
-            - examples/EthernetENC/sender
-            - examples/EthernetENC/receiver_fastled
             - examples/EthernetENC/send_receive
+            - examples/EthernetENC/sender
           libraries: |
             - source-path: ./
             - name: ArxContainer
