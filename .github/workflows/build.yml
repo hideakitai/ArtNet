@@ -240,6 +240,7 @@ jobs:
             - name: ArxTypeTraits
             - name: FastLED
           verbose: true
+
   build-etherenc:
     name: "Build Test (EtherENC): ${{matrix.board.arch}}:${{matrix.board.name}}"
     runs-on: ubuntu-latest
@@ -247,10 +248,11 @@ jobs:
       fail-fast: false
       matrix:
         board:
-          # temporarily disabled due to memory shortage in `sender` example
-          # - vendor: arduino
-          #   arch: avr
-          #   name: uno
+          # temporarily enabled to check if memory shortage in `sender` example still valid
+          - vendor: arduino
+            arch: avr
+            name: uno
+          # ----------------------
           - vendor: arduino
             arch: megaavr
             name: uno2018
