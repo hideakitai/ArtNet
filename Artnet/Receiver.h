@@ -300,11 +300,13 @@ private:
         const IPAddress my_subnet = subnetMask();
         uint8_t my_mac[6];
         macAddress(my_mac);
-        artpollreply::Packet r = artpollreply_ctx.generate_reply(my_ip, my_mac, callbacks, net_switch, sub_switch);
-        static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
-        stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
-        stream->write(r.b, sizeof(artpollreply::Packet));
-        stream->endPacket();
+        for (const auto &cb_pair : callbacks) {
+            artpollreply::Packet r = artpollreply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, net_switch, sub_switch);
+            static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
+            stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+            stream->write(r.b, sizeof(artpollreply::Packet));
+            stream->endPacket();
+        }
     }
 
 #ifdef ARTNET_ENABLE_WIFI
