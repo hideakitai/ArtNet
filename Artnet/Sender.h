@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "ArtDmx.h"
 #include "ArtTrigger.h"
+#include "ArtSync.h"
 
 namespace art_net {
 
@@ -97,6 +98,12 @@ public:
     }
     void trigger(const String& ip) {
         art_trigger_ctx.set_header(packet.data());
+        send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
+    }
+
+    // ArtSync
+    void sync(const String& ip) {
+        art_sync::set_header(packet.data());
         send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
     }
 

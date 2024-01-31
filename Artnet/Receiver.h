@@ -17,6 +17,7 @@ class Receiver_ {
     uint8_t sub_switch;  // subnet of universe
     CallbackMap callbacks;
     CallbackAllType callback_all;
+    CallbackArtSync callback_artsync;
     S* stream;
     bool b_verbose {false};
     artpollreply::ArtPollReply artpollreply_ctx;
@@ -69,6 +70,11 @@ public:
                     remote_port = (uint16_t)stream->S::remotePort();
                     poll_reply();
                     op_code = OpCode::Poll;
+                    break;
+                }
+                case OpCode::Sync: {
+                    if (callback_artsync) callback_artsync();
+                    op_code = OpCode::Sync;
                     break;
                 }
                 default: {
@@ -178,6 +184,14 @@ public:
     inline auto subscribe(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
         callback_all = arx::function_traits<F>::cast(func);
     }
+    template <typename F>
+    inline auto subscribeArtsync(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
+        callback_artsync = arx::function_traits<F>::cast(func);
+    }
+    template <typename F>
+    inline auto subscribeArtsync(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
+        callback_artsync = arx::function_traits<F>::cast(func);
+    }
 
     inline void unsubscribe(const uint8_t universe) {
         auto it = callbacks.find(universe);
@@ -185,6 +199,9 @@ public:
     }
     inline void unsubscribe() {
         callback_all = nullptr;
+    }
+    inline void unsubscribeArtSync() {
+        callback_artsync = nullptr;
     }
 
     inline void clear_subscribers() {
