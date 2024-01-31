@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "ArtDmx.h"
 #include "ArtPollReply.h"
+#include "ArtTrigger.h"
 
 namespace art_net {
 
@@ -18,6 +19,7 @@ class Receiver_ {
     CallbackMap callbacks;
     CallbackAllType callback_all;
     CallbackArtSync callback_artsync;
+    CallbackArtTrigger callback_arttrigger;
     S* stream;
     bool b_verbose {false};
     artpollreply::ArtPollReply artpollreply_ctx;
@@ -53,12 +55,12 @@ public:
 
         OpCode op_code = OpCode::NA;
         if (checkID(d)) {
+            remote_ip = stream->S::remoteIP();
+            remote_port = (uint16_t)stream->S::remotePort();
             OpCode received_op_code = static_cast<OpCode>(opcode(d));
             switch (received_op_code) {
                 case OpCode::Dmx: {
                     memcpy(packet.data(), d, size);
-                    remote_ip = stream->S::remoteIP();
-                    remote_port = (uint16_t)stream->S::remotePort();
                     if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
                     for (auto& c : callbacks)
                         if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
@@ -66,10 +68,18 @@ public:
                     break;
                 }
                 case OpCode::Poll: {
-                    remote_ip = stream->S::remoteIP();
-                    remote_port = (uint16_t)stream->S::remotePort();
                     poll_reply();
                     op_code = OpCode::Poll;
+                    break;
+                }
+                case OpCode::Trigger: {
+                    if (callback_arttrigger) {
+                        uint16_t oem = (d[art_trigger::OEM_H] << 8) | d[art_trigger::OEM_L];
+                        uint8_t key = d[art_trigger::KEY];
+                        uint8_t sub_key = d[art_trigger::SUB_KEY];
+                        callback_arttrigger(oem, key, sub_key, d + art_trigger::PAYLOAD, size - art_trigger::PAYLOAD);
+                    }
+                    op_code = OpCode::Trigger;
                     break;
                 }
                 case OpCode::Sync: {
@@ -185,12 +195,20 @@ public:
         callback_all = arx::function_traits<F>::cast(func);
     }
     template <typename F>
-    inline auto subscribeArtsync(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
+    inline auto subscribeArtSync(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
         callback_artsync = arx::function_traits<F>::cast(func);
     }
     template <typename F>
-    inline auto subscribeArtsync(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
+    inline auto subscribeArtSync(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
         callback_artsync = arx::function_traits<F>::cast(func);
+    }
+    template <typename F>
+    inline auto subscribeArtTrigger(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
+        callback_arttrigger = arx::function_traits<F>::cast(func);
+    }
+    template <typename F>
+    inline auto subscribeArtTrigger(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
+        callback_arttrigger = arx::function_traits<F>::cast(func);
     }
 
     inline void unsubscribe(const uint8_t universe) {
@@ -202,6 +220,9 @@ public:
     }
     inline void unsubscribeArtSync() {
         callback_artsync = nullptr;
+    }
+    inline void unsubscribeArtTrigger() {
+        callback_arttrigger = nullptr;
     }
 
     inline void clear_subscribers() {
@@ -279,11 +300,13 @@ private:
         const IPAddress my_subnet = subnetMask();
         uint8_t my_mac[6];
         macAddress(my_mac);
-        artpollreply::Packet r = artpollreply_ctx.generate_reply(my_ip, my_mac, callbacks, net_switch, sub_switch);
-        static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
-        stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
-        stream->write(r.b, sizeof(artpollreply::Packet));
-        stream->endPacket();
+        for (const auto &cb_pair : callbacks) {
+            artpollreply::Packet r = artpollreply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, net_switch, sub_switch);
+            static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
+            stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+            stream->write(r.b, sizeof(artpollreply::Packet));
+            stream->endPacket();
+        }
     }
 
 #ifdef ARTNET_ENABLE_WIFI

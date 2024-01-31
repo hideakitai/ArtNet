@@ -59,7 +59,7 @@ class ArtPollReply
     String node_report {""};
 
 public:
-    Packet generate_reply(const IPAddress &my_ip, const uint8_t my_mac[6], const CallbackMap &callbacks, uint8_t net_switch, uint8_t sub_switch)
+    Packet generate_reply(const IPAddress &my_ip, const uint8_t my_mac[6], uint32_t universe, uint8_t net_switch, uint8_t sub_switch)
     {
         Packet r;
         for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ARTNET_ID[i]);
@@ -84,7 +84,7 @@ public:
         memcpy(r.long_name, long_name.c_str(), long_name.length());
         memcpy(r.node_report, node_report.c_str(), node_report.length());
         r.num_ports_h = 0;                 // Reserved
-        r.num_ports_l = (callbacks.size() > NUM_POLLREPLY_PUBLIC_PORT_LIMIT) ? NUM_POLLREPLY_PUBLIC_PORT_LIMIT : callbacks.size();
+        r.num_ports_l = 1;
         memset(r.sw_in, 0, 4);
         memset(r.sw_out, 0, 4);
         memset(r.port_types, 0, 4);
@@ -92,15 +92,12 @@ public:
         memset(r.good_output, 0, 4);
         r.net_sw = net_switch & 0x7F;
         r.sub_sw = sub_switch & 0x0F;
-        size_t i = 0;
-        for (const auto& pair : callbacks) {
-            r.sw_in[i] = pair.first & 0x0F;
-            r.sw_out[i] = i;          // dummy: output port is flexible
-            r.port_types[i] = 0xC0;   // I/O available by DMX512
-            r.good_input[i] = 0x80;   // Data received without error
-            r.good_output[i] = 0x80;  // Data transmitted without error
-            if (++i >= NUM_POLLREPLY_PUBLIC_PORT_LIMIT) break;
-        }
+        // https://github.com/hideakitai/ArtNet/issues/81
+        r.sw_in[0] = universe & 0x0F;
+        r.sw_out[0] = 0;          // dummy: output port is flexible
+        r.port_types[0] = 0xC0;   // I/O available by DMX512
+        r.good_input[0] = 0x80;   // Data received without error
+        r.good_output[0] = 0x80;  // Data transmitted without error
         r.sw_video = 0;   // Video display shows local data
         r.sw_macro = 0;   // No support for macro key inputs
         r.sw_remote = 0;  // No support for remote trigger inputs
