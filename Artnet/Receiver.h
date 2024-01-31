@@ -23,7 +23,7 @@ class Receiver_ {
     art_trigger::CallbackType callback_arttrigger;
     S* stream;
     bool b_verbose {false};
-    artpollreply::ArtPollReply artpollreply_ctx;
+    art_poll_reply::ArtPollReply art_poll_reply_ctx;
 
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
@@ -262,13 +262,13 @@ public:
 
     // for ArtPollReply
     void shortname(const String& sn) {
-        artpollreply_ctx.shortname(sn);
+        art_poll_reply_ctx.shortname(sn);
     }
     void longname(const String& ln) {
-        artpollreply_ctx.longname(ln);
+        art_poll_reply_ctx.longname(ln);
     }
     void nodereport(const String& nr) {
-        artpollreply_ctx.nodereport(nr);
+        art_poll_reply_ctx.nodereport(nr);
     }
 
 protected:
@@ -302,10 +302,10 @@ private:
         uint8_t my_mac[6];
         macAddress(my_mac);
         for (const auto &cb_pair : callbacks) {
-            artpollreply::Packet r = artpollreply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, net_switch, sub_switch);
+            art_poll_reply::Packet r = art_poll_reply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, net_switch, sub_switch);
             static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
             stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
-            stream->write(r.b, sizeof(artpollreply::Packet));
+            stream->write(r.b, sizeof(art_poll_reply::Packet));
             stream->endPacket();
         }
     }

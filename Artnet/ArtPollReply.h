@@ -8,7 +8,7 @@
 #include <string.h>
 
 namespace art_net {
-namespace artpollreply {
+namespace art_poll_reply {
 
 union Packet {
     struct {
@@ -122,7 +122,7 @@ public:
     }
 };
 
-} // namespace artpollreply
+} // namespace art_poll_reply
 } // namespace art_net
 
 #endif // ARTNET_ARTPOLLREPLY_H
