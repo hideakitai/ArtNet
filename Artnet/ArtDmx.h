@@ -8,7 +8,7 @@
 
 namespace art_net {
 
-namespace artdmx {
+namespace art_dmx {
 
 enum Index : uint16_t {
     ID = 0,
@@ -67,14 +67,14 @@ public:
     }
 
     void set_data(uint8_t *packet, const uint8_t* const data, const uint16_t size) {
-        memcpy((&packet[artdmx::DATA]), data, size);
+        memcpy((&packet[art_dmx::DATA]), data, size);
     }
     void set_data(uint8_t *packet, const uint16_t ch, const uint8_t data) {
-        packet[artdmx::DATA + ch] = data;
+        packet[art_dmx::DATA + ch] = data;
     }
 };
 
-} // namespace artdmx
+} // namespace art_dmx
 
 } // namespace art_net
 

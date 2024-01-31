@@ -12,7 +12,7 @@ namespace art_net {
 template <typename S>
 class Sender_ {
     Array<PACKET_SIZE> packet;
-    artdmx::ArtDmx artdmx_ctx;
+    art_dmx::ArtDmx artdmx_ctx;
     art_trigger::ArtTrigger art_trigger_ctx;
 
     IntervalMap intervals;

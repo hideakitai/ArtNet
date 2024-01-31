@@ -110,38 +110,38 @@ public:
 
     inline String id() const {
         String str;
-        for (uint8_t i = 0; i < ID_LENGTH; ++i) str += packet[artdmx::ID + i];
+        for (uint8_t i = 0; i < ID_LENGTH; ++i) str += packet[art_dmx::ID + i];
         return str;
     }
     inline uint16_t opcode() const {
-        return (packet[artdmx::OP_CODE_H] << 8) | packet[artdmx::OP_CODE_L];
+        return (packet[art_dmx::OP_CODE_H] << 8) | packet[art_dmx::OP_CODE_L];
     }
     inline uint16_t opcode(const uint8_t* p) const {
-        return (p[artdmx::OP_CODE_H] << 8) | p[artdmx::OP_CODE_L];
+        return (p[art_dmx::OP_CODE_H] << 8) | p[art_dmx::OP_CODE_L];
     }
     inline uint16_t version() const {
-        return (packet[artdmx::PROTOCOL_VER_H] << 8) | packet[artdmx::PROTOCOL_VER_L];
+        return (packet[art_dmx::PROTOCOL_VER_H] << 8) | packet[art_dmx::PROTOCOL_VER_L];
     }
     inline uint8_t sequence() const {
-        return packet[artdmx::SEQUENCE];
+        return packet[art_dmx::SEQUENCE];
     }
     inline uint8_t physical() const {
-        return packet[artdmx::PHYSICAL];
+        return packet[art_dmx::PHYSICAL];
     }
     uint8_t net() const {
-        return packet[artdmx::NET] & 0x7F;
+        return packet[art_dmx::NET] & 0x7F;
     }
     uint8_t subnet() const {
-        return (packet[artdmx::SUBUNI] >> 4) & 0x0F;
+        return (packet[art_dmx::SUBUNI] >> 4) & 0x0F;
     }
     inline uint8_t universe() const {
-        return packet[artdmx::SUBUNI] & 0x0F;
+        return packet[art_dmx::SUBUNI] & 0x0F;
     }
     inline uint16_t universe15bit() const {
-        return (packet[artdmx::NET] << 8) | packet[artdmx::SUBUNI];
+        return (packet[art_dmx::NET] << 8) | packet[art_dmx::SUBUNI];
     }
     inline uint16_t length() const {
-        return (packet[artdmx::LENGTH_H] << 8) | packet[artdmx::LENGTH_L];
+        return (packet[art_dmx::LENGTH_H] << 8) | packet[art_dmx::LENGTH_L];
     }
     inline uint16_t size() const {
         return length();
