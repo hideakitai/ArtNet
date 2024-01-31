@@ -7,7 +7,6 @@
 #include <stddef.h>
 
 namespace art_net {
-
 namespace art_dmx {
 
 using CallbackTypeForUniverse = std::function<void(const uint8_t* data, const uint16_t size)>;
@@ -19,8 +18,8 @@ template <uint16_t SIZE>
 using CallbackMapForUniverse = arx::map<uint32_t, CallbackTypeForUniverse, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
 #endif
 
-
-enum Index : uint16_t {
+enum Index : uint16_t
+{
     ID = 0,
     OP_CODE_L = 8,
     OP_CODE_H = 9,
@@ -35,7 +34,8 @@ enum Index : uint16_t {
     DATA = 18
 };
 
-class ArtDmx {
+class ArtDmx
+{
     uint8_t target_net {0};
     uint8_t target_subnet {0};
     uint8_t target_universe {0};
@@ -45,7 +45,9 @@ class ArtDmx {
 public:
     void set_header(uint8_t *packet)
     {
-        for (size_t i = 0; i < ID_LENGTH; i++) packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        for (size_t i = 0; i < ID_LENGTH; i++) {
+            packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        }
         packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Dmx) >> 0) & 0x00FF;
         packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Dmx) >> 8) & 0x00FF;
         packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
@@ -58,34 +60,40 @@ public:
         packet[LENGTH_L] = (512 >> 0) & 0xFF;
     }
 
-    void set_universe(const uint32_t universe_) {
+    void set_universe(const uint32_t universe_)
+    {
         this->target_net = (universe_ >> 8) & 0x7F;
         this->target_subnet = (universe_ >> 4) & 0x0F;
         this->target_universe = universe_ & 0x0F;
     }
-    void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_) {
+    void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_)
+    {
         this->target_net = net_ & 0x7F;
         this->target_subnet = subnet_ & 0x0F;
         this->target_universe = universe_ & 0x0F;
     }
-    void set_physical(const uint8_t i) {
+
+    void set_physical(const uint8_t i)
+    {
         this->phy = constrain(i, 0, 3);
     }
 
-    uint8_t sequence() const {
+    uint8_t sequence() const
+    {
         return this->seq;
     }
 
-    void set_data(uint8_t *packet, const uint8_t* const data, const uint16_t size) {
+    void set_data(uint8_t *packet, const uint8_t* const data, const uint16_t size) const
+    {
         memcpy((&packet[art_dmx::DATA]), data, size);
     }
-    void set_data(uint8_t *packet, const uint16_t ch, const uint8_t data) {
+    void set_data(uint8_t *packet, const uint16_t ch, const uint8_t data) const
+    {
         packet[art_dmx::DATA + ch] = data;
     }
 };
 
 } // namespace art_dmx
-
 } // namespace art_net
 
 #endif // ARTNET_ARTDMX_H

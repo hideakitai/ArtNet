@@ -11,7 +11,8 @@ namespace art_sync {
 
 using CallbackType = std::function<void(void)>;
 
-enum Index : uint16_t {
+enum Index : uint16_t
+{
     ID = 0,
     OP_CODE_L = 8,
     OP_CODE_H = 9,
@@ -23,7 +24,9 @@ enum Index : uint16_t {
 
 inline void set_header(uint8_t *packet)
 {
-    for (size_t i = 0; i < ID_LENGTH; i++) packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+    for (size_t i = 0; i < ID_LENGTH; i++) {
+        packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+    }
     packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Sync) >> 0) & 0x00FF;
     packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Sync) >> 8) & 0x00FF;
     packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;

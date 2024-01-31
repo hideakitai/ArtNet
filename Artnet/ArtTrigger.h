@@ -11,7 +11,8 @@ namespace art_trigger {
 
 using CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
 
-enum Index : uint16_t {
+enum Index : uint16_t
+{
     ID = 0,
     OP_CODE_L = 8,
     OP_CODE_H = 9,
@@ -26,7 +27,8 @@ enum Index : uint16_t {
     PAYLOAD = 18
 };
 
-class ArtTrigger {
+class ArtTrigger
+{
     uint16_t oem {0xFFFF};
     uint8_t key {0xFF};
     uint8_t subkey {0xFF};
@@ -47,9 +49,11 @@ public:
         this->subkey = subkey_;
     }
 
-    void set_header(uint8_t *packet)
+    void set_header(uint8_t *packet) const
     {
-        for (size_t i = 0; i < ID_LENGTH; i++) packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        for (size_t i = 0; i < ID_LENGTH; i++) {
+            packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        }
         packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Trigger) >> 0) & 0x00FF;
         packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Trigger) >> 8) & 0x00FF;
         packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
@@ -62,7 +66,7 @@ public:
         packet[SUB_KEY] = this->subkey;
     }
 
-    void set_payload(uint8_t *packet, const uint8_t* const payload, uint16_t size)
+    void set_payload(uint8_t *packet, const uint8_t* const payload, uint16_t size) const
     {
         memcpy(packet + PAYLOAD, payload, size);
     }

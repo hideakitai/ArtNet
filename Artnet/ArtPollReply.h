@@ -10,8 +10,10 @@
 namespace art_net {
 namespace art_poll_reply {
 
-union Packet {
-    struct {
+union Packet
+{
+    struct
+    {
         uint8_t id[8];
         uint8_t op_code_l;
         uint8_t op_code_h;
@@ -59,14 +61,18 @@ class ArtPollReply
     String node_report {""};
 
 public:
-    Packet generate_reply(const IPAddress &my_ip, const uint8_t my_mac[6], uint32_t universe, uint8_t net_switch, uint8_t sub_switch)
+    Packet generate_reply(const IPAddress &my_ip, const uint8_t my_mac[6], uint32_t universe, uint8_t net_switch, uint8_t sub_switch) const
     {
         Packet r;
-        for (size_t i = 0; i < ID_LENGTH; i++) r.id[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        for (size_t i = 0; i < ID_LENGTH; i++) {
+            r.id[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+        }
         r.op_code_l = ((uint16_t)OpCode::PollReply >> 0) & 0x00FF;
         r.op_code_h = ((uint16_t)OpCode::PollReply >> 8) & 0x00FF;
         memcpy(r.mac, my_mac, 6);
-        for (size_t i = 0; i < 4; ++i) r.ip[i] = my_ip[i];
+        for (size_t i = 0; i < 4; ++i) {
+            r.ip[i] = my_ip[i];
+        }
         r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
         r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
         r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
@@ -103,7 +109,9 @@ public:
         r.sw_remote = 0;  // No support for remote trigger inputs
         memset(r.spare, 0x00, 3);
         r.style = 0x00;  // A DMX to / from Art-Net device
-        for (size_t i = 0; i < 4; ++i) r.bind_ip[i] = my_ip[i];
+        for (size_t i = 0; i < 4; ++i) {
+            r.bind_ip[i] = my_ip[i];
+        }
         r.bind_index = 0;
         r.status_2 = 0x08;  // sACN capable
         memset(r.filler, 0x00, 26);
@@ -111,13 +119,16 @@ public:
         return r;
     }
 
-    void shortname(const String& sn) {
+    void shortname(const String& sn)
+    {
         this->short_name = sn;
     }
-    void longname(const String& ln) {
+    void longname(const String& ln)
+    {
         this->long_name = ln;
     }
-    void nodereport(const String& nr) {
+    void nodereport(const String& nr)
+    {
         this->node_report = nr;
     }
 };
