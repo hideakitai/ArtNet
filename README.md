@@ -21,6 +21,11 @@ If you have already installed this library, please follow:
 - One-line send to desired destination
 - Flexible net/subnet/universe setting
 - Easy data forwarding to [FastLED](https://github.com/FastLED/FastLED)
+- Supports following protocols:
+  - ArtDmx
+  - ArtPoll/ArtPollReply
+  - ArtTrigger
+  - ArtSync
 
 ## Supported Platforms
 
@@ -284,6 +289,8 @@ void set_subkey(uint8_t subkey);
 void set_payload(const uint8_t* const payload, uint16_t size);
 // send ArtTrigger based on the config above
 void trigger(const String& ip);
+// send ArtSync
+void sync(const String& ip);
 ```
 
 ### ArtnetReceiver
@@ -295,12 +302,19 @@ template <typename F> inline auto subscribe(const uint8_t universe, F&& func);
 template <typename F> inline auto subscribe(const uint8_t universe, F* func);
 template <typename F> inline auto subscribe(F&& func);
 template <typename F> inline auto subscribe(F* func);
+template <typename F> inline auto subscribeArtsync(F&& func);
+template <typename F> inline auto subscribeArtsync(F* func);
+// callback definitions for subscribers
+using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
+using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
+using CallbackArtSync = std::function<void(void)>;
 // for FastLED
 inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num);
 // unsubscribe
 inline void unsubscribe(const uint8_t universe);
 inline void unsubscribe();
 inline void clear_subscribers();
+inline void unsubscribeArtSync();
 // ArtPollReply information
 void shortname(const String& sn);
 void longname(const String& ln);
