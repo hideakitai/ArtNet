@@ -50,30 +50,30 @@ public:
         packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Dmx) >> 8) & 0x00FF;
         packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
         packet[PROTOCOL_VER_L] = (PROTOCOL_VER >> 0) & 0x00FF;
-        packet[SEQUENCE] = seq++;
-        packet[PHYSICAL] = phy;
-        packet[NET] = target_net;
-        packet[SUBUNI] = (target_subnet << 4) | target_universe;
+        packet[SEQUENCE] = this->seq++;
+        packet[PHYSICAL] = this->phy;
+        packet[NET] = this->target_net;
+        packet[SUBUNI] = (this->target_subnet << 4) | this->target_universe;
         packet[LENGTH_H] = (512 >> 8) & 0xFF;
         packet[LENGTH_L] = (512 >> 0) & 0xFF;
     }
 
     void set_universe(const uint32_t universe_) {
-        target_net = (universe_ >> 8) & 0x7F;
-        target_subnet = (universe_ >> 4) & 0x0F;
-        target_universe = universe_ & 0x0F;
+        this->target_net = (universe_ >> 8) & 0x7F;
+        this->target_subnet = (universe_ >> 4) & 0x0F;
+        this->target_universe = universe_ & 0x0F;
     }
     void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_) {
-        target_net = net_ & 0x7F;
-        target_subnet = subnet_ & 0x0F;
-        target_universe = universe_ & 0x0F;
+        this->target_net = net_ & 0x7F;
+        this->target_subnet = subnet_ & 0x0F;
+        this->target_universe = universe_ & 0x0F;
     }
     void set_physical(const uint8_t i) {
-        phy = constrain(i, 0, 3);
+        this->phy = constrain(i, 0, 3);
     }
 
     uint8_t sequence() const {
-        return seq;
+        return this->seq;
     }
 
     void set_data(uint8_t *packet, const uint8_t* const data, const uint16_t size) {

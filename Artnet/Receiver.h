@@ -29,7 +29,7 @@ public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
     Receiver_() {
-        packet.resize(PACKET_SIZE);
+        this->packet.resize(PACKET_SIZE);
     }
 #endif
 
@@ -48,50 +48,50 @@ public:
             return OpCode::NA;
         }
 #endif
-        const size_t size = stream->parsePacket();
+        const size_t size = this->stream->parsePacket();
         if (size == 0) return OpCode::NA;
 
         uint8_t* d = new uint8_t[size];
-        stream->read(d, size);
+        this->stream->read(d, size);
 
         OpCode op_code = OpCode::NA;
         if (checkID(d)) {
-            remote_ip = stream->S::remoteIP();
-            remote_port = (uint16_t)stream->S::remotePort();
-            OpCode received_op_code = static_cast<OpCode>(opcode(d));
+            this->remote_ip = this->stream->S::remoteIP();
+            this->remote_port = (uint16_t)this->stream->S::remotePort();
+            OpCode received_op_code = static_cast<OpCode>(this->opcode(d));
             switch (received_op_code) {
                 case OpCode::Dmx: {
-                    memcpy(packet.data(), d, size);
-                    if (callback_all) callback_all(universe15bit(), data(), size - HEADER_SIZE);
-                    for (auto& c : callbacks)
-                        if (universe15bit() == c.first) c.second(data(), size - HEADER_SIZE);
+                    memcpy(this->packet.data(), d, size);
+                    if (this->callback_all) this->callback_all(this->universe15bit(), this->data(), size - HEADER_SIZE);
+                    for (auto& c : this->callbacks)
+                        if (this->universe15bit() == c.first) c.second(this->data(), size - HEADER_SIZE);
                     op_code = OpCode::Dmx;
                     break;
                 }
                 case OpCode::Poll: {
-                    poll_reply();
+                    this->poll_reply();
                     op_code = OpCode::Poll;
                     break;
                 }
                 case OpCode::Trigger: {
-                    if (callback_arttrigger) {
+                    if (this->callback_arttrigger) {
                         uint16_t oem = (d[art_trigger::OEM_H] << 8) | d[art_trigger::OEM_L];
                         uint8_t key = d[art_trigger::KEY];
                         uint8_t sub_key = d[art_trigger::SUB_KEY];
-                        callback_arttrigger(oem, key, sub_key, d + art_trigger::PAYLOAD, size - art_trigger::PAYLOAD);
+                        this->callback_arttrigger(oem, key, sub_key, d + art_trigger::PAYLOAD, size - art_trigger::PAYLOAD);
                     }
                     op_code = OpCode::Trigger;
                     break;
                 }
                 case OpCode::Sync: {
-                    if (callback_artsync) callback_artsync();
+                    if (this->callback_artsync) this->callback_artsync();
                     op_code = OpCode::Sync;
                     break;
                 }
                 default: {
-                    if (b_verbose) {
+                    if (this->b_verbose) {
                         Serial.print(F("Unsupported OpCode: "));
-                        Serial.println(opcode(d), HEX);
+                        Serial.println(this->opcode(d), HEX);
                     }
                     op_code = OpCode::NA;
                     break;
@@ -103,137 +103,137 @@ public:
     }
 
     inline const IPAddress& ip() const {
-        return remote_ip;
+        return this->remote_ip;
     }
     inline uint16_t port() const {
-        return remote_port;
+        return this->remote_port;
     }
 
     inline String id() const {
         String str;
-        for (uint8_t i = 0; i < ID_LENGTH; ++i) str += packet[art_dmx::ID + i];
+        for (uint8_t i = 0; i < ID_LENGTH; ++i) str += this->packet[art_dmx::ID + i];
         return str;
     }
     inline uint16_t opcode() const {
-        return (packet[art_dmx::OP_CODE_H] << 8) | packet[art_dmx::OP_CODE_L];
+        return (this->packet[art_dmx::OP_CODE_H] << 8) | this->packet[art_dmx::OP_CODE_L];
     }
     inline uint16_t opcode(const uint8_t* p) const {
         return (p[art_dmx::OP_CODE_H] << 8) | p[art_dmx::OP_CODE_L];
     }
     inline uint16_t version() const {
-        return (packet[art_dmx::PROTOCOL_VER_H] << 8) | packet[art_dmx::PROTOCOL_VER_L];
+        return (this->packet[art_dmx::PROTOCOL_VER_H] << 8) | this->packet[art_dmx::PROTOCOL_VER_L];
     }
     inline uint8_t sequence() const {
-        return packet[art_dmx::SEQUENCE];
+        return this->packet[art_dmx::SEQUENCE];
     }
     inline uint8_t physical() const {
-        return packet[art_dmx::PHYSICAL];
+        return this->packet[art_dmx::PHYSICAL];
     }
     uint8_t net() const {
-        return packet[art_dmx::NET] & 0x7F;
+        return this->packet[art_dmx::NET] & 0x7F;
     }
     uint8_t subnet() const {
-        return (packet[art_dmx::SUBUNI] >> 4) & 0x0F;
+        return (this->packet[art_dmx::SUBUNI] >> 4) & 0x0F;
     }
     inline uint8_t universe() const {
-        return packet[art_dmx::SUBUNI] & 0x0F;
+        return this->packet[art_dmx::SUBUNI] & 0x0F;
     }
     inline uint16_t universe15bit() const {
-        return (packet[art_dmx::NET] << 8) | packet[art_dmx::SUBUNI];
+        return (this->packet[art_dmx::NET] << 8) | this->packet[art_dmx::SUBUNI];
     }
     inline uint16_t length() const {
-        return (packet[art_dmx::LENGTH_H] << 8) | packet[art_dmx::LENGTH_L];
+        return (this->packet[art_dmx::LENGTH_H] << 8) | this->packet[art_dmx::LENGTH_L];
     }
     inline uint16_t size() const {
-        return length();
+        return this->length();
     }
     inline uint8_t* data() {
-        return &(packet[HEADER_SIZE]);
+        return &(this->packet[HEADER_SIZE]);
     }
     inline uint8_t data(const uint16_t i) const {
-        return packet[HEADER_SIZE + i];
+        return this->packet[HEADER_SIZE + i];
     }
 
     template <typename Fn>
     inline auto subscribe(const uint8_t universe, Fn&& func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
         if (universe > 0xF) {
-            if (b_verbose) {
+            if (this->b_verbose) {
                 Serial.println(F("universe out of bounds"));
             }
             return;
         } else {
-            uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-            callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
+            uint32_t u = ((uint32_t)this->net_switch << 8) | ((uint32_t)this->sub_switch << 4) | (uint32_t)universe;
+            this->callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
         }
     }
     template <typename Fn>
     inline auto subscribe(const uint8_t universe, Fn* func) -> std::enable_if_t<arx::is_callable<Fn>::value> {
         if (universe > 0xF) {
-            if (b_verbose) {
+            if (this->b_verbose) {
                 Serial.println(F("universe out of bounds"));
             }
         } else {
-            uint32_t u = ((uint32_t)net_switch << 8) | ((uint32_t)sub_switch << 4) | (uint32_t)universe;
-            callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
+            uint32_t u = ((uint32_t)this->net_switch << 8) | ((uint32_t)this->sub_switch << 4) | (uint32_t)universe;
+            this->callbacks.insert(make_pair(u, arx::function_traits<Fn>::cast(func)));
         }
     }
     template <typename Fn>
     inline auto subscribe15bit(const uint16_t universe, Fn&& func)
         -> std::enable_if_t<arx::is_callable<Fn>::value> {
-        callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
+        this->callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
     }
     template <typename Fn>
     inline auto subscribe15bit(const uint16_t universe, Fn* func)
         -> std::enable_if_t<arx::is_callable<Fn>::value> {
-        callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
+        this->callbacks.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
     }
     template <typename F>
     inline auto subscribe(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_all = arx::function_traits<F>::cast(func);
+        this->callback_all = arx::function_traits<F>::cast(func);
     }
     template <typename F>
     inline auto subscribe(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_all = arx::function_traits<F>::cast(func);
+        this->callback_all = arx::function_traits<F>::cast(func);
     }
     template <typename F>
     inline auto subscribeArtSync(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_artsync = arx::function_traits<F>::cast(func);
+        this->callback_artsync = arx::function_traits<F>::cast(func);
     }
     template <typename F>
     inline auto subscribeArtSync(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_artsync = arx::function_traits<F>::cast(func);
+        this->callback_artsync = arx::function_traits<F>::cast(func);
     }
     template <typename F>
     inline auto subscribeArtTrigger(F&& func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_arttrigger = arx::function_traits<F>::cast(func);
+        this->callback_arttrigger = arx::function_traits<F>::cast(func);
     }
     template <typename F>
     inline auto subscribeArtTrigger(F* func) -> std::enable_if_t<arx::is_callable<F>::value> {
-        callback_arttrigger = arx::function_traits<F>::cast(func);
+        this->callback_arttrigger = arx::function_traits<F>::cast(func);
     }
 
     inline void unsubscribe(const uint8_t universe) {
-        auto it = callbacks.find(universe);
-        if (it != callbacks.end()) callbacks.erase(it);
+        auto it = this->callbacks.find(universe);
+        if (it != this->callbacks.end()) this->callbacks.erase(it);
     }
     inline void unsubscribe() {
-        callback_all = nullptr;
+        this->callback_all = nullptr;
     }
     inline void unsubscribeArtSync() {
-        callback_artsync = nullptr;
+        this->callback_artsync = nullptr;
     }
     inline void unsubscribeArtTrigger() {
-        callback_arttrigger = nullptr;
+        this->callback_arttrigger = nullptr;
     }
 
     inline void clear_subscribers() {
-        unsubscribe();
-        callbacks.clear();
+        this->unsubscribe();
+        this->callbacks.clear();
     }
 
 #ifdef FASTLED_VERSION
     inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num) {
-        subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
+        this->subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
             size_t n;
             if (num <= size / 3) {
                 // OK: requested number of LEDs is less than received data size
@@ -257,36 +257,36 @@ public:
 #endif
 
     void verbose(const bool b) {
-        b_verbose = b;
+        this->b_verbose = b;
     }
 
     // for ArtPollReply
     void shortname(const String& sn) {
-        art_poll_reply_ctx.shortname(sn);
+        this->art_poll_reply_ctx.shortname(sn);
     }
     void longname(const String& ln) {
-        art_poll_reply_ctx.longname(ln);
+        this->art_poll_reply_ctx.longname(ln);
     }
     void nodereport(const String& nr) {
-        art_poll_reply_ctx.nodereport(nr);
+        this->art_poll_reply_ctx.nodereport(nr);
     }
 
 protected:
     void attach(S& s, const uint8_t subscribe_net = 0, const uint8_t subscribe_subnet = 0) {
-        stream = &s;
+        this->stream = &s;
         if (subscribe_net > 128) {
-            if (b_verbose) {
+            if (this->b_verbose) {
                 Serial.println(F("Net must be < 128"));
             }
         } else {
-            net_switch = subscribe_net;
+            this->net_switch = subscribe_net;
         }
         if (subscribe_subnet > 16) {
-            if (b_verbose) {
+            if (this->b_verbose) {
                 Serial.println(F("Subnet must be < 16"));
             }
         } else {
-            sub_switch = subscribe_subnet;
+            this->sub_switch = subscribe_subnet;
         }
     }
 
@@ -297,16 +297,16 @@ private:
     }
 
     void poll_reply() {
-        const IPAddress my_ip = localIP();
-        const IPAddress my_subnet = subnetMask();
+        const IPAddress my_ip = this->localIP();
+        const IPAddress my_subnet = this->subnetMask();
         uint8_t my_mac[6];
-        macAddress(my_mac);
-        for (const auto &cb_pair : callbacks) {
-            art_poll_reply::Packet r = art_poll_reply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, net_switch, sub_switch);
+        this->macAddress(my_mac);
+        for (const auto &cb_pair : this->callbacks) {
+            art_poll_reply::Packet r = this->art_poll_reply_ctx.generate_reply(my_ip, my_mac, cb_pair.first, this->net_switch, this->sub_switch);
             static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
-            stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
-            stream->write(r.b, sizeof(art_poll_reply::Packet));
-            stream->endPacket();
+            this->stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+            this->stream->write(r.b, sizeof(art_poll_reply::Packet));
+            this->stream->endPacket();
         }
     }
 
@@ -389,8 +389,8 @@ public:
         const uint8_t subscribe_net = 0,
         const uint8_t subscribe_subnet = 0,
         const uint16_t recv_port = DEFAULT_PORT) {
-        stream.begin(recv_port);
-        this->Receiver_<S>::attach(stream, subscribe_net, subscribe_subnet);
+        this->stream.begin(recv_port);
+        this->Receiver_<S>::attach(this->stream, this->subscribe_net, this->subscribe_subnet);
     }
 };
 

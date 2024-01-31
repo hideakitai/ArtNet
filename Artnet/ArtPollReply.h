@@ -80,9 +80,9 @@ public:
         memset(r.short_name, 0, 18);
         memset(r.long_name, 0, 64);
         memset(r.node_report, 0, 64);
-        memcpy(r.short_name, short_name.c_str(), short_name.length());
-        memcpy(r.long_name, long_name.c_str(), long_name.length());
-        memcpy(r.node_report, node_report.c_str(), node_report.length());
+        memcpy(r.short_name, this->short_name.c_str(), this->short_name.length());
+        memcpy(r.long_name, this->long_name.c_str(), this->long_name.length());
+        memcpy(r.node_report, this->node_report.c_str(), this->node_report.length());
         r.num_ports_h = 0;                 // Reserved
         r.num_ports_l = 1;
         memset(r.sw_in, 0, 4);
@@ -112,13 +112,13 @@ public:
     }
 
     void shortname(const String& sn) {
-        short_name = sn;
+        this->short_name = sn;
     }
     void longname(const String& ln) {
-        long_name = ln;
+        this->long_name = ln;
     }
     void nodereport(const String& nr) {
-        node_report = nr;
+        this->node_report = nr;
     }
 };
 
