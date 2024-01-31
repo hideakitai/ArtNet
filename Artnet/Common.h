@@ -65,6 +65,7 @@ constexpr uint16_t PACKET_SIZE {530};
 using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
 using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
 using CallbackArtSync = std::function<void(void)>;
+using CallbackArtTrigger = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 template <uint16_t SIZE>

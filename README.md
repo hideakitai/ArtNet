@@ -298,16 +298,15 @@ void sync(const String& ip);
 ```C++
 OpCode parse();
 // subscribers
-template <typename F> inline auto subscribe(const uint8_t universe, F&& func);
-template <typename F> inline auto subscribe(const uint8_t universe, F* func);
-template <typename F> inline auto subscribe(F&& func);
-template <typename F> inline auto subscribe(F* func);
-template <typename F> inline auto subscribeArtsync(F&& func);
-template <typename F> inline auto subscribeArtsync(F* func);
+template <typename F> inline auto subscribe(const uint8_t universe, CallbackType);
+template <typename F> inline auto subscribe(CallbackAllTyp);
+template <typename F> inline auto subscribeArtSync(CallbackArtSync);
+template <typename F> inline auto subscribeArtTrigger(CallbackArtTrigger);
 // callback definitions for subscribers
 using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
 using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
 using CallbackArtSync = std::function<void(void)>;
+using CallbackArTrigger = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
 // for FastLED
 inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num);
 // unsubscribe
@@ -315,6 +314,7 @@ inline void unsubscribe(const uint8_t universe);
 inline void unsubscribe();
 inline void clear_subscribers();
 inline void unsubscribeArtSync();
+inline void unsubscribeArtTrigger();
 // ArtPollReply information
 void shortname(const String& sn);
 void longname(const String& ln);
