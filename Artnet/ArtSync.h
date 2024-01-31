@@ -9,6 +9,8 @@
 namespace art_net {
 namespace art_sync {
 
+using CallbackType = std::function<void(void)>;
+
 enum Index : uint16_t {
     ID = 0,
     OP_CODE_L = 8,

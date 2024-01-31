@@ -10,6 +10,16 @@ namespace art_net {
 
 namespace art_dmx {
 
+using CallbackTypeForUniverse = std::function<void(const uint8_t* data, const uint16_t size)>;
+using CallbackTypeForAllPacket = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
+using CallbackMapForUniverse = std::map<uint32_t, CallbackTypeForUniverse>;
+#else
+template <uint16_t SIZE>
+using CallbackMapForUniverse = arx::map<uint32_t, CallbackTypeForUniverse, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
+#endif
+
+
 enum Index : uint16_t {
     ID = 0,
     OP_CODE_L = 8,

@@ -6,6 +6,7 @@
 #include "ArtDmx.h"
 #include "ArtPollReply.h"
 #include "ArtTrigger.h"
+#include "ArtSync.h"
 
 namespace art_net {
 
@@ -16,10 +17,10 @@ class Receiver_ {
     uint16_t remote_port;
     uint8_t net_switch;  // net of universe
     uint8_t sub_switch;  // subnet of universe
-    CallbackMap callbacks;
-    CallbackAllType callback_all;
-    CallbackArtSync callback_artsync;
-    CallbackArtTrigger callback_arttrigger;
+    art_dmx::CallbackMapForUniverse callbacks;
+    art_dmx::CallbackTypeForAllPacket callback_all;
+    art_sync::CallbackType callback_artsync;
+    art_trigger::CallbackType callback_arttrigger;
     S* stream;
     bool b_verbose {false};
     artpollreply::ArtPollReply artpollreply_ctx;

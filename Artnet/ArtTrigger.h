@@ -9,6 +9,8 @@
 namespace art_net {
 namespace art_trigger {
 
+using CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
+
 enum Index : uint16_t {
     ID = 0,
     OP_CODE_L = 8,

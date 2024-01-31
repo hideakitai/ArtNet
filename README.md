@@ -298,15 +298,15 @@ void sync(const String& ip);
 ```C++
 OpCode parse();
 // subscribers
-template <typename F> inline auto subscribe(const uint8_t universe, CallbackType);
-template <typename F> inline auto subscribe(CallbackAllTyp);
-template <typename F> inline auto subscribeArtSync(CallbackArtSync);
-template <typename F> inline auto subscribeArtTrigger(CallbackArtTrigger);
+template <typename F> inline auto subscribe(const uint8_t universe, art_dmx::CallbackTypeForUniverse);
+template <typename F> inline auto subscribe(art_dmx::CallbackTypeForAllPacket);
+template <typename F> inline auto subscribeArtSync(art_sync::CallbackType);
+template <typename F> inline auto subscribeArtTrigger(art_trigger::CallbackType);
 // callback definitions for subscribers
-using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
-using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
-using CallbackArtSync = std::function<void(void)>;
-using CallbackArTrigger = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
+using art_dmx::CallbackTypeForUniverse = std::function<void(const uint8_t* data, const uint16_t size)>;
+using art_dmx::CallbackTypeForAllPacket = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
+using art_sync::CallbackType = std::function<void(void)>;
+using art_trigger::CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
 // for FastLED
 inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num);
 // unsubscribe

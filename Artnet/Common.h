@@ -62,22 +62,15 @@ constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
 constexpr uint16_t HEADER_SIZE {18};
 constexpr uint16_t PACKET_SIZE {530};
 
-using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
-using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
-using CallbackArtSync = std::function<void(void)>;
-using CallbackArtTrigger = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
-
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 template <uint16_t SIZE>
 using Array = std::array<uint8_t, SIZE>;
 using IntervalMap = std::map<uint32_t, uint32_t>;
-using CallbackMap = std::map<uint32_t, CallbackType>;
 using namespace std;
 #else
 template <uint16_t SIZE>
 using Array = arx::vector<uint8_t, SIZE>;
 using IntervalMap = arx::map<uint32_t, uint32_t>;
-using CallbackMap = arx::map<uint32_t, CallbackType, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
 using namespace arx;
 #endif
 
