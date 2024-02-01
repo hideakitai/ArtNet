@@ -10,19 +10,27 @@
 
 namespace art_net {
 
+struct RemoteInfo
+{
+    IPAddress ip;
+    uint16_t port;
+};
+
 template <typename S>
 class Receiver_
 {
+    S *stream;
     Array<PACKET_SIZE> packet;
     IPAddress remote_ip;
     uint16_t remote_port;
     uint8_t net_switch;  // net of universe
     uint8_t sub_switch;  // subnet of universe
+
     art_dmx::CallbackMapForUniverse callbacks;
     art_dmx::CallbackTypeForAllPacket callback_all;
     art_sync::CallbackType callback_artsync;
     art_trigger::CallbackType callback_arttrigger;
-    S* stream;
+
     bool b_verbose {false};
     art_poll_reply::ArtPollReply art_poll_reply_ctx;
 

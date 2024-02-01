@@ -56,7 +56,7 @@ void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
-    artnet.streaming_data(data, size);
-    artnet.streaming(target_ip, universe);  // automatically send set data in 40fps
-    // artnet.streaming(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
+    artnet.setArtDmxData(data, size);
+    artnet.streamArtDmxTo(target_ip, universe);  // automatically send set data in 40fps
+    // artnet.streamArtDmxTo(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
 }

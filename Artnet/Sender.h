@@ -12,12 +12,10 @@ namespace art_net {
 template <typename S>
 class Sender_
 {
-    Array<PACKET_SIZE> packet;
-    art_dmx::ArtDmx artdmx_ctx;
-    art_trigger::ArtTrigger art_trigger_ctx;
-
-    IntervalMap intervals;
     S* stream;
+    Array<PACKET_SIZE> packet;
+    art_dmx::LastSendTimeMsMap last_send_times;
+    art_dmx::SequenceMap sequences;
 
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
@@ -27,93 +25,72 @@ public:
         this->packet.resize(PACKET_SIZE);
     }
 #endif
+
     // streaming packet
-    void streaming_data(const uint8_t* const data, uint16_t size)
+    void setArtDmxData(const uint8_t* const data, uint16_t size)
     {
-        this->artdmx_ctx.set_data(this->packet.data(), data, size);
+        art_dmx::setDataTo(this->packet.data(), data, size);
     }
-    void streaming_data(uint16_t ch, uint8_t data)
+    void setArtDmxData(uint16_t ch, uint8_t data)
     {
-        this->artdmx_ctx.set_data(this->packet.data(), ch, data);
+        art_dmx::setDataTo(this->packet.data(), ch, data);
     }
 
-    void streaming(const String& ip, uint32_t universe_)
+    void streamArtDmxTo(const String& ip, uint16_t universe15bit)
     {
-        uint32_t now = millis();
-        if (this->intervals.find(universe_) == this->intervals.end()) {
-            this->intervals.insert(make_pair(universe_, now));
-        }
-        if (now >= this->intervals[universe_] + DEFAULT_INTERVAL_MS) {
-            this->set_universe(universe_);
-            this->send_packet(ip);
-            this->intervals[universe_] = now;
-        }
+        uint8_t net = (universe15bit >> 8) & 0x7F;
+        uint8_t subnet = (universe15bit >> 4) & 0x0F;
+        uint8_t universe = (universe15bit >> 0) & 0x0F;
+        this->streamArtDmxTo(ip, net, subnet, universe, 0);
     }
-    void streaming(const String& ip, uint8_t net_, uint8_t subnet_, uint8_t universe_)
+    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe)
     {
-        uint32_t u = ((uint32_t)net_ << 8) | ((uint32_t)subnet_ << 4) | (uint32_t)universe_;
-        this->streaming(ip, u);
+        this->streamArtDmxTo(ip, net, subnet, universe, 0);
+    }
+    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical)
+    {
+        art_dmx::Destination dest {ip, net, subnet, universe};
+        uint32_t now = millis();
+        if (this->last_send_times.find(dest) == this->last_send_times.end()) {
+            this->last_send_times.insert(make_pair(dest, 0));
+        }
+        if (now >= this->last_send_times[dest] + DEFAULT_INTERVAL_MS) {
+            this->sendArxDmxInternal(dest, physical);
+            this->last_send_times[dest] = now;
+        }
     }
 
     // one-line sender
-    void send(const String& ip, uint32_t universe_, const uint8_t* const data, uint16_t size)
+    void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size)
     {
-        this->set_universe(universe_);
-        this->streaming_data(data, size);
-        this->send_packet(ip);
+        uint8_t net = (universe15bit >> 8) & 0x7F;
+        uint8_t subnet = (universe15bit >> 4) & 0x0F;
+        uint8_t universe = (universe15bit >> 0) & 0x0F;
+        this->sendArtDmx(ip, net, subnet, universe, 0, data, size);
     }
-    void send(const String& ip, uint8_t net_, uint8_t subnet_, uint8_t universe_, const uint8_t* const data, uint16_t size)
+    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size)
     {
-        this->set_universe(net_, subnet_, universe_);
-        this->streaming_data(data, size);
-        this->send_packet(ip);
+        this->sendArtDmx(ip, net, subnet, universe, 0, data, size);
     }
-
-    void send_raw(const String& ip, uint16_t port, const uint8_t* const data, size_t size)
+    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size)
     {
-        this->stream->beginPacket(ip.c_str(), port);
-        this->stream->write(data, size);
-        this->stream->endPacket();
-    }
-
-    void physical(const uint8_t i)
-    {
-        this->artdmx_ctx.set_physical(i);
-    }
-
-    uint8_t sequence() const
-    {
-        return this->artdmx_ctx.sequence();
+        art_dmx::Destination dest {ip, net, subnet, universe};
+        this->setArtDmxData(data, size);
+        this->sendArxDmxInternal(dest, physical);
     }
 
     // ArtTrigger
-    void set_oem(uint16_t oem)
+    void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512)
     {
-        this->art_trigger_ctx.set_oem(oem);
-    }
-    void set_key(uint8_t key)
-    {
-        this->art_trigger_ctx.set_key(key);
-    }
-    void set_subkey(uint8_t subkey)
-    {
-        this->art_trigger_ctx.set_subkey(subkey);
-    }
-    void set_payload(const uint8_t* const payload, uint16_t size)
-    {
-        this->art_trigger_ctx.set_payload(packet.data(), payload, size);
-    }
-    void trigger(const String& ip)
-    {
-        this->art_trigger_ctx.set_header(packet.data());
-        this->send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
+        art_trigger::setPacketTo(packet.data(), oem, key, subkey, payload, size);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), packet.size());
     }
 
     // ArtSync
-    void sync(const String& ip)
+    void sendArtSync(const String& ip)
     {
-        art_sync::set_header(packet.data());
-        this->send_raw(ip, DEFAULT_PORT, packet.data(), packet.size());
+        art_sync::setPacketTo(packet.data());
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_sync::PACKET_SIZE);
     }
 
 protected:
@@ -122,9 +99,9 @@ protected:
         this->stream = &s;
     }
 
-    void send_packet(const String& ip)
-    {
 #ifdef ARTNET_ENABLE_WIFI
+    bool isNetworkReady() const
+    {
         auto status = WiFi.status();
         auto is_connected = status == WL_CONNECTED;
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
@@ -132,21 +109,30 @@ protected:
 #else
         bool is_ap_active = status == WL_AP_CONNECTED;
 #endif
-        if (!is_connected && !is_ap_active) {
+        return is_connected || is_ap_active;
+    }
+#endif
+
+    void sendArxDmxInternal(const art_dmx::Destination &dest, uint8_t physical)
+    {
+#ifdef ARTNET_ENABLE_WIFI
+        if (!isNetworkReady()) {
             return;
         }
 #endif
-        this->artdmx_ctx.set_header(this->packet.data());
-        this->send_raw(ip, DEFAULT_PORT, this->packet.data(), this->packet.size());
+        if (this->sequences.find(dest) == this->sequences.end()) {
+            this->sequences.insert(make_pair(dest, 0));
+        }
+        art_dmx::setHeaderTo(this->packet.data(), this->sequences[dest], physical, dest.net, dest.subnet, dest.universe);
+        this->sendRawData(dest.ip, DEFAULT_PORT, this->packet.data(), this->packet.size());
+        this->sequences[dest] = (this->sequences[dest] + 1) % 256;
     }
 
-    void set_universe(const uint32_t universe_)
+    void sendRawData(const String& ip, uint16_t port, const uint8_t* const data, size_t size)
     {
-        this->artdmx_ctx.set_universe(universe_);
-    }
-    void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_)
-    {
-        this->artdmx_ctx.set_universe(net_, subnet_, universe_);
+        this->stream->beginPacket(ip.c_str(), port);
+        this->stream->write(data, size);
+        this->stream->endPacket();
     }
 };
 

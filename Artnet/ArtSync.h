@@ -20,9 +20,11 @@ enum Index : uint16_t
     PROTOCOL_VER_L = 11,
     AUX1 = 12,
     AUX2 = 13,
+
+    PACKET_SIZE = 14,
 };
 
-inline void set_header(uint8_t *packet)
+inline void setPacketTo(uint8_t *packet)
 {
     for (size_t i = 0; i < ID_LENGTH; i++) {
         packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);

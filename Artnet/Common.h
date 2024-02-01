@@ -65,12 +65,10 @@ constexpr uint16_t PACKET_SIZE {530};
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 template <uint16_t SIZE>
 using Array = std::array<uint8_t, SIZE>;
-using IntervalMap = std::map<uint32_t, uint32_t>;
 using namespace std;
 #else
 template <uint16_t SIZE>
 using Array = arx::vector<uint8_t, SIZE>;
-using IntervalMap = arx::map<uint32_t, uint32_t>;
 using namespace arx;
 #endif
 
