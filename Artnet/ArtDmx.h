@@ -9,6 +9,22 @@
 namespace art_net {
 namespace art_dmx {
 
+enum Index : uint16_t
+{
+    ID = 0,
+    OP_CODE_L = 8,
+    OP_CODE_H = 9,
+    PROTOCOL_VER_H = 10,
+    PROTOCOL_VER_L = 11,
+    SEQUENCE = 12,
+    PHYSICAL = 13,
+    SUBUNI = 14,
+    NET = 15,
+    LENGTH_H = 16,
+    LENGTH_L = 17,
+    DATA = 18
+};
+
 struct Destination
 {
     String ip;
@@ -46,36 +62,43 @@ inline bool operator<(const Destination &rhs, const Destination &lhs)
     return false;
 }
 
-using CallbackTypeForUniverse = std::function<void(const uint8_t* data, const uint16_t size)>;
-using CallbackTypeForAllPacket = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-using CallbackMapForUniverse = std::map<uint32_t, CallbackTypeForUniverse>;
-using LastSendTimeMsMap = std::map<Destination, uint32_t>;
-using SequenceMap = std::map<Destination, uint8_t>;
-#else
-template <uint16_t SIZE>
-using CallbackMapForUniverse = arx::map<uint32_t, CallbackTypeForUniverse, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
-using LastSendTimeMsMap = arx::map<Destination, uint32_t>;
-using SequenceMap = arx::map<Destination, uint8_t>;
-#endif
-
-enum Index : uint16_t
+struct Metadata
 {
-    ID = 0,
-    OP_CODE_L = 8,
-    OP_CODE_H = 9,
-    PROTOCOL_VER_H = 10,
-    PROTOCOL_VER_L = 11,
-    SEQUENCE = 12,
-    PHYSICAL = 13,
-    SUBUNI = 14,
-    NET = 15,
-    LENGTH_H = 16,
-    LENGTH_L = 17,
-    DATA = 18
+    uint8_t sequence;
+    uint8_t physical;
+    uint8_t net;
+    uint8_t subnet;
+    uint8_t universe;
 };
 
-inline void setHeaderTo(uint8_t *packet, uint8_t sequence, uint8_t physical, uint8_t net, uint8_t subnet, uint8_t universe)
+using CallbackType = std::function<void(const uint8_t *data, uint16_t size, const Metadata &metadata, const RemoteInfo &remote)>;
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
+// sender
+using LastSendTimeMsMap = std::map<Destination, uint32_t>;
+using SequenceMap = std::map<Destination, uint8_t>;
+// receiver
+using CallbackMap = std::map<uint16_t, CallbackType>;
+#else
+template <uint16_t SIZE>
+// sender
+using LastSendTimeMsMap = arx::map<Destination, uint32_t>;
+using SequenceMap = arx::map<Destination, uint8_t>;
+// receiver
+using CallbackMap = arx::map<uint16_t, CallbackTypeForUniverse, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
+#endif
+
+inline Metadata generateMetadataFrom(const uint8_t *packet)
+{
+    Metadata metadata;
+    metadata.sequence = packet[SEQUENCE];
+    metadata.physical = packet[PHYSICAL];
+    metadata.net = packet[NET];
+    metadata.subnet = (packet[SUBUNI] >> 4) & 0x0F;
+    metadata.universe = (packet[SUBUNI] >> 0) & 0x0F;
+    return metadata;
+}
+
+inline void setMetadataTo(uint8_t *packet, uint8_t sequence, uint8_t physical, uint8_t net, uint8_t subnet, uint8_t universe)
 {
     for (size_t i = 0; i < ID_LENGTH; i++) {
         packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
@@ -94,7 +117,7 @@ inline void setHeaderTo(uint8_t *packet, uint8_t sequence, uint8_t physical, uin
 
 inline void setDataTo(uint8_t *packet, const uint8_t* const data, uint16_t size)
 {
-    memcpy((&packet[art_dmx::DATA]), data, size);
+    memcpy(packet + art_dmx::DATA, data, size);
 }
 inline void setDataTo(uint8_t *packet, const uint16_t ch, const uint8_t data)
 {
@@ -103,5 +126,8 @@ inline void setDataTo(uint8_t *packet, const uint16_t ch, const uint8_t data)
 
 } // namespace art_dmx
 } // namespace art_net
+
+using ArtDmxMetadata = art_net::art_dmx::Metadata;
+using ArtDmxCallback = art_net::art_dmx::CallbackType;
 
 #endif // ARTNET_ARTDMX_H

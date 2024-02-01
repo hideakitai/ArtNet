@@ -37,7 +37,7 @@ void setup() {
     // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, this function (lambda) is called
-    artnet.subscribe(universe1, [&](const uint8_t* data, const uint16_t size) {
+    artnet.subscribeArtDmx(universe1, [&](const uint8_t* data, const uint16_t size) {
         Serial.print("lambda : artnet data (universe : ");
         Serial.print(universe1);
         Serial.print(", size = ");
@@ -51,7 +51,7 @@ void setup() {
     });
 
     // you can also use pre-defined callbacks
-    artnet.subscribe(universe2, callback);
+    artnet.subscribeArtDmx(universe2, callback);
 }
 
 void loop() {

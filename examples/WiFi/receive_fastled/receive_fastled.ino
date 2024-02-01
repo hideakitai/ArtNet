@@ -46,7 +46,7 @@ void setup() {
 
     // this can be achieved manually as follows
     // if Artnet packet comes to this universe, this function (lambda) is called
-    // artnet.subscribe(universe, [&](uint8_t* data, uint16_t size) {
+    // artnet.subscribeArtDmx(universe, [&](uint8_t* data, uint16_t size) {
     //     // set led
     //     // artnet data size per packet is 512 max
     //     // so there is max 170 pixel per packet (per universe)

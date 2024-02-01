@@ -72,6 +72,28 @@ using Array = arx::vector<uint8_t, SIZE>;
 using namespace arx;
 #endif
 
+struct RemoteInfo
+{
+    IPAddress ip;
+    uint16_t port;
+};
+
+#ifdef ARTNET_ENABLE_WIFI
+inline bool isNetworkReady()
+{
+    auto status = WiFi.status();
+    auto is_connected = status == WL_CONNECTED;
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
+    bool is_ap_active = WiFi.getMode() == WIFI_AP;
+#else
+    bool is_ap_active = status == WL_AP_CONNECTED;
+#endif
+    return is_connected || is_ap_active;
+}
+#endif
+
 }  // namespace art_net
+
+using ArtNetRemoteInfo = art_net::RemoteInfo;
 
 #endif  // ARTNET_COMMON_H

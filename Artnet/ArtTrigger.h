@@ -9,8 +9,6 @@
 namespace art_net {
 namespace art_trigger {
 
-using CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
-
 enum Index : uint16_t
 {
     ID = 0,
@@ -27,7 +25,9 @@ enum Index : uint16_t
     PAYLOAD = 18
 };
 
-inline void setPacketTo(uint8_t *packet, uint16_t oem, uint8_t key, uint8_t subkey, const uint8_t* const payload, uint16_t size)
+using CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size, const RemoteInfo &remote)>;
+
+inline void setDataTo(uint8_t *packet, uint16_t oem, uint8_t key, uint8_t subkey, const uint8_t* const payload, uint16_t size)
 {
     for (size_t i = 0; i < ID_LENGTH; i++) {
         packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
@@ -51,5 +51,7 @@ inline void setPacketTo(uint8_t *packet, uint16_t oem, uint8_t key, uint8_t subk
 
 } // namespace art_trigger
 } // namespace art_net
+
+using ArtTriggerCallback = art_net::art_trigger::CallbackType;
 
 #endif // ARTNET_ART_TRIGGER_H

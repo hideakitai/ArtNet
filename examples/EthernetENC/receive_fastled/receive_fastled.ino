@@ -30,7 +30,7 @@ void setup() {
 
     // this can be achieved manually as follows
     // if Artnet packet comes to this universe, this function is called
-    // artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size)
+    // artnet.subscribeArtDmx(universe, [&](const uint8_t* data, const uint16_t size)
     // {
     //     // set led
     //     // artnet data size per packet is 512 max

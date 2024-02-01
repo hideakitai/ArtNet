@@ -13,11 +13,11 @@ class Manager : public Sender_<S>, public Receiver_<S>
     S stream;
 
 public:
-    void begin(uint8_t subscribe_net = 0, uint8_t subscribe_subnet = 0, uint16_t recv_port = DEFAULT_PORT)
+    void begin(uint16_t recv_port = DEFAULT_PORT)
     {
         this->stream.begin(recv_port);
         this->Sender_<S>::attach(this->stream);
-        this->Receiver_<S>::attach(this->stream, subscribe_net, subscribe_subnet);
+        this->Receiver_<S>::attach(this->stream);
     }
 
     void parse()

@@ -32,7 +32,7 @@ void setup() {
     Serial.println("set subscriber");
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [](const uint8_t* data, const uint16_t size) {
+    artnet.subscribeArtDmx(universe, [](const uint8_t* data, const uint16_t size) {
         Serial.print("artnet data (universe : ");
         Serial.print(universe);
         Serial.print(", size = ");
@@ -46,7 +46,7 @@ void setup() {
     });
 
     // if Artnet packet comes, this function is called to every universe
-    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
+    artnet.subscribeArtDmx([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
         Serial.print("ArtNet data has come to universe: ");
         Serial.println(univ);
     });

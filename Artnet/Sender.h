@@ -26,7 +26,7 @@ public:
     }
 #endif
 
-    // streaming packet
+    // streaming artdmx packet
     void setArtDmxData(const uint8_t* const data, uint16_t size)
     {
         art_dmx::setDataTo(this->packet.data(), data, size);
@@ -60,7 +60,7 @@ public:
         }
     }
 
-    // one-line sender
+    // one-line artdmx sender
     void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size)
     {
         uint8_t net = (universe15bit >> 8) & 0x7F;
@@ -79,17 +79,15 @@ public:
         this->sendArxDmxInternal(dest, physical);
     }
 
-    // ArtTrigger
     void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512)
     {
-        art_trigger::setPacketTo(packet.data(), oem, key, subkey, payload, size);
+        art_trigger::setDataTo(packet.data(), oem, key, subkey, payload, size);
         this->sendRawData(ip, DEFAULT_PORT, packet.data(), packet.size());
     }
 
-    // ArtSync
     void sendArtSync(const String& ip)
     {
-        art_sync::setPacketTo(packet.data());
+        art_sync::setMetadataTo(packet.data());
         this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_sync::PACKET_SIZE);
     }
 
@@ -98,20 +96,6 @@ protected:
     {
         this->stream = &s;
     }
-
-#ifdef ARTNET_ENABLE_WIFI
-    bool isNetworkReady() const
-    {
-        auto status = WiFi.status();
-        auto is_connected = status == WL_CONNECTED;
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
-        bool is_ap_active = WiFi.getMode() == WIFI_AP;
-#else
-        bool is_ap_active = status == WL_AP_CONNECTED;
-#endif
-        return is_connected || is_ap_active;
-    }
-#endif
 
     void sendArxDmxInternal(const art_dmx::Destination &dest, uint8_t physical)
     {
@@ -123,7 +107,7 @@ protected:
         if (this->sequences.find(dest) == this->sequences.end()) {
             this->sequences.insert(make_pair(dest, 0));
         }
-        art_dmx::setHeaderTo(this->packet.data(), this->sequences[dest], physical, dest.net, dest.subnet, dest.universe);
+        art_dmx::setMetadataTo(this->packet.data(), this->sequences[dest], physical, dest.net, dest.subnet, dest.universe);
         this->sendRawData(dest.ip, DEFAULT_PORT, this->packet.data(), this->packet.size());
         this->sequences[dest] = (this->sequences[dest] + 1) % 256;
     }
