@@ -22,21 +22,18 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
-    // artnet.subscribe_net(0);     // optionally you can change
-    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, forward them to fastled directly
-    artnet.forward(universe, leds, NUM_LEDS);
+    artnet.forwardArtDmxDataToFastLED(universe, leds, NUM_LEDS);
 
     // this can be achieved manually as follows
-    // if Artnet packet comes to this universe, this function is called
-    // artnet.subscribeArtDmx(universe, [&](const uint8_t* data, const uint16_t size)
-    // {
+    // if Artnet packet comes to this universe, this function (lambda) is called
+    // artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t* data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     //     // set led
     //     // artnet data size per packet is 512 max
     //     // so there is max 170 pixel per packet (per universe)
     //     for (size_t pixel = 0; pixel < NUM_LEDS; ++pixel) {
-    //         const size_t idx = pixel * 3;
+    //         size_t idx = pixel * 3;
     //         leds[pixel].r = data[idx + 0];
     //         leds[pixel].g = data[idx + 1];
     //         leds[pixel].b = data[idx + 2];

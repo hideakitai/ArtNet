@@ -33,7 +33,6 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
-    // artnet.begin(net, subnet);     // optionally you can change net and subnet
 }
 
 void loop() {

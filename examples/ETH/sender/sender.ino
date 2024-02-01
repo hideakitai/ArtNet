@@ -20,7 +20,6 @@ void setup() {
     ETH.begin();
     ETH.config(ip, gateway, subnet);
     artnet.begin();
-    // artnet.begin(net, subnet); // optionally you can change
 
     Serial.println("start");
 #ifdef UDP_TX_PACKET_MAX_SIZE

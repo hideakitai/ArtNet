@@ -33,11 +33,14 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
-    // artnet.begin(net, subnet);     // optionally you can change net and subnet
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t* data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
-        Serial.print("artnet data (universe : ");
+    artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
+        Serial.print("lambda : artnet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", universe = ");
         Serial.print(universe);
         Serial.print(", size = ");
         Serial.print(size);
@@ -50,9 +53,22 @@ void setup() {
     });
 
     // if Artnet packet comes, this function is called to every universe
-    artnet.subscribeArtDmx([&](const uint8_t* data, const uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
-        Serial.print("ArtNet data has come to universe: ");
-        Serial.println(metadata.universe);
+    artnet.subscribeArtDmx([&](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
+        Serial.print("received ArtNet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", net = ");
+        Serial.print(metadata.net);
+        Serial.print(", subnet = ");
+        Serial.print(metadata.subnet);
+        Serial.print(", universe = ");
+        Serial.print(metadata.universe);
+        Serial.print(", sequence = ");
+        Serial.print(metadata.sequence);
+        Serial.print(", size = ");
+        Serial.print(size);
+        Serial.println(")");
     });
 }
 

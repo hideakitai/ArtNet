@@ -23,7 +23,6 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
-    // artnet.begin(net, subnet); // optionally you can change
 
     Serial.println("start");
 #ifdef UDP_TX_PACKET_MAX_SIZE
