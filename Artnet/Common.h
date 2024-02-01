@@ -54,7 +54,6 @@ constexpr uint16_t DEFAULT_PORT {6454};  // 0x1936
 constexpr uint16_t PROTOCOL_VER {14}; // 0x000E
 constexpr uint8_t ID_LENGTH {8};
 constexpr char ARTNET_ID[ID_LENGTH] {"Art-Net"};
-constexpr size_t NUM_POLLREPLY_PUBLIC_PORT_LIMIT {4};
 constexpr float DEFAULT_FPS {40.};
 constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
 

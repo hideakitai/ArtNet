@@ -10,6 +10,8 @@
 namespace art_net {
 namespace art_poll_reply {
 
+static constexpr size_t NUM_POLLREPLY_PUBLIC_PORT_LIMIT {4};
+
 union Packet
 {
     struct

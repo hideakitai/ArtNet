@@ -62,6 +62,11 @@ inline bool operator<(const Destination &rhs, const Destination &lhs)
     return false;
 }
 
+inline bool operator==(const Destination &rhs, const Destination &lhs)
+{
+    return rhs.ip == lhs.ip && rhs.net == lhs.net && rhs.subnet == lhs.subnet && rhs.universe == lhs.universe;
+}
+
 struct Metadata
 {
     uint8_t sequence;
@@ -79,12 +84,11 @@ using SequenceMap = std::map<Destination, uint8_t>;
 // receiver
 using CallbackMap = std::map<uint16_t, CallbackType>;
 #else
-template <uint16_t SIZE>
 // sender
 using LastSendTimeMsMap = arx::map<Destination, uint32_t>;
 using SequenceMap = arx::map<Destination, uint8_t>;
 // receiver
-using CallbackMap = arx::map<uint16_t, CallbackTypeForUniverse, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
+using CallbackMap = arx::map<uint16_t, CallbackType>;
 #endif
 
 inline Metadata generateMetadataFrom(const uint8_t *packet)
