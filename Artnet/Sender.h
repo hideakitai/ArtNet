@@ -27,8 +27,6 @@ public:
         this->packet.resize(PACKET_SIZE);
     }
 #endif
-    virtual ~Sender_() {}
-
     // streaming packet
     void streaming_data(const uint8_t* const data, uint16_t size)
     {
