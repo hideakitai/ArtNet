@@ -27,13 +27,14 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
-    // artnet.begin(net, subnet); // optionally you can change
-
-    Serial.println("set subscriber");
 
     // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe, [](const uint8_t* data, const uint16_t size) {
-        Serial.print("artnet data (universe : ");
+    artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
+        Serial.print("lambda : artnet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", universe = ");
         Serial.print(universe);
         Serial.print(", size = ");
         Serial.print(size);
@@ -46,12 +47,23 @@ void setup() {
     });
 
     // if Artnet packet comes, this function is called to every universe
-    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
-        Serial.print("ArtNet data has come to universe: ");
-        Serial.println(univ);
+    artnet.subscribeArtDmx([&](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
+        Serial.print("received ArtNet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", net = ");
+        Serial.print(metadata.net);
+        Serial.print(", subnet = ");
+        Serial.print(metadata.subnet);
+        Serial.print(", universe = ");
+        Serial.print(metadata.universe);
+        Serial.print(", sequence = ");
+        Serial.print(metadata.sequence);
+        Serial.print(", size = ");
+        Serial.print(size);
+        Serial.println(")");
     });
-
-    Serial.println("start");
 }
 
 void loop() {
@@ -60,7 +72,7 @@ void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
-    artnet.streaming_data(data, size);
-    artnet.streaming(target_ip, universe);  // automatically send set data in 40fps
-    // artnet.streaming(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
+    artnet.setArtDmxData(data, size);
+    artnet.streamArtDmxTo(target_ip, universe);  // automatically send set data in 40fps
+    // artnet.streamArtDmxTo(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
 }

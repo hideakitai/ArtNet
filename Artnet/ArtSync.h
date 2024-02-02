@@ -9,7 +9,8 @@
 namespace art_net {
 namespace art_sync {
 
-enum Index : uint16_t {
+enum Index : uint16_t
+{
     ID = 0,
     OP_CODE_L = 8,
     OP_CODE_H = 9,
@@ -17,11 +18,17 @@ enum Index : uint16_t {
     PROTOCOL_VER_L = 11,
     AUX1 = 12,
     AUX2 = 13,
+
+    PACKET_SIZE = 14,
 };
 
-inline void set_header(uint8_t *packet)
+using CallbackType = std::function<void(const ArtNetRemoteInfo &remote)>;
+
+inline void setMetadataTo(uint8_t *packet)
 {
-    for (size_t i = 0; i < ID_LENGTH; i++) packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+    for (size_t i = 0; i < ID_LENGTH; i++) {
+        packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+    }
     packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Sync) >> 0) & 0x00FF;
     packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Sync) >> 8) & 0x00FF;
     packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
@@ -32,5 +39,7 @@ inline void set_header(uint8_t *packet)
 
 } // namespace art_sync
 } // namespace art_net
+
+using ArtSyncCallback = art_net::art_sync::CallbackType;
 
 #endif // ARTNET_ART_SYNC_H

@@ -9,13 +9,15 @@ const char* ssid = "your-ssid";
 const char* pwd = "your-password";
 const IPAddress ip(192, 168, 1, 201);
 const IPAddress gateway(192, 168, 1, 1);
-const IPAddress subnet(255, 255, 255, 0);
+const IPAddress subnet_mask(255, 255, 255, 0);
 
 ArtnetWiFiReceiver artnet;
-uint8_t universe1 = 1;  // 0 - 15
+uint16_t universe1 = 1; // 0 - 32767
+uint8_t net = 0;        // 0 - 127
+uint8_t subnet = 0;     // 0 - 15
 uint8_t universe2 = 2;  // 0 - 15
 
-void callback(const uint8_t* data, const uint16_t size) {
+void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks
 }
 
@@ -24,7 +26,7 @@ void setup() {
 
     // WiFi stuff
     WiFi.begin(ssid, pwd);
-    WiFi.config(ip, gateway, subnet);
+    WiFi.config(ip, gateway, subnet_mask);
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
         delay(500);
@@ -33,12 +35,14 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
-    // artnet.subscribe_net(0);     // optionally you can change
-    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, this function (lambda) is called
-    artnet.subscribe(universe1, [&](const uint8_t* data, const uint16_t size) {
-        Serial.print("lambda : artnet data (universe : ");
+    artnet.subscribeArtDmxUniverse(universe1, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
+        Serial.print("lambda : artnet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", universe = ");
         Serial.print(universe1);
         Serial.print(", size = ");
         Serial.print(size);
@@ -51,7 +55,7 @@ void setup() {
     });
 
     // you can also use pre-defined callbacks
-    artnet.subscribe(universe2, callback);
+    artnet.subscribeArtDmxUniverse(net, subnet, universe2, callback);
 }
 
 void loop() {

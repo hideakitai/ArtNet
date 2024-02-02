@@ -10,10 +10,10 @@ const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 ArtnetReceiver artnet;
-uint32_t universe1 = 1;  // 0 - 15
-uint32_t universe2 = 2;  // 0 - 15
+uint16_t universe1 = 1; // 0 - 32767
+uint8_t universe2 = 2;  // 0 - 15
 
-void callback(const uint8_t* data, const uint16_t size) {
+void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks
 }
 
@@ -22,12 +22,14 @@ void setup() {
 
     Ethernet.begin(mac, ip);
     artnet.begin();
-    // artnet.subscribe_net(0);     // optionally you can change
-    // artnet.subscribe_subnet(0);  // optionally you can change
 
-    // if Artnet packet comes to this universe, this function is called
-    artnet.subscribe(universe1, [&](const uint8_t* data, const uint16_t size) {
-        Serial.print("artnet data (universe : ");
+    // if Artnet packet comes to this universe, this function (lambda) is called
+    artnet.subscribeArtDmxUniverse(universe1, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
+        Serial.print("lambda : artnet data from ");
+        Serial.print(remote.ip);
+        Serial.print(":");
+        Serial.print(remote.port);
+        Serial.print(", universe = ");
         Serial.print(universe1);
         Serial.print(", size = ");
         Serial.print(size);
@@ -40,7 +42,7 @@ void setup() {
     });
 
     // you can also use pre-defined callbacks
-    artnet.subscribe(universe2, callback);
+    artnet.subscribeArtDmxUniverse(universe2, callback);
 }
 
 void loop() {

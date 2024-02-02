@@ -38,15 +38,13 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
-    // artnet.subscribe_net(0);     // optionally you can change
-    // artnet.subscribe_subnet(0);  // optionally you can change
 
     // if Artnet packet comes to this universe, forward them to fastled directly
-    artnet.forward(universe, leds, NUM_LEDS);
+    artnet.forwardArtDmxDataToFastLED(universe, leds, NUM_LEDS);
 
     // this can be achieved manually as follows
     // if Artnet packet comes to this universe, this function (lambda) is called
-    // artnet.subscribe(universe, [&](uint8_t* data, uint16_t size) {
+    // artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t* data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     //     // set led
     //     // artnet data size per packet is 512 max
     //     // so there is max 170 pixel per packet (per universe)

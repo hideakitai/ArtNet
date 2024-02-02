@@ -13,7 +13,7 @@ const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetWiFiSender artnet;
 const String target_ip = "192.168.1.200";
-uint32_t universe = 1;
+uint16_t universe = 1;
 
 const uint16_t size = 512;
 uint8_t data[size];
@@ -33,14 +33,13 @@ void setup() {
     Serial.println(WiFi.localIP());
 
     artnet.begin();
-    // artnet.begin(net, subnet);     // optionally you can change net and subnet
 }
 
 void loop() {
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
-    artnet.streaming_data(data, size);
-    artnet.streaming(target_ip, universe);  // automatically send set data in 40fps
-    // artnet.streaming(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
+    artnet.setArtDmxData(data, size);
+    artnet.streamArtDmxTo(target_ip, universe);  // automatically send set data in 40fps
+    // artnet.streamArtDmxTo(target_ip, net, subnet, univ);  // or you can set net, subnet, and universe
 }

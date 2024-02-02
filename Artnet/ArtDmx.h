@@ -7,10 +7,10 @@
 #include <stddef.h>
 
 namespace art_net {
+namespace art_dmx {
 
-namespace artdmx {
-
-enum Index : uint16_t {
+enum Index : uint16_t
+{
     ID = 0,
     OP_CODE_L = 8,
     OP_CODE_H = 9,
@@ -25,57 +25,113 @@ enum Index : uint16_t {
     DATA = 18
 };
 
-class ArtDmx {
-    uint8_t target_net {0};
-    uint8_t target_subnet {0};
-    uint8_t target_universe {0};
-    uint8_t seq {0};
-    uint8_t phy {0};
-
-public:
-    void set_header(uint8_t *packet)
-    {
-        for (size_t i = 0; i < ID_LENGTH; i++) packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
-        packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Dmx) >> 0) & 0x00FF;
-        packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Dmx) >> 8) & 0x00FF;
-        packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
-        packet[PROTOCOL_VER_L] = (PROTOCOL_VER >> 0) & 0x00FF;
-        packet[SEQUENCE] = seq++;
-        packet[PHYSICAL] = phy;
-        packet[NET] = target_net;
-        packet[SUBUNI] = (target_subnet << 4) | target_universe;
-        packet[LENGTH_H] = (512 >> 8) & 0xFF;
-        packet[LENGTH_L] = (512 >> 0) & 0xFF;
-    }
-
-    void set_universe(const uint32_t universe_) {
-        target_net = (universe_ >> 8) & 0x7F;
-        target_subnet = (universe_ >> 4) & 0x0F;
-        target_universe = universe_ & 0x0F;
-    }
-    void set_universe(const uint8_t net_, const uint8_t subnet_, const uint8_t universe_) {
-        target_net = net_ & 0x7F;
-        target_subnet = subnet_ & 0x0F;
-        target_universe = universe_ & 0x0F;
-    }
-    void set_physical(const uint8_t i) {
-        phy = constrain(i, 0, 3);
-    }
-
-    uint8_t sequence() const {
-        return seq;
-    }
-
-    void set_data(uint8_t *packet, const uint8_t* const data, const uint16_t size) {
-        memcpy((&packet[artdmx::DATA]), data, size);
-    }
-    void set_data(uint8_t *packet, const uint16_t ch, const uint8_t data) {
-        packet[artdmx::DATA + ch] = data;
-    }
+struct Destination
+{
+    String ip;
+    uint8_t net;
+    uint8_t subnet;
+    uint8_t universe;
 };
 
-} // namespace artdmx
+inline bool operator<(const Destination &rhs, const Destination &lhs)
+{
+    if (rhs.ip < lhs.ip) {
+        return true;
+    }
+    if (rhs.ip > lhs.ip) {
+        return false;
+    }
+    if (rhs.net < lhs.net) {
+        return true;
+    }
+    if (rhs.net > lhs.net) {
+        return false;
+    }
+    if (rhs.subnet < lhs.subnet) {
+        return true;
+    }
+    if (rhs.subnet > lhs.subnet) {
+        return false;
+    }
+    if (rhs.universe < lhs.universe) {
+        return true;
+    }
+    if (rhs.universe > lhs.universe) {
+        return false;
+    }
+    return false;
+}
 
+inline bool operator==(const Destination &rhs, const Destination &lhs)
+{
+    return rhs.ip == lhs.ip && rhs.net == lhs.net && rhs.subnet == lhs.subnet && rhs.universe == lhs.universe;
+}
+
+struct Metadata
+{
+    uint8_t sequence;
+    uint8_t physical;
+    uint8_t net;
+    uint8_t subnet;
+    uint8_t universe;
+};
+
+using CallbackType = std::function<void(const uint8_t *data, uint16_t size, const Metadata &metadata, const RemoteInfo &remote)>;
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
+// sender
+using LastSendTimeMsMap = std::map<Destination, uint32_t>;
+using SequenceMap = std::map<Destination, uint8_t>;
+// receiver
+using CallbackMap = std::map<uint16_t, CallbackType>;
+#else
+// sender
+using LastSendTimeMsMap = arx::map<Destination, uint32_t>;
+using SequenceMap = arx::map<Destination, uint8_t>;
+// receiver
+using CallbackMap = arx::map<uint16_t, CallbackType>;
+#endif
+
+inline Metadata generateMetadataFrom(const uint8_t *packet)
+{
+    Metadata metadata;
+    metadata.sequence = packet[SEQUENCE];
+    metadata.physical = packet[PHYSICAL];
+    metadata.net = packet[NET];
+    metadata.subnet = (packet[SUBUNI] >> 4) & 0x0F;
+    metadata.universe = (packet[SUBUNI] >> 0) & 0x0F;
+    return metadata;
+}
+
+inline void setMetadataTo(uint8_t *packet, uint8_t sequence, uint8_t physical, uint8_t net, uint8_t subnet, uint8_t universe)
+{
+    for (size_t i = 0; i < ID_LENGTH; i++) {
+        packet[i] = static_cast<uint8_t>(ARTNET_ID[i]);
+    }
+    packet[OP_CODE_L] = (static_cast<uint16_t>(OpCode::Dmx) >> 0) & 0x00FF;
+    packet[OP_CODE_H] = (static_cast<uint16_t>(OpCode::Dmx) >> 8) & 0x00FF;
+    packet[PROTOCOL_VER_H] = (PROTOCOL_VER >> 8) & 0x00FF;
+    packet[PROTOCOL_VER_L] = (PROTOCOL_VER >> 0) & 0x00FF;
+    packet[SEQUENCE] = sequence;
+    packet[PHYSICAL] = physical & 0x03;
+    packet[NET] = net & 0x7F;
+    packet[SUBUNI] = ((subnet & 0x0F) << 4) | (universe & 0x0F);
+    packet[LENGTH_H] = (512 >> 8) & 0xFF;
+    packet[LENGTH_L] = (512 >> 0) & 0xFF;
+}
+
+inline void setDataTo(uint8_t *packet, const uint8_t* const data, uint16_t size)
+{
+    memcpy(packet + art_dmx::DATA, data, size);
+}
+inline void setDataTo(uint8_t *packet, const uint16_t ch, const uint8_t data)
+{
+    packet[art_dmx::DATA + ch] = data;
+}
+
+} // namespace art_dmx
 } // namespace art_net
+
+using ArtDmxMetadata = art_net::art_dmx::Metadata;
+using ArtDmxCallback = art_net::art_dmx::CallbackType;
 
 #endif // ARTNET_ARTDMX_H

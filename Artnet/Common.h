@@ -54,7 +54,6 @@ constexpr uint16_t DEFAULT_PORT {6454};  // 0x1936
 constexpr uint16_t PROTOCOL_VER {14}; // 0x000E
 constexpr uint8_t ID_LENGTH {8};
 constexpr char ARTNET_ID[ID_LENGTH] {"Art-Net"};
-constexpr size_t NUM_POLLREPLY_PUBLIC_PORT_LIMIT {4};
 constexpr float DEFAULT_FPS {40.};
 constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
 
@@ -62,25 +61,38 @@ constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
 constexpr uint16_t HEADER_SIZE {18};
 constexpr uint16_t PACKET_SIZE {530};
 
-using CallbackAllType = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
-using CallbackType = std::function<void(const uint8_t* data, const uint16_t size)>;
-using CallbackArtSync = std::function<void(void)>;
-using CallbackArtTrigger = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
-
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 template <uint16_t SIZE>
 using Array = std::array<uint8_t, SIZE>;
-using IntervalMap = std::map<uint32_t, uint32_t>;
-using CallbackMap = std::map<uint32_t, CallbackType>;
 using namespace std;
 #else
 template <uint16_t SIZE>
 using Array = arx::vector<uint8_t, SIZE>;
-using IntervalMap = arx::map<uint32_t, uint32_t>;
-using CallbackMap = arx::map<uint32_t, CallbackType, NUM_POLLREPLY_PUBLIC_PORT_LIMIT>;
 using namespace arx;
 #endif
 
+struct RemoteInfo
+{
+    IPAddress ip;
+    uint16_t port;
+};
+
+#ifdef ARTNET_ENABLE_WIFI
+inline bool isNetworkReady()
+{
+    auto status = WiFi.status();
+    auto is_connected = status == WL_CONNECTED;
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
+    bool is_ap_active = WiFi.getMode() == WIFI_AP;
+#else
+    bool is_ap_active = status == WL_AP_CONNECTED;
+#endif
+    return is_connected || is_ap_active;
+}
+#endif
+
 }  // namespace art_net
+
+using ArtNetRemoteInfo = art_net::RemoteInfo;
 
 #endif  // ARTNET_COMMON_H
