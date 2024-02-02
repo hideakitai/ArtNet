@@ -3,7 +3,7 @@
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
 const IPAddress gateway(192, 168, 0, 1);
-const IPAddress subnet(255, 255, 255, 0);
+const IPAddress subnet_mask(255, 255, 255, 0);
 
 ArtnetReceiver artnet;
 uint16_t universe1 = 1; // 0 - 32767
@@ -19,7 +19,7 @@ void setup() {
     Serial.begin(115200);
 
     ETH.begin();
-    ETH.config(ip, gateway, subnet);
+    ETH.config(ip, gateway, subnet_mask);
     artnet.begin();
 
     // if Artnet packet comes to this universe, this function (lambda) is called

@@ -82,7 +82,7 @@ public:
                 break;
             }
             case OpCode::Poll: {
-                this->sendArtPollReply();
+                this->sendArtPollReply(remote_info);
                 op_code = OpCode::Poll;
                 break;
             }
@@ -145,7 +145,7 @@ public:
             return;
         }
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
-        this->subscribeArtDmx(u, func);
+        this->subscribeArtDmxUniverse(u, func);
     }
 
     // subscribe artdmx packet for specified universe (15 bit)
@@ -298,7 +298,7 @@ private:
         return &(this->packet[art_dmx::DATA]);
     }
 
-    void sendArtPollReply()
+    void sendArtPollReply(const RemoteInfo &remote)
     {
         const IPAddress my_ip = this->localIP();
         const IPAddress my_subnet = this->subnetMask();
@@ -308,7 +308,7 @@ private:
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
             art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, cb_pair.first, this->art_poll_reply_config);
             static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
-            this->stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
+            this->stream->beginPacket(remote.ip, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));
             this->stream->endPacket();
         }

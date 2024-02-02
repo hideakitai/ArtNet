@@ -9,7 +9,7 @@ const char* ssid = "your-ssid";
 const char* pwd = "your-password";
 const IPAddress ip(192, 168, 1, 201);
 const IPAddress gateway(192, 168, 1, 1);
-const IPAddress subnet(255, 255, 255, 0);
+const IPAddress subnet_mask(255, 255, 255, 0);
 
 ArtnetWiFiReceiver artnet;
 uint16_t universe1 = 1; // 0 - 32767
@@ -26,7 +26,7 @@ void setup() {
 
     // WiFi stuff
     WiFi.begin(ssid, pwd);
-    WiFi.config(ip, gateway, subnet);
+    WiFi.config(ip, gateway, subnet_mask);
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
         delay(500);
