@@ -10,8 +10,8 @@ const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 ArtnetReceiver artnet;
-uint32_t universe1 = 1;  // 0 - 15
-uint32_t universe2 = 2;  // 0 - 15
+uint16_t universe1 = 1; // 0 - 32767
+uint8_t universe2 = 2;  // 0 - 15
 
 void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks

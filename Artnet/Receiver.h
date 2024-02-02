@@ -20,7 +20,7 @@ class Receiver_
     art_dmx::CallbackType callback_art_dmx;
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
-    art_poll_reply::Metadata art_poll_reply_metadata;
+    ArtPollReplyConfig art_poll_reply_config;
 
     bool b_verbose {false};
 
@@ -88,11 +88,14 @@ public:
             }
             case OpCode::Trigger: {
                 if (this->callback_art_trigger) {
-                    uint16_t oem = this->getArtTriggerOEM();
-                    uint8_t key = this->getArtTriggerKey();
-                    uint8_t sub_key = this->getArtTriggerSubKey();
-                    const uint8_t* payload = this->getArtTriggerPayload();
-                    this->callback_art_trigger(oem, key, sub_key, payload, size - art_trigger::PAYLOAD, remote_info);
+                    ArtTriggerMetadata metadata = {
+                        .oem = this->getArtTriggerOEM(),
+                        .key = this->getArtTriggerKey(),
+                        .sub_key = this->getArtTriggerSubKey(),
+                        .payload = this->getArtTriggerPayload(),
+                        .size = static_cast<uint16_t>(size - art_trigger::PAYLOAD),
+                    };
+                    this->callback_art_trigger(metadata, remote_info);
                 }
                 op_code = OpCode::Trigger;
                 break;
@@ -244,7 +247,7 @@ public:
 #endif
 
     // https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
-    void setArtPollReplyMetadata(
+    void setArtPollReplyConfig(
         uint16_t oem,
         uint16_t esta_man,
         uint8_t status1,
@@ -253,13 +256,13 @@ public:
         const String &long_name,
         const String &node_report
     ) {
-        this->art_poll_reply_metadata.oem = oem;
-        this->art_poll_reply_metadata.esta_man = esta_man;
-        this->art_poll_reply_metadata.status1 = status1;
-        this->art_poll_reply_metadata.status2 = status2;
-        this->art_poll_reply_metadata.short_name = short_name;
-        this->art_poll_reply_metadata.long_name = long_name;
-        this->art_poll_reply_metadata.node_report = node_report;
+        this->art_poll_reply_config.oem = oem;
+        this->art_poll_reply_config.esta_man = esta_man;
+        this->art_poll_reply_config.status1 = status1;
+        this->art_poll_reply_config.status2 = status2;
+        this->art_poll_reply_config.short_name = short_name;
+        this->art_poll_reply_config.long_name = long_name;
+        this->art_poll_reply_config.node_report = node_report;
     }
 
     void verbose(bool b)
@@ -303,7 +306,7 @@ private:
         this->macAddress(my_mac);
 
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
-            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, cb_pair.first, this->art_poll_reply_metadata);
+            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, cb_pair.first, this->art_poll_reply_config);
             static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
             this->stream->beginPacket(local_broadcast_addr, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));

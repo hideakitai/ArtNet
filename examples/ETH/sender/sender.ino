@@ -7,7 +7,7 @@ const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetSender artnet;
 const String target_ip = "192.168.0.200";
-uint32_t universe = 1;
+uint16_t universe = 1;
 
 const uint16_t size = 512;
 uint8_t data[size];

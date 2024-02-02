@@ -56,7 +56,7 @@ union Packet
     uint8_t b[239];
 };
 
-struct Metadata
+struct Config
 {
     uint16_t oem {0x00FF};      // OemUnknown https://github.com/tobiasebsen/ArtNode/blob/master/src/Art-NetOemCodes.h
     uint16_t esta_man {0x0000}; // ESTA manufacturer code
@@ -67,7 +67,7 @@ struct Metadata
     String node_report {""};
 };
 
-inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6], uint16_t universe, const Metadata &metadata)
+inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6], uint16_t universe, const Config &metadata)
 {
     Packet r;
     for (size_t i = 0; i < ID_LENGTH; i++) {
@@ -127,5 +127,7 @@ inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6]
 
 } // namespace art_poll_reply
 } // namespace art_net
+
+using ArtPollReplyConfig = art_net::art_poll_reply::Config;
 
 #endif // ARTNET_ARTPOLLREPLY_H

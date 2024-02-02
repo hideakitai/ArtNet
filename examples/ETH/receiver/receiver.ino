@@ -6,8 +6,10 @@ const IPAddress gateway(192, 168, 0, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
 ArtnetReceiver artnet;
-uint32_t universe1 = 1;  // 0 - 15
-uint32_t universe2 = 2;  // 0 - 15
+uint16_t universe1 = 1; // 0 - 32767
+uint8_t net = 0;        // 0 - 127
+uint8_t subnet = 0;     // 0 - 15
+uint8_t universe2 = 2;  // 0 - 15
 
 void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks
@@ -39,7 +41,7 @@ void setup() {
     });
 
     // you can also use pre-defined callbacks
-    artnet.subscribeArtDmxUniverse(universe2, callback);
+    artnet.subscribeArtDmxUniverse(net, subnet, universe2, callback);
 }
 
 void loop() {

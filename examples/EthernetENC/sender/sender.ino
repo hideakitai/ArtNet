@@ -7,7 +7,7 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
 ArtnetSender artnet;
 const String target_ip = "192.168.0.200";
-uint32_t universe = 1;
+uint16_t universe = 1;
 
 const uint16_t size = 512;
 uint8_t data[size];

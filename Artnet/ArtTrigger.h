@@ -25,7 +25,16 @@ enum Index : uint16_t
     PAYLOAD = 18
 };
 
-using CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size, const RemoteInfo &remote)>;
+struct Metadata
+{
+    uint16_t oem;
+    uint8_t key;
+    uint8_t sub_key;
+    const uint8_t *payload;
+    uint16_t size;
+};
+
+using CallbackType = std::function<void(const Metadata &metadata, const RemoteInfo &remote)>;
 
 inline void setDataTo(uint8_t *packet, uint16_t oem, uint8_t key, uint8_t subkey, const uint8_t* const payload, uint16_t size)
 {
@@ -53,5 +62,6 @@ inline void setDataTo(uint8_t *packet, uint16_t oem, uint8_t key, uint8_t subkey
 } // namespace art_net
 
 using ArtTriggerCallback = art_net::art_trigger::CallbackType;
+using ArtTriggerMetadata = art_net::art_trigger::Metadata;
 
 #endif // ARTNET_ART_TRIGGER_H
