@@ -2,11 +2,13 @@
 
 [Art-Net](https://en.wikipedia.org/wiki/Art-Net) Sender/Receiver for Arduino (Ethernet, WiFi)
 
-**NOTE (>= v0.2.0) : BREAKING API CHANGES (v0.2.0 or later)**
+> [!WARNING]
+> Breaking API changes from v0.4.0 and above
 
-**NOTE (>= v0.3.0) : DEPENDENT LIBRARIES REMOVED**
+> [!WARNING]
+> Dependent libraries removed from v0.3.0
 
-If you have already installed this library, please follow:
+If you have already installed this library before v0.3.0, please follow:
 
 - Cloned from GitHub (manually): Please install dependent libraries manually
 - Installed from library manager: re-install this library from library manager
@@ -14,18 +16,23 @@ If you have already installed this library, please follow:
 
 ## Feature
 
-- Art-Net with both Ethernet and WiFi
-- Support a lot of boards which can use Ethernet or WiFi
-- Multiple receiver callbacks depending on universe
-- Mutilple destination streaming with sender
-- One-line send to desired destination
-- Flexible net/subnet/universe setting
-- Easy data forwarding to [FastLED](https://github.com/FastLED/FastLED)
 - Supports following protocols:
   - ArtDmx
   - ArtPoll/ArtPollReply
   - ArtTrigger
   - ArtSync
+- Supports multiple WiFi/Ethernet libraries
+  - WiFi
+  - WiFiNINA
+  - Ethernet
+  - EthernetENC
+  - ETH (ESP32)
+- Supports a lot of boards which can use Ethernet or WiFi
+- Multiple receiver callbacks depending on universe
+- Mutilple destination streaming with sender
+- One-line send to desired destination
+- Flexible net/subnet/universe setting
+- Easy data forwarding to [FastLED](https://github.com/FastLED/FastLED)
 
 ## Supported Platforms
 
@@ -87,7 +94,7 @@ If you use the board which has both `WiFi` and `Ethernet`, you can't use `#inclu
 #include <Artnet.h>
 ArtnetReceiver artnet;
 
-void callback(const uint8_t* data, const uint16_t size) {
+void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks
 }
 
@@ -95,12 +102,13 @@ void setup() {
     // setup Ethernet/WiFi...
 
     artnet.begin(); // waiting for Art-Net in default port
-    // artnet.begin(net, subnet); // optionally you can set net and subnet here
 
-    artnet.subscribe(universe1, [](const uint8_t* data, const uint16_t size) {
+    artnet.subscribeArtDmxUniverse(universe15bit, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
         // if Artnet packet comes to this universe(0-15), this function is called
     });
-    artnet.subscribe(universe2, callback);  // you can also use pre-defined callbacks
+
+    // you can also use pre-defined callbacks
+    artnet.subscribeArtDmxUniverse(net, subnet, universe, callback);
 }
 
 void loop() {
@@ -123,16 +131,23 @@ void setup() {
 void loop() {
     // change send data as you want
 
-    artnet.send("127.0.0.1", universe15bit, data_ptr, size); // one-line send
-    // artnet.send("127.0.0.1", net, subnet, univ, data_ptr, size); // or you can set net and subnet
+    // one-line send
+    artnet.sendArtDmx("127.0.0.1", universe15bit, data_ptr, size);
+    // or you can set net and subnet
+    // artnet.sendArtDmx("127.0.0.1", net, subnet, universe, data_ptr, size);
 
-    artnet.streaming_data(data_ptr, size);
-    artnet.streaming("127.0.0.1", universe15bit); // automatically send set data in 40fps (15bit universe)
-    // artnet.streaming("127.0.0.1", net, subnet, univ); // or you can set net and subnet here
+    // To use streamArtDmxTo(), you need to setArtDmxData() before streamArtDmxTo()
+    artnet.setArtDmxData(data_ptr, size);
+    // automatically send set data in 40fps
+    artnet.streamArtDmxTo("127.0.0.1", universe15bit);
+    // or you can set net and subnet here
+    // artnet.streamArtDmxTo("127.0.0.1", net, subnet, universe);
 }
 ```
 
 ### Artnet (Integrated Sender/Receiver)
+
+`ArtNet` class has `ArtNetReceiver` and `ArtNetSender` features.
 
 ```C++
 #include <Artnet.h>
@@ -143,14 +158,12 @@ void setup()
     // setup Ethernet/WiFi...
 
     artnet.begin(); // send to localhost and listen to default port
-    // artnet.begin(net, subnet); // optionally you can set net and subnet here
 
-    artnet.subscribe(universe, [&](const uint8_t* data, const uint16_t size) {
+    artnet.subscribeArtDmxUniverse(universe, [&](const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
         // if Artnet packet comes to this universe, this function is called
     });
-
-    artnet.subscribe([&](const uint32_t univ, const uint8_t* data, const uint16_t size) {
-        // if Artnet packet comes, this function is called to every universe
+    artnet.subscribeArtDmx([&](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote) {
+        // if Artnet packet comes, this function is called for every universe
     });
 }
 
@@ -159,12 +172,10 @@ void loop() {
 
     // change send data as you want
 
-    artnet.send("127.0.0.1", universe15bit, data_ptr, size); // one-line send
-    // artnet.send("127.0.0.1", net, subnet, univ, data_ptr, size); // or you can set net and subnet
+    artnet.send("127.0.0.1", universe, data_ptr, size); // one-line send
 
     artnet.streaming_data(data_ptr, size);
-    artnet.streaming("127.0.0.1", universe15bit); // automatically send set data in 40fps (15bit universe)
-    // artnet.streaming("127.0.0.1", net, subnet, univ); // or you can set net and subnet here
+    artnet.streaming("127.0.0.1", universe); // stream in 40 fps
 }
 ```
 
@@ -187,10 +198,10 @@ void setup() {
 
     artnet.begin();
     // if Artnet packet comes to this universe, forward them to fastled directly
-    artnet.forward(universe, leds, NUM_LEDS);
+    artnet.forwardArtDmxDataToFastLED(universe, leds, NUM_LEDS);
 
     // this can be achieved manually as follows
-    // artnet.subscribe(universe, [](uint8_t* data, uint16_t size)
+    // artnet.subscribeArtDmxUniverse(universe, [](const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata, const ArtNetRemoteInfo& remote)
     // {
     //     // artnet data size per packet is 512 max
     //     // so there is max 170 pixel per packet (per universe)
@@ -210,134 +221,127 @@ void loop() {
 }
 ```
 
-## Other Settings
+## Other Configurations
 
 ### Subscribing Callbacks with Net, Sub-Net and Universe as you like
 
-- You can set Net (0-127) and Sub-Net (0-15) like `artnet.begin(net, subnet)`
-- Universe (0-15) can be set in `artnet.subscribe(universe, callback)`,
-- These universes (targets of the callbacks) are reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply` automatically
+- The relationship of Net (0-127), Sub-Net (0-15), 4-bit Universe (0-15) and 15-bit Universe (0-32767) is `universe15bit = (net << 8) | (subnet << 4) | universe4bit`
+- You can subscribe ArtDmx data for Net (0-127), Sub-Net (0-15), and 4-bit Universe (0-15) like `artnet.subscribeArtDmxUniverse(net, subnet, universe, callback)`
+- Or you can use 15-bit Universe (0-32767) can be set lnke `artnet.subscribeArtDmxUniverse(universe, callback)`
+- Subscribed universes (targets of the callbacks) are automatically reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply`
 
-PortTypes, GoodInput/Output, SwIn, etc., are limited to 4 ports. Only the first four ports are reflected if you subscribe to more than four callbacks.
-
-```C++
-artnet.begin(net, subnet); // net and subnet can be set only once
-artnet.subscribe(univ1, callback1); // callbacks can be set
-artnet.subscribe(univ2, callback2); // these universes are reported to
-artnet.subscribe(univ3, callback3); // Art-Net controller if it polls
-artnet.subscribe(univ4, callback4); // Art-Net devices
-```
-
-Or you can register callbacks based on 15 bit universe. But these universes are not reflected to `ArtPollReply` automatically.
-
-```C++
-artnet.subscribe15bit(univ15bit1, callback1); // callbacks can be set
-artnet.subscribe15bit(univ15bit2, callback2); // these universes are NOT reported to
-artnet.subscribe15bit(univ15bit3, callback3); // Art-Net controller if it polls
-artnet.subscribe15bit(univ15bit4, callback4); // Art-Net devices
-```
-
-### Sending Art-Net to Net, Sub-Net and Universe as you like
-
-#### One-line sender
-
-```C++
-artnet.send(ip, univ15bit, data, size);         // use 15bit universer or
-artnet.send(ip, net, subnet, univ, data, size); // net, subnet, and universe
-```
-
-#### Streaming
-
-```C++
-artnet.streaming_data(data, size);       // set data first
-artnet.streaming(ip, univ15bit);         // stream to 15bit universe or
-artnet.streaming(ip, net, subnet, univ); // net, subnet, and universe
-```
-
-### ArtPollReply Setting
+### ArtPollReply Configuration
 
 - This library supports `ArtPoll` and `ArtPollReply`
 - `ArtPoll` is automatically parsed and sends `ArtPollReply`
-- `net_sw` `sub_sw` `sw_in` etc. are set automatically based on registerd callbacks
-- You can configure the information of `ArtPollReply` as follows
-  - `void shortname(const String& sn)`
-  - `void longname(const String& ln)`
-  - `void nodereport(const String& nr)`
+- You can configure the following information of by `setArtPollReplyConfig()`
+- Other settings are set automatically based on registerd callbacks
+- Please refer [here](https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/) for more information
+
+```C++
+struct ArtPollReplyMetadata
+{
+    uint16_t oem {0x00FF};      // OemUnknown https://github.com/tobiasebsen/ArtNode/blob/master/src/Art-NetOemCodes.h
+    uint16_t esta_man {0x0000}; // ESTA manufacturer code
+    uint8_t status1 {0x00};     // Unknown / Normal
+    uint8_t status2 {0x08};     // sACN capable
+    String short_name {"Arduino ArtNet"};
+    String long_name {"Ardino ArtNet Protocol by hideakitai/ArtNet"};
+    String node_report {""};
+};
+```
+
+## ArtTrigger
+
+You can send/subscribe `ArtTrigger` using the follwing APIs. Please refer [here](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttrigger/) for more information.
+
+```C++
+void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512);
+void subscribeArtTrigger(const ArtTriggerCallback &func);
+using ArtTriggerCallback = std::function<void(const ArtTriggerMetadata &metadata, const ArtNetRemoteInfo &remote)>;
+```
+
+## ArtSync
+
+You can send/subscribe `ArtSync` using the follwing APIs. Please refer [here](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttimesync/) for more information.
+
+```C++
+void sendArtSync(const String& ip);
+void subscribeArtSync(const ArtSyncCallback &func);
+using ArtSyncCallback = std::function<void(const ArtNetRemoteInfo &remote)>;
+```
 
 ## APIs
 
 ### ArtnetSender
 
 ```C++
-// streaming packet
-void streaming_data(const uint8_t* const data, const uint16_t size);
-void streaming_data(const uint16_t ch, const uint8_t data);
-void streaming(const String& ip, const uint32_t universe_);
-void streaming(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_);
-// one-line sender
-void send(const String& ip, const uint32_t universe_, const uint8_t* const data, const uint16_t size);
-void send(const String& ip, const uint8_t net_, const uint8_t subnet_, const uint8_t universe_, const uint8_t* const data, const uint16_t size);
-// send arbitrary packet to the target
-void send_raw(const String& ip, uint16_t port, const uint8_t* const data, size_t size);
-// ArtDmx
-void physical(const uint8_t i);
-uint8_t sequence() const;
-// ArtTrigger
-void set_oem(uint16_t oem);
-void set_key(uint8_t key);
-void set_subkey(uint8_t subkey);
-void set_payload(const uint8_t* const payload, uint16_t size);
-// send ArtTrigger based on the config above
-void trigger(const String& ip);
-// send ArtSync
-void sync(const String& ip);
+// streaming artdmx packet
+void setArtDmxData(const uint8_t* const data, uint16_t size);
+void setArtDmxData(uint16_t ch, uint8_t data);
+void streamArtDmxTo(const String& ip, uint16_t universe15bit);
+void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe);
+void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical);
+// one-line artdmx sender
+void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size);
+void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size);
+void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size);
+// send other packets
+void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512);
+void sendArtSync(const String& ip);
 ```
 
 ### ArtnetReceiver
 
 ```C++
-OpCode parse();
-// subscribers
-template <typename F> inline auto subscribe(const uint8_t universe, art_dmx::CallbackTypeForUniverse);
-template <typename F> inline auto subscribe(art_dmx::CallbackTypeForAllPacket);
-template <typename F> inline auto subscribeArtSync(art_sync::CallbackType);
-template <typename F> inline auto subscribeArtTrigger(art_trigger::CallbackType);
-// callback definitions for subscribers
-using art_dmx::CallbackTypeForUniverse = std::function<void(const uint8_t* data, const uint16_t size)>;
-using art_dmx::CallbackTypeForAllPacket = std::function<void(const uint32_t universe, const uint8_t* data, const uint16_t size)>;
-using art_sync::CallbackType = std::function<void(void)>;
-using art_trigger::CallbackType = std::function<void(uint16_t oem, uint8_t key, uint8_t sub_key, const uint8_t *payload, uint16_t size)>;
-// for FastLED
-inline void forward(const uint8_t universe, CRGB* leds, const uint16_t num);
-// unsubscribe
-inline void unsubscribe(const uint8_t universe);
-inline void unsubscribe();
-inline void clear_subscribers();
-inline void unsubscribeArtSync();
-inline void unsubscribeArtTrigger();
-// ArtPollReply information
-void shortname(const String& sn);
-void longname(const String& ln);
-void nodereport(const String& nr);
-// option
-void verbose(const bool b);
+using ArtDmxCallback = std::function<void(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote)>;
+using ArtSyncCallback = std::function<void(const ArtNetRemoteInfo &remote)>;
+using ArtTriggerCallback = std::function<void(const ArtTriggerMetadata &metadata, const RemoteInfo &remote)>;
+```
+
+```C++
+struct ArtNetRemoteInfo
+{
+    IPAddress ip;
+    uint16_t port;
+};
+
+struct ArtDmxMetadata
+{
+    uint8_t sequence;
+    uint8_t physical;
+    uint8_t net;
+    uint8_t subnet;
+    uint8_t universe;
+};
+```
+
+```C++
+OpCode parse()
+// subscribe artdmx packet for specified net, subnet, and universe
+void subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const ArtDmxCallback &func);
+// subscribe artdmx packet for specified universe (15 bit)
+void subscribeArtDmxUniverse(uint16_t universe, const ArtDmxCallback &func);
+// subscribe artdmx packet for all universes
+void subscribeArtDmx(const ArtDmxCallback &func);
+// subscribe other packets
+void subscribeArtSync(const ArtSyncCallback &func);
+void subscribeArtTrigger(const ArtTriggerCallback &func);
+// unsubscribe callbacks
+void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe);
+void unsubscribeArtDmxUniverse(uint16_t universe);
+void unsubscribeArtDmxUniverses();
+void unsubscribeArtDmx();
+void unsubscribeArtSync();
+void unsubscribeArtTrigger();
+// set artdmx data to CRGB (FastLED) directly
+void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, CRGB* leds, uint16_t num);
+void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num);
+// set information for artpollreply
+// https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
+void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report);
 // others
-inline const IPAddress& ip() const;
-uint16_t port() const;
-String id() const;
-uint16_t opcode() const;
-uint16_t opcode(const uint8_t* p) const;
-uint16_t version() const;
-uint8_t sequence() const;
-uint8_t physical() const;
-uint8_t net() const;
-uint8_t subnet() const;
-uint8_t universe() const;
-uint16_t universe15bit() const;
-uint16_t length() const;
-uint16_t size() const;
-uint8_t* data();
-uint8_t data(const uint16_t i) const;
+void verbose(bool b);
 ```
 
 ### Note
