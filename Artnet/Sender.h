@@ -52,7 +52,7 @@ public:
         art_dmx::Destination dest {ip, net, subnet, universe};
         uint32_t now = millis();
         if (this->last_send_times.find(dest) == this->last_send_times.end()) {
-            this->last_send_times.insert(make_pair(dest, uint32_t(0)));
+            this->last_send_times.insert(std::make_pair(dest, uint32_t(0)));
         }
         if (now >= this->last_send_times[dest] + DEFAULT_INTERVAL_MS) {
             this->sendArxDmxInternal(dest, physical);
@@ -105,7 +105,7 @@ protected:
         }
 #endif
         if (this->sequences.find(dest) == this->sequences.end()) {
-            this->sequences.insert(make_pair(dest, uint8_t(0)));
+            this->sequences.insert(std::make_pair(dest, uint8_t(0)));
         }
         art_dmx::setMetadataTo(this->packet.data(), this->sequences[dest], physical, dest.net, dest.subnet, dest.universe);
         this->sendRawData(dest.ip, DEFAULT_PORT, this->packet.data(), this->packet.size());
