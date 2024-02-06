@@ -153,12 +153,7 @@ public:
     auto subscribeArtDmxUniverse(uint16_t universe, const Fn &func)
     -> std::enable_if_t<arx::is_callable<Fn>::value>
     {
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-        this->callback_art_dmx_universes.insert(make_pair(universe, arx::function_traits<Fn>::cast(func)));
-#else
-        // TODO: arx::map::insert()
-        this->callback_art_dmx_universes.insert(make_pair<uint16_t, ArtDmxCallback>(universe, arx::function_traits<Fn>::cast(func)));
-#endif
+        this->callback_art_dmx_universes.insert(std::make_pair(universe, arx::function_traits<Fn>::cast(func)));
     }
 
     // subscribe artdmx packet for all universes

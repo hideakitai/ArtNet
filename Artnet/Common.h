@@ -64,11 +64,9 @@ constexpr uint16_t PACKET_SIZE {530};
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 template <uint16_t SIZE>
 using Array = std::array<uint8_t, SIZE>;
-using namespace std;
 #else
 template <uint16_t SIZE>
-using Array = arx::vector<uint8_t, SIZE>;
-using namespace arx;
+using Array = arx::stdx::vector<uint8_t, SIZE>;
 #endif
 
 struct RemoteInfo

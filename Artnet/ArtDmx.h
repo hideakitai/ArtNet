@@ -85,10 +85,10 @@ using SequenceMap = std::map<Destination, uint8_t>;
 using CallbackMap = std::map<uint16_t, CallbackType>;
 #else
 // sender
-using LastSendTimeMsMap = arx::map<Destination, uint32_t>;
-using SequenceMap = arx::map<Destination, uint8_t>;
+using LastSendTimeMsMap = arx::stdx::map<Destination, uint32_t>;
+using SequenceMap = arx::stdx::map<Destination, uint8_t>;
 // receiver
-using CallbackMap = arx::map<uint16_t, CallbackType>;
+using CallbackMap = arx::stdx::map<uint16_t, CallbackType>;
 #endif
 
 inline Metadata generateMetadataFrom(const uint8_t *packet)
