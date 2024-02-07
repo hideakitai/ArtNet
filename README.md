@@ -24,6 +24,7 @@ If you have already installed this library before v0.3.0, please follow:
 - Supports multiple WiFi/Ethernet libraries
   - WiFi
   - WiFiNINA
+  - WiFiS3 (Arduino Uno R4 WiFi)
   - Ethernet
   - EthernetENC
   - ETH (ESP32)
