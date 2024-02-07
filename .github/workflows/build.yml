@@ -116,6 +116,39 @@ jobs:
             - name: FastLED
           verbose: true
 
+  build-wifis3:
+    name: "Build Test (WiFiS3): ${{matrix.board.arch}}:${{matrix.board.name}}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: arduino
+            arch: renesas_uno
+            name: unor4wifi
+        include:
+          - index: https://downloads.arduino.cc/packages/package_index.json
+            board:
+              vendor: arduino
+    steps:
+      - uses: actions/checkout@v4
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/WiFi/receiver
+            - examples/WiFi/sender
+          libraries: |
+            - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
+          verbose: true
+
   build-ethernet:
     name: "Build Test (Ethernet): ${{matrix.board.arch}}:${{matrix.board.name}}"
     runs-on: ubuntu-latest
