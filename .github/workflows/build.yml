@@ -53,6 +53,9 @@ jobs:
               vendor: rp2040
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
@@ -96,6 +99,9 @@ jobs:
               vendor: arduino
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
@@ -132,6 +138,9 @@ jobs:
               vendor: arduino
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
@@ -216,6 +225,9 @@ jobs:
           #     vendor: teensy
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
@@ -257,6 +269,9 @@ jobs:
               vendor: esp32
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
@@ -331,6 +346,9 @@ jobs:
               vendor: rp2040
     steps:
       - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
       - name: compile example sketchs
         uses: arduino/compile-sketches@v1
         with:
