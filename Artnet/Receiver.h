@@ -188,7 +188,7 @@ public:
     {
         auto it = this->callback_art_dmx_universes.find(universe);
         if (it != this->callback_art_dmx_universes.end()) {
-            this->callbacks.erase(it);
+            this->callback_art_dmx_universes.erase(it);
         }
     }
     void unsubscribeArtDmxUniverses()
