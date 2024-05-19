@@ -296,13 +296,11 @@ private:
     void sendArtPollReply(const RemoteInfo &remote)
     {
         const IPAddress my_ip = this->localIP();
-        const IPAddress my_subnet = this->subnetMask();
         uint8_t my_mac[6];
         this->macAddress(my_mac);
 
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
             art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, cb_pair.first, this->art_poll_reply_config);
-            static const IPAddress local_broadcast_addr = IPAddress((uint32_t)my_ip | ~(uint32_t)my_subnet);
             this->stream->beginPacket(remote.ip, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));
             this->stream->endPacket();
