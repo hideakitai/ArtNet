@@ -64,8 +64,13 @@ jobs:
           platforms: |
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
+          # temporary disable FastLED examples due to Error: invalid offset, value too big
+          # sketch-paths: |
+          #   - examples/WiFi
           sketch-paths: |
-            - examples/WiFi
+            - examples/WiFi/receiver
+            - examples/WiFi/send_receive
+            - examples/WiFi/sender
           libraries: |
             - source-path: ./
             - name: ArxContainer
@@ -280,8 +285,13 @@ jobs:
           platforms: |
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
+          # temporary disable FastLED examples due to Error: invalid offset, value too big
+          # sketch-paths: |
+          #   - examples/ETH
           sketch-paths: |
-            - examples/ETH
+            - examples/ETH/receiver
+            - examples/ETH/send_receive
+            - examples/ETH/sender
           libraries: |
             - source-path: ./
             - name: ArxContainer
@@ -357,8 +367,13 @@ jobs:
           platforms: |
             - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
               source-url: ${{matrix.index}}
+          # temporary disable FastLED examples due to Error: invalid offset, value too big
+          # sketch-paths: |
+          #   - examples/EthernetENC/receive_fastled
+          #   - examples/EthernetENC/receiver
+          #   - examples/EthernetENC/send_receive
+          #   - examples/EthernetENC/sender
           sketch-paths: |
-            - examples/EthernetENC/receive_fastled
             - examples/EthernetENC/receiver
             - examples/EthernetENC/send_receive
             - examples/EthernetENC/sender

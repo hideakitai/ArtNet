@@ -58,7 +58,7 @@ public:
             if (this->b_verbose) {
                 Serial.println(F("Packet ID is not Art-Net"));
             }
-            return OpCode::NA;
+            return OpCode::ParseFailed;
         }
 
         RemoteInfo remote_info;
@@ -112,7 +112,7 @@ public:
                     Serial.print(F("Unsupported OpCode: "));
                     Serial.println(this->getOpCode(), HEX);
                 }
-                op_code = OpCode::NA;
+                op_code = OpCode::ParseFailed;
                 break;
             }
         }

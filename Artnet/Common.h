@@ -48,6 +48,7 @@ enum class OpCode : uint16_t {
     FileFnReply = 0xF600,
     // N/A
     NA = 0x0000,
+    ParseFailed = 0xFFFF,
 };
 
 constexpr uint16_t DEFAULT_PORT {6454};  // 0x1936
