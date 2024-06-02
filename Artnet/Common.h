@@ -46,8 +46,9 @@ enum class OpCode : uint16_t {
     FileTnMaster = 0xF400,
     FileFnMaster = 0xF500,
     FileFnReply = 0xF600,
-    // N/A
-    NA = 0x0000,
+    // Others
+    NoPacket = 0x0000,
+    Unsupported = 0xFFFE,
     ParseFailed = 0xFFFF,
 };
 
