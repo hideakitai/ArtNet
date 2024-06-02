@@ -37,12 +37,12 @@ public:
     {
 #ifdef ARTNET_ENABLE_WIFI
         if (!isNetworkReady()) {
-            return OpCode::NA;
+            return OpCode::NoPacket;
         }
 #endif
         size_t size = this->stream->parsePacket();
         if (size == 0) {
-            return OpCode::NA;
+            return OpCode::NoPacket;
         }
 
         if (size > PACKET_SIZE) {
@@ -65,7 +65,7 @@ public:
         remote_info.ip = this->stream->S::remoteIP();
         remote_info.port = (uint16_t)this->stream->S::remotePort();
 
-        OpCode op_code = OpCode::NA;
+        OpCode op_code = OpCode::Unsupported;
         OpCode received_op_code = static_cast<OpCode>(this->getOpCode());
         switch (received_op_code) {
             case OpCode::Dmx: {
@@ -112,7 +112,7 @@ public:
                     Serial.print(F("Unsupported OpCode: "));
                     Serial.println(this->getOpCode(), HEX);
                 }
-                op_code = OpCode::ParseFailed;
+                op_code = OpCode::Unsupported;
                 break;
             }
         }
