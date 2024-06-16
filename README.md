@@ -18,6 +18,7 @@ If you have already installed this library before v0.3.0, please follow:
 
 - Supports following protocols:
   - ArtDmx
+  - ArtNzs
   - ArtPoll/ArtPollReply
   - ArtTrigger
   - ArtSync

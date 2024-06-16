@@ -4,6 +4,7 @@
 
 #include "Common.h"
 #include "ArtDmx.h"
+#include "ArtNzs.h"
 #include "ArtPollReply.h"
 #include "ArtTrigger.h"
 #include "ArtSync.h"
@@ -18,6 +19,7 @@ class Receiver_
 
     art_dmx::CallbackMap callback_art_dmx_universes;
     art_dmx::CallbackType callback_art_dmx;
+    art_nzs::CallbackMap callback_art_nzs_universes;
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
     ArtPollReplyConfig art_poll_reply_config;
@@ -79,6 +81,16 @@ public:
                     }
                 }
                 op_code = OpCode::Dmx;
+                break;
+            }
+            case OpCode::Nzs: {
+                art_nzs::Metadata metadata = art_nzs::generateMetadataFrom(this->packet.data());
+                for (auto& cb : this->callback_art_nzs_universes) {
+                    if (this->getArtDmxUniverse15bit() == cb.first) {
+                        cb.second(this->getArtDmxData(), size - HEADER_SIZE, metadata, remote_info);
+                    }
+                }
+                op_code = OpCode::Nzs;
                 break;
             }
             case OpCode::Poll: {
@@ -156,6 +168,14 @@ public:
         this->callback_art_dmx_universes.insert(std::make_pair(universe, arx::function_traits<Fn>::cast(func)));
     }
 
+    // subscribe artnzs packet for specified universe (15 bit)
+    template <typename Fn>
+    auto subscribeArtNzsUniverse(uint16_t universe, const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_nzs_universes.insert(std::make_pair(universe, arx::function_traits<Fn>::cast(func)));
+    }
+
     // subscribe artdmx packet for all universes
     template <typename Fn>
     auto subscribeArtDmx(const Fn &func)
@@ -198,6 +218,14 @@ public:
     void unsubscribeArtDmx()
     {
         this->callback_art_dmx = nullptr;
+    }
+
+    void unsubscribeArtNzsUniverse(uint16_t universe)
+    {
+        auto it = this->callback_art_nzs_universes.find(universe);
+        if (it != this->callback_art_nzs_universes.end()) {
+            this->callback_art_nzs_universes.erase(it);
+        }
     }
 
     void unsubscribeArtSync()
@@ -299,8 +327,18 @@ private:
         uint8_t my_mac[6];
         this->macAddress(my_mac);
 
+        arx::stdx::map<uint16_t, bool> universes;
+
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
-            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, cb_pair.first, this->art_poll_reply_config);
+            universes[cb_pair.first] = true;
+        }
+
+        for (const auto &cb_pair : this->callback_art_nzs_universes) {
+            universes[cb_pair.first] = true;
+        }
+
+        for (const auto &u_pair : universes) {
+            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, u_pair.first, this->art_poll_reply_config);
             this->stream->beginPacket(remote.ip, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));
             this->stream->endPacket();
