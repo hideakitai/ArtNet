@@ -284,10 +284,20 @@ void setArtDmxData(uint16_t ch, uint8_t data);
 void streamArtDmxTo(const String& ip, uint16_t universe15bit);
 void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe);
 void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical);
+// streaming artnzs packet
+void setArtNzsData(const uint8_t* const data, uint16_t size);
+void setArtNzsData(uint16_t ch, uint8_t data);
+void streamArtNzsTo(const String& ip, uint16_t universe15bit);
+void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe);
+void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code);
 // one-line artdmx sender
 void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size);
 void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size);
 void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size);
+// one-line artnzs sender
+void sendArtNzs(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size);
+void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size);
+void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code, const uint8_t *data, uint16_t size);
 // send other packets
 void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512);
 void sendArtSync(const String& ip);
@@ -324,6 +334,8 @@ OpCode parse()
 void subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const ArtDmxCallback &func);
 // subscribe artdmx packet for specified universe (15 bit)
 void subscribeArtDmxUniverse(uint16_t universe, const ArtDmxCallback &func);
+// subscribe artnzs packet for specified universe (15 bit)
+auto subscribeArtNzsUniverse(uint16_t universe, const ArtNzsCallback &func);
 // subscribe artdmx packet for all universes
 void subscribeArtDmx(const ArtDmxCallback &func);
 // subscribe other packets
@@ -334,6 +346,7 @@ void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe);
 void unsubscribeArtDmxUniverse(uint16_t universe);
 void unsubscribeArtDmxUniverses();
 void unsubscribeArtDmx();
+void unsubscribeArtNzsUniverse(uint16_t universe);
 void unsubscribeArtSync();
 void unsubscribeArtTrigger();
 // set artdmx data to CRGB (FastLED) directly
