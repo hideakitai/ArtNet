@@ -25,48 +25,6 @@ enum Index : uint16_t
     DATA = 18
 };
 
-struct Destination
-{
-    String ip;
-    uint8_t net;
-    uint8_t subnet;
-    uint8_t universe;
-};
-
-inline bool operator<(const Destination &rhs, const Destination &lhs)
-{
-    if (rhs.ip < lhs.ip) {
-        return true;
-    }
-    if (rhs.ip > lhs.ip) {
-        return false;
-    }
-    if (rhs.net < lhs.net) {
-        return true;
-    }
-    if (rhs.net > lhs.net) {
-        return false;
-    }
-    if (rhs.subnet < lhs.subnet) {
-        return true;
-    }
-    if (rhs.subnet > lhs.subnet) {
-        return false;
-    }
-    if (rhs.universe < lhs.universe) {
-        return true;
-    }
-    if (rhs.universe > lhs.universe) {
-        return false;
-    }
-    return false;
-}
-
-inline bool operator==(const Destination &rhs, const Destination &lhs)
-{
-    return rhs.ip == lhs.ip && rhs.net == lhs.net && rhs.subnet == lhs.subnet && rhs.universe == lhs.universe;
-}
-
 struct Metadata
 {
     uint8_t sequence;
@@ -78,16 +36,8 @@ struct Metadata
 
 using CallbackType = std::function<void(const uint8_t *data, uint16_t size, const Metadata &metadata, const RemoteInfo &remote)>;
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-// sender
-using LastSendTimeMsMap = std::map<Destination, uint32_t>;
-using SequenceMap = std::map<Destination, uint8_t>;
-// receiver
 using CallbackMap = std::map<uint16_t, CallbackType>;
 #else
-// sender
-using LastSendTimeMsMap = arx::stdx::map<Destination, uint32_t>;
-using SequenceMap = arx::stdx::map<Destination, uint8_t>;
-// receiver
 using CallbackMap = arx::stdx::map<uint16_t, CallbackType>;
 #endif
 
