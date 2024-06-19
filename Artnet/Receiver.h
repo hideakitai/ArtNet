@@ -328,13 +328,15 @@ private:
         this->macAddress(my_mac);
 
         arx::stdx::map<uint16_t, bool> universes;
-
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
             universes[cb_pair.first] = true;
         }
-
         for (const auto &cb_pair : this->callback_art_nzs_universes) {
             universes[cb_pair.first] = true;
+        }
+        // if no universe is subscribed, send reply for universe 0
+        if (universes.empty()) {
+            universes[0] = true;
         }
 
         for (const auto &u_pair : universes) {
