@@ -17,7 +17,7 @@ class Sender_
     Array<PACKET_SIZE> packet;
     art_dmx::LastSendTimeMsMap last_send_times;
     art_dmx::SequenceMap dmx_sequences;
-    art_dmx::SequenceMap nzs_sequences;
+    art_nzs::SequenceMap nzs_sequences;
 
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
