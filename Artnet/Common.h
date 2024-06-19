@@ -77,6 +77,58 @@ struct RemoteInfo
     uint16_t port;
 };
 
+struct Destination
+{
+    String ip;
+    uint8_t net;
+    uint8_t subnet;
+    uint8_t universe;
+};
+
+inline bool operator<(const Destination &rhs, const Destination &lhs)
+{
+    if (rhs.ip < lhs.ip) {
+        return true;
+    }
+    if (rhs.ip > lhs.ip) {
+        return false;
+    }
+    if (rhs.net < lhs.net) {
+        return true;
+    }
+    if (rhs.net > lhs.net) {
+        return false;
+    }
+    if (rhs.subnet < lhs.subnet) {
+        return true;
+    }
+    if (rhs.subnet > lhs.subnet) {
+        return false;
+    }
+    if (rhs.universe < lhs.universe) {
+        return true;
+    }
+    if (rhs.universe > lhs.universe) {
+        return false;
+    }
+    return false;
+}
+
+inline bool operator==(const Destination &rhs, const Destination &lhs)
+{
+    return rhs.ip == lhs.ip && rhs.net == lhs.net && rhs.subnet == lhs.subnet && rhs.universe == lhs.universe;
+}
+
+#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
+// sender
+using LastSendTimeMsMap = std::map<Destination, uint32_t>;
+using SequenceMap = std::map<Destination, uint8_t>;
+#else
+// sender
+using LastSendTimeMsMap = arx::stdx::map<Destination, uint32_t>;
+using SequenceMap = arx::stdx::map<Destination, uint8_t>;
+#endif
+
 #ifdef ARTNET_ENABLE_WIFI
 inline bool isNetworkReady()
 {

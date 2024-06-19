@@ -15,9 +15,9 @@ class Sender_
 {
     S* stream;
     Array<PACKET_SIZE> packet;
-    art_dmx::LastSendTimeMsMap last_send_times;
-    art_dmx::SequenceMap dmx_sequences;
-    art_nzs::SequenceMap nzs_sequences;
+    LastSendTimeMsMap last_send_times;
+    SequenceMap dmx_sequences;
+    SequenceMap nzs_sequences;
 
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
@@ -51,7 +51,7 @@ public:
     }
     void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical)
     {
-        art_dmx::Destination dest {ip, net, subnet, universe};
+        Destination dest {ip, net, subnet, universe};
         uint32_t now = millis();
         if (this->last_send_times.find(dest) == this->last_send_times.end()) {
             this->last_send_times.insert(std::make_pair(dest, uint32_t(0)));
@@ -85,7 +85,7 @@ public:
     }
     void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code)
     {
-        art_dmx::Destination dest {ip, net, subnet, universe};
+        Destination dest {ip, net, subnet, universe};
         uint32_t now = millis();
         if (this->last_send_times.find(dest) == this->last_send_times.end()) {
             this->last_send_times.insert(std::make_pair(dest, uint32_t(0)));
@@ -110,7 +110,7 @@ public:
     }
     void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size)
     {
-        art_dmx::Destination dest {ip, net, subnet, universe};
+        Destination dest {ip, net, subnet, universe};
         this->setArtDmxData(data, size);
         this->sendArxDmxInternal(dest, physical);
     }
@@ -129,7 +129,7 @@ public:
     }
     void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code, const uint8_t *data, uint16_t size)
     {
-        art_dmx::Destination dest {ip, net, subnet, universe};
+        Destination dest {ip, net, subnet, universe};
         this->setArtNzsData(data, size);
         this->sendArxNzsInternal(dest, start_code);
     }
@@ -152,7 +152,7 @@ protected:
         this->stream = &s;
     }
 
-    void sendArxDmxInternal(const art_dmx::Destination &dest, uint8_t physical)
+    void sendArxDmxInternal(const Destination &dest, uint8_t physical)
     {
 #ifdef ARTNET_ENABLE_WIFI
         if (!isNetworkReady()) {
@@ -167,7 +167,7 @@ protected:
         this->dmx_sequences[dest] = (this->dmx_sequences[dest] + 1) % 256;
     }
 
-    void sendArxNzsInternal(const art_dmx::Destination &dest, uint8_t start_code)
+    void sendArxNzsInternal(const Destination &dest, uint8_t start_code)
     {
 #ifdef ARTNET_ENABLE_WIFI
         if (!isNetworkReady()) {

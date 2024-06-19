@@ -36,10 +36,8 @@ struct Metadata
 
 using CallbackType = std::function<void(const uint8_t *data, uint16_t size, const Metadata &metadata, const RemoteInfo &remote)>;
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-// receiver
 using CallbackMap = std::map<uint16_t, CallbackType>;
 #else
-// receiver
 using CallbackMap = arx::stdx::map<uint16_t, CallbackType>;
 #endif
 
@@ -84,5 +82,6 @@ inline void setDataTo(uint8_t *packet, const uint16_t ch, const uint8_t data)
 } // namespace art_net
 
 using ArtNzsMetadata = art_net::art_nzs::Metadata;
+using ArtNzsCallback = art_net::art_nzs::CallbackType;
 
 #endif // ARTNET_ARTNZS_H
