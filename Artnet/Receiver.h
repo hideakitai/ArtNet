@@ -303,11 +303,7 @@ protected:
         this->stream = &s;
     }
 
-#if defined(NO_GLOBAL_INSTANCES) || defined(NO_GLOBAL_SERIAL)
-    Print* log = nullptr; // No Serial -> no output
-#else
-    Print* log = &Serial; // Use Serial by default
-#endif
+    Print* log = &NoLog;
 
 private:
     bool checkID() const
