@@ -84,7 +84,7 @@ inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6]
     r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
     r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
     r.oem_h = (metadata.oem >> 8) & 0xFF; //
-    r.oem_l = (metadata.oem >> 8) & 0xFF;
+    r.oem_l = (metadata.oem >> 0) & 0xFF;
     r.ubea_ver = 0;     // UBEA not programmed
     r.status_1 = metadata.status1;
     r.esta_man_l = (metadata.esta_man >> 8) & 0xFF;
