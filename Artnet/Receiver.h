@@ -270,6 +270,27 @@ public:
 #endif
 
     // https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
+    void setArtPollReplyConfigOem(uint16_t oem) {
+        this->art_poll_reply_config.oem = oem;
+    }
+    void setArtPollReplyConfigEstaMan(uint16_t esta_man) {
+        this->art_poll_reply_config.esta_man = esta_man;
+    }
+    void setArtPollReplyConfigStatus1(uint8_t status1) {
+        this->art_poll_reply_config.status1 = status1;
+    }
+    void setArtPollReplyConfigStatus2(uint8_t status2) {
+        this->art_poll_reply_config.status2 = status2;
+    }
+    void setArtPollReplyConfigShortName(const String &short_name) {
+        this->art_poll_reply_config.short_name = short_name;
+    }
+    void setArtPollReplyConfigLongName(const String &long_name) {
+        this->art_poll_reply_config.long_name = long_name;
+    }
+    void setArtPollReplyConfigNodeReport(const String &node_report) {
+        this->art_poll_reply_config.node_report = node_report;
+    }
     void setArtPollReplyConfig(
         uint16_t oem,
         uint16_t esta_man,
@@ -279,13 +300,13 @@ public:
         const String &long_name,
         const String &node_report
     ) {
-        this->art_poll_reply_config.oem = oem;
-        this->art_poll_reply_config.esta_man = esta_man;
-        this->art_poll_reply_config.status1 = status1;
-        this->art_poll_reply_config.status2 = status2;
-        this->art_poll_reply_config.short_name = short_name;
-        this->art_poll_reply_config.long_name = long_name;
-        this->art_poll_reply_config.node_report = node_report;
+        this->setArtPollReplyConfigOem(oem);
+        this->setArtPollReplyConfigEstaMan(esta_man);
+        this->setArtPollReplyConfigStatus1(status1);
+        this->setArtPollReplyConfigStatus2(status2);
+        this->setArtPollReplyConfigShortName(short_name);
+        this->setArtPollReplyConfigLongName(long_name);
+        this->setArtPollReplyConfigNodeReport(node_report);
     }
 
     void verbose(bool b)
