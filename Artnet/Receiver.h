@@ -22,8 +22,8 @@ class Receiver_
     art_nzs::CallbackMap callback_art_nzs_universes;
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
-    ArtPollReplyConfig art_poll_reply_config;
-
+    ArtPollReplyConfig* art_poll_reply_config;
+    bool using_default_reply_config = true;
     bool b_verbose {false};
 
 public:
@@ -279,13 +279,24 @@ public:
         const String &long_name,
         const String &node_report
     ) {
-        this->art_poll_reply_config.oem = oem;
-        this->art_poll_reply_config.esta_man = esta_man;
-        this->art_poll_reply_config.status1 = status1;
-        this->art_poll_reply_config.status2 = status2;
-        this->art_poll_reply_config.short_name = short_name;
-        this->art_poll_reply_config.long_name = long_name;
-        this->art_poll_reply_config.node_report = node_report;
+        if (art_poll_reply_config == nullptr) {
+            art_poll_reply_config = new ArtPollReplyConfig;
+        }
+        this->art_poll_reply_config->oem = oem;
+        this->art_poll_reply_config->esta_man = esta_man;
+        this->art_poll_reply_config->status1 = status1;
+        this->art_poll_reply_config->status2 = status2;
+        this->art_poll_reply_config->short_name = short_name;
+        this->art_poll_reply_config->long_name = long_name;
+        this->art_poll_reply_config->node_report = node_report;
+    }
+
+    void setArtPollReplyConfig(ArtPollReplyConfig* config) {
+        if (art_poll_reply_config != nullptr && using_default_reply_config == true) {
+            using_default_reply_config = false;
+            delete art_poll_reply_config;
+        }
+        art_poll_reply_config = config;
     }
 
     void verbose(bool b)
@@ -339,8 +350,11 @@ private:
             universes[0] = true;
         }
 
+        if (art_poll_reply_config == nullptr) {
+            art_poll_reply_config = new ArtPollReplyConfig;
+        }
         for (const auto &u_pair : universes) {
-            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, u_pair.first, this->art_poll_reply_config);
+            art_poll_reply::Packet reply = art_poll_reply::generatePacketFrom(my_ip, my_mac, u_pair.first, this->*art_poll_reply_config);
             this->stream->beginPacket(remote.ip, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));
             this->stream->endPacket();
