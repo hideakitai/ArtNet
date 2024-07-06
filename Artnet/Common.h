@@ -85,6 +85,7 @@ struct Destination
     uint8_t universe;
 };
 
+
 inline bool operator<(const Destination &rhs, const Destination &lhs)
 {
     if (rhs.ip < lhs.ip) {
