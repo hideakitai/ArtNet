@@ -11,6 +11,13 @@
 
 namespace art_net {
 
+class NoPrint : public Print {
+    size_t write(uint8_t) {
+        return 0;
+    }
+};
+static NoPrint no_log;
+
 template <typename S>
 class Receiver_
 {
@@ -46,14 +53,14 @@ public:
         }
 
         if (size > PACKET_SIZE) {
-            log->print(F("Packet size is unexpectedly too large: "));
-            log->println(size);
+            logger->print(F("Packet size is unexpectedly too large: "));
+            logger->println(size);
             size = PACKET_SIZE;
         }
         this->stream->read(this->packet.data(), size);
 
         if (!checkID()) {
-            log->println(F("Packet ID is not Art-Net"));
+            logger->println(F("Packet ID is not Art-Net"));
             return OpCode::ParseFailed;
         }
 
@@ -114,8 +121,8 @@ public:
                 break;
             }
             default: {
-                log->print(F("Unsupported OpCode: "));
-                log->println(this->getOpCode(), HEX);
+                logger->print(F("Unsupported OpCode: "));
+                logger->println(this->getOpCode(), HEX);
                 op_code = OpCode::Unsupported;
                 break;
             }
@@ -131,15 +138,15 @@ public:
     -> std::enable_if_t<arx::is_callable<Fn>::value>
     {
         if (net > 0x7F) {
-            log->println(F("net should be less than 0x7F"));
+            logger->println(F("net should be less than 0x7F"));
             return;
         }
         if (subnet > 0xF) {
-            log->println(F("subnet should be less than 0xF"));
+            logger->println(F("subnet should be less than 0xF"));
             return;
         }
         if (universe > 0xF) {
-            log->println(F("universe should be less than 0xF"));
+            logger->println(F("universe should be less than 0xF"));
             return;
         }
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
@@ -239,11 +246,11 @@ public:
                 n = num;
             } else {
                 n = size / 3;
-                log->println(F("WARN: ArtNet packet size is less than requested LED numbers to forward"));
-                log->print(F("      requested: "));
-                log->print(num * 3);
-                log->print(F("      received : "));
-                log->println(size);
+                logger->println(F("WARN: ArtNet packet size is less than requested LED numbers to forward"));
+                logger->print(F("      requested: "));
+                logger->print(num * 3);
+                logger->print(F("      received : "));
+                logger->println(size);
             }
             for (size_t pixel = 0; pixel < n; ++pixel) {
                 size_t idx = pixel * 3;
@@ -274,8 +281,8 @@ public:
         this->art_poll_reply_config.node_report = node_report;
     }
 
-    void logOutputTo(Print* dest) {
-        log = dest;
+    void setLogger(Print* dest) {
+        logger = dest;
     }
 
 protected:
@@ -284,9 +291,11 @@ protected:
         this->stream = &s;
     }
 
-    Print* log = &NoLog;
 
 private:
+
+    Print* logger = &no_log;
+
     bool checkID() const
     {
         const char* idptr = reinterpret_cast<const char*>(this->packet.data());

@@ -85,12 +85,6 @@ struct Destination
     uint8_t universe;
 };
 
-class NoPrint : public Print {
-    size_t write(uint8_t) {
-        return 0;
-    }
-};
-NoPrint NoLog;
 
 inline bool operator<(const Destination &rhs, const Destination &lhs)
 {

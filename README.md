@@ -356,7 +356,7 @@ void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num);
 // https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
 void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report);
 // Set where debug output should go (default is nowhere)
-void logOutputTo(Print*);
+void setLogger(Print*);
 ```
 
 ### Note
