@@ -11,12 +11,15 @@
 
 namespace art_net {
 
-class NoPrint : public Print {
-    size_t write(uint8_t) {
-        return 0;
-    }
+namespace {
+
+struct NoPrint : public Print
+{
+    size_t write(uint8_t) override { return 0; }
 };
 static NoPrint no_log;
+
+} // namespace
 
 template <typename S>
 class Receiver_
@@ -30,6 +33,8 @@ class Receiver_
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
     ArtPollReplyConfig art_poll_reply_config;
+
+    Print *logger {&no_log};
 
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
@@ -53,14 +58,14 @@ public:
         }
 
         if (size > PACKET_SIZE) {
-            logger->print(F("Packet size is unexpectedly too large: "));
-            logger->println(size);
+            this->logger->print(F("Packet size is unexpectedly too large: "));
+            this->logger->println(size);
             size = PACKET_SIZE;
         }
         this->stream->read(this->packet.data(), size);
 
         if (!checkID()) {
-            logger->println(F("Packet ID is not Art-Net"));
+            this->logger->println(F("Packet ID is not Art-Net"));
             return OpCode::ParseFailed;
         }
 
@@ -121,8 +126,8 @@ public:
                 break;
             }
             default: {
-                logger->print(F("Unsupported OpCode: "));
-                logger->println(this->getOpCode(), HEX);
+                this->logger->print(F("Unsupported OpCode: "));
+                this->logger->println(this->getOpCode(), HEX);
                 op_code = OpCode::Unsupported;
                 break;
             }
@@ -138,15 +143,15 @@ public:
     -> std::enable_if_t<arx::is_callable<Fn>::value>
     {
         if (net > 0x7F) {
-            logger->println(F("net should be less than 0x7F"));
+            this->logger->println(F("net should be less than 0x7F"));
             return;
         }
         if (subnet > 0xF) {
-            logger->println(F("subnet should be less than 0xF"));
+            this->logger->println(F("subnet should be less than 0xF"));
             return;
         }
         if (universe > 0xF) {
-            logger->println(F("universe should be less than 0xF"));
+            this->logger->println(F("universe should be less than 0xF"));
             return;
         }
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
@@ -246,11 +251,11 @@ public:
                 n = num;
             } else {
                 n = size / 3;
-                logger->println(F("WARN: ArtNet packet size is less than requested LED numbers to forward"));
-                logger->print(F("      requested: "));
-                logger->print(num * 3);
-                logger->print(F("      received : "));
-                logger->println(size);
+                this->logger->println(F("WARN: ArtNet packet size is less than requested LED numbers to forward"));
+                this->logger->print(F("      requested: "));
+                this->logger->print(num * 3);
+                this->logger->print(F("      received : "));
+                this->logger->println(size);
             }
             for (size_t pixel = 0; pixel < n; ++pixel) {
                 size_t idx = pixel * 3;
@@ -263,25 +268,32 @@ public:
 #endif
 
     // https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
-    void setArtPollReplyConfigOem(uint16_t oem) {
+    void setArtPollReplyConfigOem(uint16_t oem)
+    {
         this->art_poll_reply_config.oem = oem;
     }
-    void setArtPollReplyConfigEstaMan(uint16_t esta_man) {
+    void setArtPollReplyConfigEstaMan(uint16_t esta_man)
+    {
         this->art_poll_reply_config.esta_man = esta_man;
     }
-    void setArtPollReplyConfigStatus1(uint8_t status1) {
+    void setArtPollReplyConfigStatus1(uint8_t status1)
+    {
         this->art_poll_reply_config.status1 = status1;
     }
-    void setArtPollReplyConfigStatus2(uint8_t status2) {
+    void setArtPollReplyConfigStatus2(uint8_t status2)
+    {
         this->art_poll_reply_config.status2 = status2;
     }
-    void setArtPollReplyConfigShortName(const String &short_name) {
+    void setArtPollReplyConfigShortName(const String &short_name)
+    {
         this->art_poll_reply_config.short_name = short_name;
     }
-    void setArtPollReplyConfigLongName(const String &long_name) {
+    void setArtPollReplyConfigLongName(const String &long_name)
+    {
         this->art_poll_reply_config.long_name = long_name;
     }
-    void setArtPollReplyConfigNodeReport(const String &node_report) {
+    void setArtPollReplyConfigNodeReport(const String &node_report)
+    {
         this->art_poll_reply_config.node_report = node_report;
     }
     void setArtPollReplyConfig(
@@ -302,8 +314,9 @@ public:
         this->setArtPollReplyConfigNodeReport(node_report);
     }
 
-    void setLogger(Print* dest) {
-        logger = dest;
+    void setLogger(Print* logger)
+    {
+        this->logger = logger;
     }
 
 protected:
@@ -312,10 +325,7 @@ protected:
         this->stream = &s;
     }
 
-
 private:
-
-    Print* logger = &no_log;
 
     bool checkID() const
     {
