@@ -22,11 +22,13 @@ class Receiver_
     art_nzs::CallbackMap callback_art_nzs_universes;
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
-    ArtPollReplyConfig art_poll_reply_config;
 
     bool b_verbose {false};
 
 public:
+    ArtPollReplyConfig art_poll_reply_config;
+
+
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
     Receiver_()
