@@ -244,7 +244,7 @@ public:
     }
     void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num)
     {
-        this->subscribeArtDmxUniverse(universe, [leds, num](const uint8_t* data, const uint16_t size, const ArtDmxMetadata &, const RemoteInfo &) {
+        this->subscribeArtDmxUniverse(universe, [this, leds, num](const uint8_t* data, const uint16_t size, const ArtDmxMetadata &, const RemoteInfo &) {
             size_t n;
             if (num <= size / 3) {
                 // OK: requested number of LEDs is less than received data size
