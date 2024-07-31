@@ -268,6 +268,7 @@ struct ArtPollReplyMetadata
 ```c++
 // set information for artpollreply individually
 // https://art-net.org.uk/downloads/art-net.pdf
+void setArtPollReplyConfig(const ArtPollReplyConfig &cfg);
 void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report, uint8_t sw_in[4]);
 void setArtPollReplyConfigOem(uint16_t oem);
 void setArtPollReplyConfigEstaMan(uint16_t esta_man);
@@ -382,6 +383,7 @@ void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, C
 void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num);
 // set information for artpollreply individually
 // https://art-net.org.uk/downloads/art-net.pdf
+void setArtPollReplyConfig(const ArtPollReplyConfig &cfg);
 void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report, uint8_t sw_in[4]);
 void setArtPollReplyConfigOem(uint16_t oem);
 void setArtPollReplyConfigEstaMan(uint16_t esta_man);

@@ -334,6 +334,10 @@ public:
         this->setArtPollReplyConfigNodeReport(node_report);
         this->setArtPollReplyConfigSwIn(sw_in);
     }
+    void setArtPollReplyConfig(const ArtPollReplyConfig &cfg)
+    {
+        this->art_poll_reply_config = cfg;
+    }
 
     void setLogger(Print* logger)
     {
