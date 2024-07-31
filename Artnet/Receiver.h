@@ -296,6 +296,25 @@ public:
     {
         this->art_poll_reply_config.node_report = node_report;
     }
+    void setArtPollReplyConfigSwIn(size_t index, uint8_t sw_in)
+    {
+        if (index < 4) {
+            this->art_poll_reply_config.sw_in[index] = sw_in;
+        }
+    }
+    void setArtPollReplyConfigSwIn(uint8_t sw_in[4])
+    {
+        for (size_t i = 0; i < 4; ++i) {
+            this->art_poll_reply_config.sw_in[i] = sw_in[i];
+        }
+    }
+    void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2, uint8_t sw_in_3)
+    {
+        this->setArtPollReplyConfigSwIn(0, sw_in_0);
+        this->setArtPollReplyConfigSwIn(1, sw_in_1);
+        this->setArtPollReplyConfigSwIn(2, sw_in_2);
+        this->setArtPollReplyConfigSwIn(3, sw_in_3);
+    }
     void setArtPollReplyConfig(
         uint16_t oem,
         uint16_t esta_man,
@@ -303,7 +322,8 @@ public:
         uint8_t status2,
         const String &short_name,
         const String &long_name,
-        const String &node_report
+        const String &node_report,
+        uint8_t sw_in[4]
     ) {
         this->setArtPollReplyConfigOem(oem);
         this->setArtPollReplyConfigEstaMan(esta_man);
@@ -312,6 +332,7 @@ public:
         this->setArtPollReplyConfigShortName(short_name);
         this->setArtPollReplyConfigLongName(long_name);
         this->setArtPollReplyConfigNodeReport(node_report);
+        this->setArtPollReplyConfigSwIn(sw_in);
     }
 
     void setLogger(Print* logger)
