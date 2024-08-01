@@ -230,7 +230,7 @@ void loop() {
 - The relationship of Net (0-127), Sub-Net (0-15), 4-bit Universe (0-15) and 15-bit Universe (0-32767) is `universe15bit = (net << 8) | (subnet << 4) | universe4bit`
 - You can subscribe ArtDmx data for Net (0-127), Sub-Net (0-15), and 4-bit Universe (0-15) like `artnet.subscribeArtDmxUniverse(net, subnet, universe, callback)`
 - Or you can use 15-bit Universe (0-32767) can be set lnke `artnet.subscribeArtDmxUniverse(universe, callback)`
-- Subscribed universes (targets of the callbacks) are automatically reflected to `net_sw` `sub_sw` `sw_in` in `ArtPollreply`
+- Subscribed universes (targets of the callbacks) are automatically reflected to `net_sw` `sub_sw` `sw_out` in `ArtPollreply`
 
 ### ArtPollReply Configuration
 
@@ -238,7 +238,7 @@ void loop() {
 - `ArtPoll` is automatically parsed and sends `ArtPollReply`
 - You can configure the following information of by `setArtPollReplyConfig()`
 - Other settings are set automatically based on registerd callbacks
-- Please refer [here](https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/) for more information
+- Please refer [here](https://art-net.org.uk/downloads/art-net.pdf) for more information
 
 ```C++
 struct ArtPollReplyMetadata
@@ -250,7 +250,36 @@ struct ArtPollReplyMetadata
     String short_name {"Arduino ArtNet"};
     String long_name {"Ardino ArtNet Protocol by hideakitai/ArtNet"};
     String node_report {""};
+    // Four universes from Device to Controller
+    // NOTE: Only low 4 bits of the universes
+    // NOTE: Upper 11 bits of the universes will be
+    //       shared with the subscribed universe (net, subnet)
+    // e.g.) If you have subscribed universe 0x1234,
+    //       you can set the device to controller universes
+    //       from 0x1230 to 0x123F (sw_in will be from 0x0 to 0xF).
+    //       So, I recommned subscribing only in the range of
+    //       0x1230 to 0x123F if you want to set the sw_in.
+    // REF: Please refer the Art-Net spec for the detail.
+    //      https://art-net.org.uk/downloads/art-net.pdf
+    uint8_t sw_in[4] {0};
 };
+```
+
+```c++
+// set information for artpollreply individually
+// https://art-net.org.uk/downloads/art-net.pdf
+void setArtPollReplyConfig(const ArtPollReplyConfig &cfg);
+void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report, uint8_t sw_in[4]);
+void setArtPollReplyConfigOem(uint16_t oem);
+void setArtPollReplyConfigEstaMan(uint16_t esta_man);
+void setArtPollReplyConfigStatus1(uint8_t status1);
+void setArtPollReplyConfigStatus2(uint8_t status2);
+void setArtPollReplyConfigShortName(const String &short_name);
+void setArtPollReplyConfigLongName(const String &long_name);
+void setArtPollReplyConfigNodeReport(const String &node_report);
+void setArtPollReplyConfigSwIn(size_t index, uint8_t sw_in);
+void setArtPollReplyConfigSwIn(uint8_t sw_in[4]);
+void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2, uint8_t sw_in_3);
 ```
 
 ## ArtTrigger
@@ -352,9 +381,10 @@ void unsubscribeArtTrigger();
 // set artdmx data to CRGB (FastLED) directly
 void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, CRGB* leds, uint16_t num);
 void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num);
-// set information for artpollreply
-// https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
-void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report);
+// set information for artpollreply individually
+// https://art-net.org.uk/downloads/art-net.pdf
+void setArtPollReplyConfig(const ArtPollReplyConfig &cfg);
+void setArtPollReplyConfig(uint16_t oem, uint16_t esta_man, uint8_t status1, uint8_t status2, const String &short_name, const String &long_name, const String &node_report, uint8_t sw_in[4]);
 void setArtPollReplyConfigOem(uint16_t oem);
 void setArtPollReplyConfigEstaMan(uint16_t esta_man);
 void setArtPollReplyConfigStatus1(uint8_t status1);
@@ -362,6 +392,9 @@ void setArtPollReplyConfigStatus2(uint8_t status2);
 void setArtPollReplyConfigShortName(const String &short_name);
 void setArtPollReplyConfigLongName(const String &long_name);
 void setArtPollReplyConfigNodeReport(const String &node_report);
+void setArtPollReplyConfigSwIn(size_t index, uint8_t sw_in);
+void setArtPollReplyConfigSwIn(uint8_t sw_in[4]);
+void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2, uint8_t sw_in_3);
 // Set where debug output should go (e.g. setLogger(&Serial); default is nowhere)
 void setLogger(Print*);
 ```

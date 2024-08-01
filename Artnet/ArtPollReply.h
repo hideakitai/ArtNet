@@ -65,6 +65,18 @@ struct Config
     String short_name {"Arduino ArtNet"};
     String long_name {"Ardino ArtNet Protocol by hideakitai/ArtNet"};
     String node_report {""};
+    // Four universes from Device to Controller
+    // NOTE: Only low 4 bits of the universes
+    // NOTE: Upper 11 bits of the universes will be
+    //       shared with the subscribed universe (net, subnet)
+    // e.g.) If you have subscribed universe 0x1234,
+    //       you can set the device to controller universes
+    //       from 0x1230 to 0x123F (sw_in will be from 0x0 to 0xF).
+    //       So, I recommned subscribing only in the range of
+    //       0x1230 to 0x123F if you want to set the sw_in.
+    // REF: Please refer the Art-Net spec for the detail.
+    //      https://art-net.org.uk/downloads/art-net.pdf
+    uint8_t sw_in[4] {0};
 };
 
 inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6], uint16_t universe, const Config &metadata)
@@ -105,8 +117,11 @@ inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6]
     r.net_sw = (universe >> 8) & 0x7F;
     r.sub_sw = (universe >> 4) & 0x0F;
     // https://github.com/hideakitai/ArtNet/issues/81
-    r.sw_in[0] = (universe >> 0) & 0x0F;
-    r.sw_out[0] = 0;          // dummy: output port is flexible
+    // https://github.com/hideakitai/ArtNet/issues/121
+    r.sw_out[0] = (universe >> 0) & 0x0F;
+    for (size_t i = 0; i < 4; ++i) {
+        r.sw_in[i] = metadata.sw_in[i] & 0x0F;
+    }
     r.port_types[0] = 0xC0;   // I/O available by DMX512
     r.good_input[0] = 0x80;   // Data received without error
     r.good_output[0] = 0x80;  // Data transmitted without error
