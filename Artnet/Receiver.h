@@ -57,6 +57,9 @@ public:
             return OpCode::NoPacket;
         }
 
+        this->logger->print(F("Packet received: size = "));
+        this->logger->println(size);
+
         if (size > PACKET_SIZE) {
             this->logger->print(F("Packet size is unexpectedly too large: "));
             this->logger->println(size);
