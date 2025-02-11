@@ -303,10 +303,11 @@ jobs:
           # - vendor: arduino
           #   arch: avr
           #   name: uno
-          - vendor: arduino
-            arch: megaavr
-            name: uno2018
-          # temporarily disabled due to FastLED not supporting mkrvidor4000
+          # TODO: temporary disabled because of compile error of FastLED
+          # - vendor: arduino
+          #   arch: megaavr
+          #   name: uno2018
+          # TODO: temporary disabled because of compile error of FastLED
           # - vendor: arduino
           #   arch: samd
           #   name: mkrvidor4000

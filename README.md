@@ -248,7 +248,7 @@ struct ArtPollReplyMetadata
     uint8_t status1 {0x00};     // Unknown / Normal
     uint8_t status2 {0x08};     // sACN capable
     String short_name {"Arduino ArtNet"};
-    String long_name {"Ardino ArtNet Protocol by hideakitai/ArtNet"};
+    String long_name {"Arduino ArtNet Protocol by hideakitai/ArtNet"};
     String node_report {""};
     // Four universes from Device to Controller
     // NOTE: Only low 4 bits of the universes
