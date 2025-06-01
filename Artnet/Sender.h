@@ -7,6 +7,7 @@
 #include "ArtNzs.h"
 #include "ArtTrigger.h"
 #include "ArtSync.h"
+#include "ArtRdm.h"
 
 namespace art_net {
 
@@ -144,6 +145,79 @@ public:
     {
         art_sync::setMetadataTo(packet.data());
         this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_sync::PACKET_SIZE);
+    }
+
+    // RDM packet senders
+    void sendArtRdm(const String& ip, uint8_t net, uint16_t address, const uint8_t* rdm_data, uint16_t rdm_size)
+    {
+        art_rdm::Metadata metadata;
+        metadata.rdm_ver = 0x01;  // RDM version 1.0
+        metadata.net = net;
+        metadata.command = 0x00;  // Process RDM Packet
+        metadata.address = address;
+
+        art_rdm::setMetadataToOpRdm(packet.data(), metadata);
+        art_rdm::setRdmDataToOpRdm(packet.data(), rdm_data, rdm_size);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_rdm::SIZE + rdm_size);
+    }
+
+    void sendArtRdmSub(const String& ip, const uint8_t uid[6], uint8_t command_class, uint16_t parameter_id,
+                       uint16_t sub_device, uint16_t sub_count, const uint8_t block[4],
+                       const uint8_t* sub_data, uint16_t sub_size)
+    {
+        art_rdm_sub::Metadata metadata;
+        metadata.rdm_ver = 0x01;  // RDM version 1.0
+        memcpy(metadata.uid, uid, 6);
+        metadata.command_class = command_class;
+        metadata.parameter_id = parameter_id;
+        metadata.sub_device = sub_device;
+        metadata.sub_count = sub_count;
+        memcpy(metadata.block, block, 4);
+
+        art_rdm_sub::setMetadataToOpRdmSub(packet.data(), metadata);
+        art_rdm_sub::setRdmSubDataToOpRdmSub(packet.data(), sub_data, sub_size);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_rdm_sub::SIZE + sub_size);
+    }
+
+    void sendArtTodRequest(const String& ip, uint8_t net, uint8_t command, const uint16_t* addresses, uint8_t count)
+    {
+        art_tod_request::Metadata metadata;
+        metadata.net = net;
+        metadata.command = command;
+        metadata.add_count = count;
+
+        art_tod_request::setMetadataToOpTodRequest(packet.data(), metadata);
+        art_tod_request::setAddressesToOpTodRequest(packet.data(), addresses, count);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_tod_request::SIZE + count * 2);
+    }
+
+    void sendArtTodData(const String& ip, uint8_t net, uint16_t address, uint8_t port,
+                        uint16_t uid_total, uint8_t block_count, const uint8_t* uids, uint8_t uid_count)
+    {
+        art_tod_data::Metadata metadata;
+        metadata.rdm_ver = 0x01;  // RDM version 1.0
+        metadata.port = port;
+        metadata.net = net;
+        metadata.command_response = 0x00;  // TodFull
+        metadata.address = address;
+        metadata.uid_total = uid_total;
+        metadata.block_count = block_count;
+        metadata.uid_count = uid_count;
+
+        art_tod_data::setMetadataToOpTodData(packet.data(), metadata);
+        art_tod_data::setUidsToOpTodData(packet.data(), uids, uid_count);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_tod_data::SIZE + uid_count * 6);
+    }
+
+    void sendArtTodControl(const String& ip, uint8_t net, uint8_t command, uint16_t address)
+    {
+        art_tod_control::Metadata metadata;
+        metadata.net = net;
+        metadata.command = command;
+        metadata.address = address;
+
+        art_tod_control::setMetadataToOpTodControl(packet.data(), metadata);
+        this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_tod_control::SIZE);
     }
 
 protected:
