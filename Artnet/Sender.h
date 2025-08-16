@@ -81,7 +81,7 @@ public:
     }
     void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe)
     {
-        this->streamArtNzsTo(ip, net, subnet, universe, 0, 0);
+        this->streamArtNzsTo(ip, net, subnet, universe, 0);
     }
     void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code)
     {

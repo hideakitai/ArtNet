@@ -203,7 +203,7 @@ public:
     void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe)
     {
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
-        this->unsubscribe(u);
+        this->unsubscribeArtDmxUniverse(u);
     }
     void unsubscribeArtDmxUniverse(uint16_t universe)
     {
