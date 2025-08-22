@@ -91,16 +91,16 @@ inline Packet generatePacketFrom(const IPAddress &my_ip, const uint8_t my_mac[6]
     for (size_t i = 0; i < 4; ++i) {
         r.ip[i] = my_ip[i];
     }
-    r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
     r.port_h = (DEFAULT_PORT >> 8) & 0xFF;
+    r.port_l = (DEFAULT_PORT >> 0) & 0xFF;
     r.ver_h = (PROTOCOL_VER >> 8) & 0x00FF;
     r.ver_l = (PROTOCOL_VER >> 0) & 0x00FF;
     r.oem_h = (metadata.oem >> 8) & 0xFF; //
     r.oem_l = (metadata.oem >> 0) & 0xFF;
     r.ubea_ver = 0;     // UBEA not programmed
     r.status_1 = metadata.status1;
-    r.esta_man_l = (metadata.esta_man >> 8) & 0xFF;
     r.esta_man_h = (metadata.esta_man >> 8) & 0xFF;
+    r.esta_man_l = (metadata.esta_man >> 0) & 0xFF;
     memset(r.short_name, 0, 18);
     memset(r.long_name, 0, 64);
     memset(r.node_report, 0, 64);
