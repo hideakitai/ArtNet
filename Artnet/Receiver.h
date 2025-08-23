@@ -8,6 +8,7 @@
 #include "ArtPollReply.h"
 #include "ArtTrigger.h"
 #include "ArtSync.h"
+#include "ArtRdm.h"
 
 namespace art_net {
 
@@ -32,6 +33,11 @@ class Receiver_
     art_nzs::CallbackMap callback_art_nzs_universes;
     art_sync::CallbackType callback_art_sync;
     art_trigger::CallbackType callback_art_trigger;
+    art_rdm::CallbackType callback_art_rdm;
+    art_rdm_sub::CallbackType callback_art_rdm_sub;
+    art_tod_data::CallbackType callback_art_tod_data;
+    art_tod_request::CallbackType callback_art_tod_request;
+    art_tod_control::CallbackType callback_art_tod_control;
     ArtPollReplyConfig art_poll_reply_config;
 
     Print *logger {&no_log};
@@ -128,6 +134,48 @@ public:
                 op_code = OpCode::Sync;
                 break;
             }
+            case OpCode::Rdm: {
+                if (this->callback_art_rdm) {
+                    art_rdm::Metadata metadata = art_rdm::generateMetadataFromOpRdm(this->packet.data());
+                    uint16_t rdm_size = size - art_rdm::SIZE;
+                    this->callback_art_rdm(this->packet.data() + art_rdm::RDM_PACKET, rdm_size, metadata, remote_info);
+                }
+                op_code = OpCode::Rdm;
+                break;
+            }
+            case OpCode::RdmSub: {
+                if (this->callback_art_rdm_sub) {
+                    art_rdm_sub::Metadata metadata = art_rdm_sub::generateMetadataFromOpRdmSub(this->packet.data());
+                    uint16_t rdm_sub_size = size - art_rdm_sub::SIZE;
+                    this->callback_art_rdm_sub(this->packet.data() + art_rdm_sub::RDM_SUB_DATA, rdm_sub_size, metadata, remote_info);
+                }
+                op_code = OpCode::RdmSub;
+                break;
+            }
+            case OpCode::TodData: {
+                if (this->callback_art_tod_data) {
+                    art_tod_data::Metadata metadata = art_tod_data::generateMetadataFromOpTodData(this->packet.data());
+                    this->callback_art_tod_data(this->packet.data() + art_tod_data::TOD, metadata.uid_count, metadata, remote_info);
+                }
+                op_code = OpCode::TodData;
+                break;
+            }
+            case OpCode::TodRequest: {
+                if (this->callback_art_tod_request) {
+                    art_tod_request::Metadata metadata = art_tod_request::generateMetadataFromOpTodRequest(this->packet.data());
+                    this->callback_art_tod_request((uint16_t*)(this->packet.data() + art_tod_request::ADDRESS), metadata.add_count, metadata, remote_info);
+                }
+                op_code = OpCode::TodRequest;
+                break;
+            }
+            case OpCode::TodControl: {
+                if (this->callback_art_tod_control) {
+                    art_tod_control::Metadata metadata = art_tod_control::generateMetadataFromOpTodControl(this->packet.data());
+                    this->callback_art_tod_control(metadata, remote_info);
+                }
+                op_code = OpCode::TodControl;
+                break;
+            }
             default: {
                 this->logger->print(F("Unsupported OpCode: "));
                 this->logger->println(this->getOpCode(), HEX);
@@ -200,6 +248,42 @@ public:
         this->callback_art_trigger = arx::function_traits<Fn>::cast(func);
     }
 
+    // subscribe RDM packets
+    template <typename Fn>
+    auto subscribeArtRdm(const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_rdm = arx::function_traits<Fn>::cast(func);
+    }
+
+    template <typename Fn>
+    auto subscribeArtRdmSub(const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_rdm_sub = arx::function_traits<Fn>::cast(func);
+    }
+
+    template <typename Fn>
+    auto subscribeArtTodData(const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_tod_data = arx::function_traits<Fn>::cast(func);
+    }
+
+    template <typename Fn>
+    auto subscribeArtTodRequest(const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_tod_request = arx::function_traits<Fn>::cast(func);
+    }
+
+    template <typename Fn>
+    auto subscribeArtTodControl(const Fn &func)
+    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    {
+        this->callback_art_tod_control = arx::function_traits<Fn>::cast(func);
+    }
+
     void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe)
     {
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
@@ -237,6 +321,31 @@ public:
     void unsubscribeArtTrigger()
     {
         this->callback_art_trigger = nullptr;
+    }
+
+    void unsubscribeArtRdm()
+    {
+        this->callback_art_rdm = nullptr;
+    }
+
+    void unsubscribeArtRdmSub()
+    {
+        this->callback_art_rdm_sub = nullptr;
+    }
+
+    void unsubscribeArtTodData()
+    {
+        this->callback_art_tod_data = nullptr;
+    }
+
+    void unsubscribeArtTodRequest()
+    {
+        this->callback_art_tod_request = nullptr;
+    }
+
+    void unsubscribeArtTodControl()
+    {
+        this->callback_art_tod_control = nullptr;
     }
 
 #ifdef FASTLED_VERSION

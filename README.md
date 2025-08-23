@@ -302,6 +302,43 @@ void subscribeArtSync(const ArtSyncCallback &func);
 using ArtSyncCallback = std::function<void(const ArtNetRemoteInfo &remote)>;
 ```
 
+## RDM (Remote Device Management)
+
+This library now supports RDM over Art-Net, allowing for remote configuration and monitoring of RDM-enabled devices. RDM support includes:
+
+- **ArtRdm** (OpCode: 0x8300) - For sending/receiving RDM packets
+- **ArtRdmSub** (OpCode: 0x8400) - For compressed sub-device data
+- **ArtTodRequest** (OpCode: 0x8000) - For requesting Table of Devices
+- **ArtTodData** (OpCode: 0x8100) - For responding with device UIDs
+- **ArtTodControl** (OpCode: 0x8200) - For TOD control commands
+
+### RDM Example
+
+```C++
+// Subscribe to RDM packets
+artnet.subscribeArtRdm([](const uint8_t* data, const uint16_t size,
+                         const art_net::art_rdm::Metadata& metadata,
+                         const art_net::RemoteInfo& remote) {
+    // Handle RDM packet
+    Serial.print("RDM packet from ");
+    Serial.println(remote.ip);
+});
+
+// Subscribe to TOD requests
+artnet.subscribeArtTodRequest([](const uint16_t* addresses, const uint8_t count,
+                                const art_net::art_tod_request::Metadata& metadata,
+                                const art_net::RemoteInfo& remote) {
+    // Respond with your device UID
+    uint8_t my_uid[6] = {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC};
+    artnet.sendArtTodData(remote.ip.toString(), metadata.net, addresses[0],
+                         0, 1, 0, my_uid, 1);
+});
+
+// Send RDM discovery request
+uint16_t addresses[] = {0x0001};
+artnet.sendArtTodRequest("192.168.1.255", 0x00, 0x00, addresses, 1);
+```
+
 ## APIs
 
 ### ArtnetSender
@@ -330,6 +367,15 @@ void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe,
 // send other packets
 void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512);
 void sendArtSync(const String& ip);
+// send RDM packets
+void sendArtRdm(const String& ip, uint8_t net, uint16_t address, const uint8_t* rdm_data, uint16_t rdm_size);
+void sendArtRdmSub(const String& ip, const uint8_t uid[6], uint8_t command_class, uint16_t parameter_id,
+                   uint16_t sub_device, uint16_t sub_count, const uint8_t block[4],
+                   const uint8_t* sub_data, uint16_t sub_size);
+void sendArtTodRequest(const String& ip, uint8_t net, uint8_t command, const uint16_t* addresses, uint8_t count);
+void sendArtTodData(const String& ip, uint8_t net, uint16_t address, uint8_t port,
+                    uint16_t uid_total, uint8_t block_count, const uint8_t* uids, uint8_t uid_count);
+void sendArtTodControl(const String& ip, uint8_t net, uint8_t command, uint16_t address);
 ```
 
 ### ArtnetReceiver
@@ -370,6 +416,12 @@ void subscribeArtDmx(const ArtDmxCallback &func);
 // subscribe other packets
 void subscribeArtSync(const ArtSyncCallback &func);
 void subscribeArtTrigger(const ArtTriggerCallback &func);
+// subscribe RDM packets
+void subscribeArtRdm(const ArtRdmCallback &func);
+void subscribeArtRdmSub(const ArtRdmSubCallback &func);
+void subscribeArtTodData(const ArtTodDataCallback &func);
+void subscribeArtTodRequest(const ArtTodRequestCallback &func);
+void subscribeArtTodControl(const ArtTodControlCallback &func);
 // unsubscribe callbacks
 void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe);
 void unsubscribeArtDmxUniverse(uint16_t universe);
@@ -378,6 +430,11 @@ void unsubscribeArtDmx();
 void unsubscribeArtNzsUniverse(uint16_t universe);
 void unsubscribeArtSync();
 void unsubscribeArtTrigger();
+void unsubscribeArtRdm();
+void unsubscribeArtRdmSub();
+void unsubscribeArtTodData();
+void unsubscribeArtTodRequest();
+void unsubscribeArtTodControl();
 // set artdmx data to CRGB (FastLED) directly
 void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, CRGB* leds, uint16_t num);
 void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num);
