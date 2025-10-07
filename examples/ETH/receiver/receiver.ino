@@ -5,7 +5,7 @@ const IPAddress ip(192, 168, 0, 201);
 const IPAddress gateway(192, 168, 0, 1);
 const IPAddress subnet_mask(255, 255, 255, 0);
 
-ArtnetReceiver artnet;
+ArtnetETHReceiver artnet;
 uint16_t universe1 = 1; // 0 - 32767
 uint8_t net = 0;        // 0 - 127
 uint8_t subnet = 0;     // 0 - 15

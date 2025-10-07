@@ -12,8 +12,8 @@
 #include "Artnet/Manager.h"
 
 // ETH.h is a library for Ethernet PHY, but we should use WiFi library's apis for sever/client
-using Artnet = art_net::Manager<WiFiUDP>;
-using ArtnetSender = art_net::Sender<WiFiUDP>;
-using ArtnetReceiver = art_net::Receiver<WiFiUDP>;
+using ArtnetETH = art_net::Manager<WiFiUDP>;
+using ArtnetETHSender = art_net::Sender<WiFiUDP>;
+using ArtnetETHReceiver = art_net::Receiver<WiFiUDP>;
 
 #endif // ARTNET_ETH_H

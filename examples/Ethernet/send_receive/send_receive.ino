@@ -2,18 +2,14 @@
 #warning THIS EXAMPLE MAY USE TOO MUCH MEMORY FOR AVR. WE RECOMMEND TO USE SENDER OR RECEIVER ONLY.
 #endif
 
-// Please include ArtnetEther.h to use Artnet on the platform
-// which can use both WiFi and Ethernet
 #include <ArtnetEther.h>
 // #include <ArtnetNativeEther.h>  // only for Teensy 4.1
-// this is also valid for other platforms which can use only Ethernet
-// #include <Artnet.h>
 
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
-Artnet artnet;
+ArtnetEther artnet;
 const String target_ip = "192.168.0.200";
 uint8_t universe = 1;  // 0 - 15
 

@@ -6,7 +6,7 @@ const IPAddress ip(192, 168, 0, 201);
 const IPAddress gateway(192, 168, 0, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
-ArtnetReceiver artnet;
+ArtnetETHReceiver artnet;
 uint8_t universe = 1;  // 0 - 15
 
 // FastLED

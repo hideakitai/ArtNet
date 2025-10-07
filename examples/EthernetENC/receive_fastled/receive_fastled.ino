@@ -6,7 +6,7 @@
 const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
-ArtnetReceiver artnet;
+ArtnetEtherENCReceiver artnet;
 uint8_t universe = 1;  // 0 - 15
 
 // FastLED
