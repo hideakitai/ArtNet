@@ -30,6 +30,82 @@
 #elif defined(ARDUINO_UNOR4_WIFI)
 #include <WiFiS3.h>
 #endif
+
+#include "Artnet/ReceiverTraits.h"
+
+namespace art_net {
+
+template <>
+struct LocalIP<WiFiClass>
+{
+    static IPAddress get(WiFiClass& wifi)
+    {
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
+        if( wifi.getMode() == WIFI_AP ) {
+            return wifi.softAPIP();
+        } else {
+            return wifi.localIP();
+        }
+#else
+        return wifi.localIP();
+#endif
+    }
+};
+
+template <>
+struct SubnetMask<WiFiClass>
+{
+    static IPAddress get(WiFiClass& wifi)
+    {
+#if defined(ARDUINO_ARCH_ESP32)
+        if( wifi.getMode() == WIFI_AP ) {
+            return wifi.softAPSubnetMask();
+        } else {
+            return wifi.subnetMask();
+        }
+#else
+        return wifi.subnetMask();
+#endif
+    }
+};
+
+template <>
+struct MacAddress<WiFiClass>
+{
+    static void get(WiFiClass& wifi, uint8_t mac[6])
+    {
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
+        if( wifi.getMode() == WIFI_AP ) {
+            wifi.softAPmacAddress(mac);
+        } else {
+            wifi.macAddress(mac);
+        }
+#else
+        wifi.macAddress(mac);
+#endif
+    }
+};
+
+template <>
+IPAddress getLocalIP<WiFiUDP>()
+{
+    return LocalIP<WiFiClass>::get(WiFi);
+}
+
+template <>
+IPAddress getSubnetMask<WiFiUDP>()
+{
+    return SubnetMask<WiFiClass>::get(WiFi);
+}
+
+template <>
+void getMacAddress<WiFiUDP>(uint8_t mac[6])
+{
+    MacAddress<WiFiClass>::get(WiFi, mac);
+}
+
+} // namespace art_net
+
 #include "Artnet/Manager.h"
 
 using ArtnetWiFi = art_net::Manager<WiFiUDP>;
