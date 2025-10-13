@@ -15,20 +15,25 @@
 #if defined(ESP_PLATFORM) || defined(ARDUINO_ARCH_RP2040)
 #include <WiFi.h>
 #include <WiFiUdp.h>
+using ArtnetWiFiClass = WiFiClass;
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
+using ArtnetWiFiClass = ESP8266WiFiClass;
 #elif defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) \
     || defined(ARDUINO_SAMD_NANO_33_IOT)
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <WiFiUdp.h>
+using ArtnetWiFiClass = WiFiClass;
 #elif defined(ARDUINO_SAMD_MKR1000)
 #include <SPI.h>
 #include <WiFi101.h>
 #include <WiFiUdp.h>
+using ArtnetWiFiClass = WiFiClass;
 #elif defined(ARDUINO_UNOR4_WIFI)
 #include <WiFiS3.h>
+using ArtnetWiFiClass = CWifi;
 #endif
 
 #include "Artnet/ReceiverTraits.h"
@@ -36,9 +41,9 @@
 namespace art_net {
 
 template <>
-struct LocalIP<WiFiClass>
+struct LocalIP<ArtnetWiFiClass>
 {
-    static IPAddress get(WiFiClass& wifi)
+    static IPAddress get(ArtnetWiFiClass& wifi)
     {
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
         if( wifi.getMode() == WIFI_AP ) {
@@ -53,9 +58,9 @@ struct LocalIP<WiFiClass>
 };
 
 template <>
-struct SubnetMask<WiFiClass>
+struct SubnetMask<ArtnetWiFiClass>
 {
-    static IPAddress get(WiFiClass& wifi)
+    static IPAddress get(ArtnetWiFiClass& wifi)
     {
 #if defined(ARDUINO_ARCH_ESP32)
         if( wifi.getMode() == WIFI_AP ) {
@@ -70,9 +75,9 @@ struct SubnetMask<WiFiClass>
 };
 
 template <>
-struct MacAddress<WiFiClass>
+struct MacAddress<ArtnetWiFiClass>
 {
-    static void get(WiFiClass& wifi, uint8_t mac[6])
+    static void get(ArtnetWiFiClass& wifi, uint8_t mac[6])
     {
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
         if( wifi.getMode() == WIFI_AP ) {
@@ -89,19 +94,19 @@ struct MacAddress<WiFiClass>
 template <>
 IPAddress getLocalIP<WiFiUDP>()
 {
-    return LocalIP<WiFiClass>::get(WiFi);
+    return LocalIP<ArtnetWiFiClass>::get(WiFi);
 }
 
 template <>
 IPAddress getSubnetMask<WiFiUDP>()
 {
-    return SubnetMask<WiFiClass>::get(WiFi);
+    return SubnetMask<ArtnetWiFiClass>::get(WiFi);
 }
 
 template <>
 void getMacAddress<WiFiUDP>(uint8_t mac[6])
 {
-    MacAddress<WiFiClass>::get(WiFi, mac);
+    MacAddress<ArtnetWiFiClass>::get(WiFi, mac);
 }
 
 } // namespace art_net
