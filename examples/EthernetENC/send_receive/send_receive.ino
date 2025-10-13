@@ -4,7 +4,6 @@
 
 #include <ArtnetEtherENC.h>
 
-
 // Ethernet stuff
 const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};

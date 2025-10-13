@@ -13,8 +13,7 @@ using ArtnetWiFiClass = WiFiClass;
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 using ArtnetWiFiClass = ESP8266WiFiClass;
-#elif defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) \
-    || defined(ARDUINO_SAMD_NANO_33_IOT)
+#elif defined(ARDUINO_AVR_UNO_WIFI_REV2) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_NANO_33_IOT)
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <WiFiUdp.h>
@@ -28,7 +27,6 @@ using ArtnetWiFiClass = WiFiClass;
 #include <WiFiS3.h>
 using ArtnetWiFiClass = CWifi;
 #endif
-
 #include "Artnet/ReceiverTraits.h"
 
 namespace art_net {
