@@ -25,6 +25,10 @@ template <typename T>
 bool isNetworkReady(T&& x) {
     return IsNetworkReady<std::decay_t<T>>::get(std::forward<T>(x));
 }
+template <typename T>
+bool isNetworkReady(T&& x) {
+    return IsNetworkReady<std::decay_t<T>>::isNetworkReady(std::forward<T>(x));
+}
 
 template <typename T>
 IPAddress getLocalIP();
