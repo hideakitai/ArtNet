@@ -2,8 +2,6 @@
 #ifndef ARTNET_RECEIVER_TRAITS_H
 #define ARTNET_RECEIVER_TRAITS_H
 
-class IPAddress;
-
 namespace art_net {
 
 template <typename T> struct LocalIP;
