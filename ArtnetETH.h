@@ -2,14 +2,11 @@
 #ifndef ARTNET_ETH_H
 #define ARTNET_ETH_H
 
-#define ARTNET_ENABLE_ETH
-
 #include <Arduino.h>
 #include <ArxTypeTraits.h>
 #include <ArxContainer.h>
 #include <ETH.h>
 #include <WiFiUdp.h>
-
 #include "Artnet/ReceiverTraits.h"
 
 namespace art_net {
@@ -55,6 +52,12 @@ template <>
 void getMacAddress<WiFiUDP>(uint8_t mac[6])
 {
     MacAddress<ETHClass>::get(ETH, mac);
+}
+
+template <>
+bool isNetworkReady<WiFiUDP>()
+{
+    return true;
 }
 
 } // namespace art_net

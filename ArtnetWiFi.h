@@ -2,13 +2,6 @@
 #ifndef ARTNET_WIFI_H
 #define ARTNET_WIFI_H
 
-#if defined(ESP_PLATFORM) || defined(ESP8266) || defined(ARDUINO_AVR_UNO_WIFI_REV2)                             \
-    || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRVIDOR4000) || defined(ARDUINO_SAMD_MKR1000) \
-    || defined(ARDUINO_SAMD_NANO_33_IOT) || defined(ARDUINO_RASPBERRY_PI_PICO_W) || defined(ARDUINO_UNOR4_WIFI)
-#define ARTNET_ENABLE_WIFI
-#endif
-
-#ifdef ARTNET_ENABLE_WIFI
 #include <Arduino.h>
 #include <ArxTypeTraits.h>
 #include <ArxContainer.h>
@@ -92,6 +85,22 @@ struct MacAddress<ArtnetWiFiClass>
 };
 
 template <>
+struct IsNetworkReady<ArtnetWiFiClass>
+{
+    static bool get(ArtnetWiFiClass& wifi)
+    {
+        auto status = wifi.status();
+        auto is_connected = status == WL_CONNECTED;
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
+        bool is_ap_active = wifi.getMode() == WIFI_AP;
+#else
+        bool is_ap_active = status == WL_AP_CONNECTED;
+#endif
+        return is_connected || is_ap_active;
+    }
+};
+
+template <>
 IPAddress getLocalIP<WiFiUDP>()
 {
     return LocalIP<ArtnetWiFiClass>::get(WiFi);
@@ -109,6 +118,12 @@ void getMacAddress<WiFiUDP>(uint8_t mac[6])
     MacAddress<ArtnetWiFiClass>::get(WiFi, mac);
 }
 
+template <>
+bool isNetworkReady<WiFiUDP>()
+{
+    return IsNetworkReady<ArtnetWiFiClass>::get(WiFi);
+}
+
 } // namespace art_net
 
 #include "Artnet/Manager.h"
@@ -116,6 +131,5 @@ void getMacAddress<WiFiUDP>(uint8_t mac[6])
 using ArtnetWiFi = art_net::Manager<WiFiUDP>;
 using ArtnetWiFiSender = art_net::Sender<WiFiUDP>;
 using ArtnetWiFiReceiver = art_net::Receiver<WiFiUDP>;
-#endif  // ARTNET_ENABLE_WIFI
 
 #endif  // ARTNET_WIFI_H

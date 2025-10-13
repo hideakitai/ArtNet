@@ -47,11 +47,10 @@ public:
 
     OpCode parse()
     {
-#ifdef ARTNET_ENABLE_WIFI
-        if (!isNetworkReady()) {
+        if (!isNetworkReady<S>()) {
             return OpCode::NoPacket;
         }
-#endif
+
         size_t size = this->stream->parsePacket();
         if (size == 0) {
             return OpCode::NoPacket;

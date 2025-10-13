@@ -2,15 +2,12 @@
 #ifndef ARTNET_ETHER_H
 #define ARTNET_ETHER_H
 
-#define ARTNET_ENABLE_ETHER
-
 #include <Arduino.h>
 #include <ArxTypeTraits.h>
 #include <ArxContainer.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include "Artnet/util/TeensyDirtySTLErrorSolution/TeensyDirtySTLErrorSolution.h"
-
 #include "Artnet/ReceiverTraits.h"
 
 namespace art_net {
@@ -58,6 +55,12 @@ template <>
 void getMacAddress<EthernetUDP>(uint8_t mac[6])
 {
     MacAddress<EthernetClass>::get(Ethernet, mac);
+}
+
+template <>
+bool isNetworkReady<EthernetUDP>()
+{
+    return true;
 }
 
 } // namespace art_net
