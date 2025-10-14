@@ -11,7 +11,10 @@ const IPAddress subnet(255, 255, 255, 0);
 const IPAddress ip_ether(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
-std::unique_ptr<ArtnetInterface> artnet;
+// To switch between ArtnetWiFi and ArtnetEther at runtime, use pointer to the interface
+// std::unique_ptr<ArtnetSenderInterface> artnet; // if you only need sender functions
+// std::unique_ptr<ArtnetReceiverInterface> artnet; // if you only need receiver functions
+std::unique_ptr<ArtnetInterface> artnet; // if you need both sender and receiver functions
 const String target_ip = "192.168.1.200";
 uint8_t universe = 1;  // 0 - 15
 
