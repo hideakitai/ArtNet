@@ -11,9 +11,7 @@ const IPAddress subnet(255, 255, 255, 0);
 const IPAddress ip_ether(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
-// TODO: Switching the following instances at runtime
-ArtnetEther artnet_ether;
-ArtnetWiFi artnet_wifi;
+std::unique_ptr<ArtnetInterface> artnet;
 const String target_ip = "192.168.1.200";
 uint8_t universe = 1;  // 0 - 15
 
@@ -66,7 +64,6 @@ void onArtDmx(const uint8_t *data, uint16_t size, const ArtDmxMetadata& metadata
 void setup() {
     Serial.begin(115200);
 
-    // TODO: Switching the following instances at runtime
     if (use_wifi) {
         Serial.println("Use WiFi for ArtNet");
         // WiFi stuff
@@ -79,33 +76,31 @@ void setup() {
         Serial.print("WiFi connected, IP = ");
         Serial.println(WiFi.localIP());
         // ArtnetWiFi
-        artnet_wifi.begin();
-        artnet_wifi.subscribeArtDmxUniverse(universe, onArtDmxUniverse);
-        artnet_wifi.subscribeArtDmx(onArtDmx);
+        artnet = std::make_unique<ArtnetWiFi>();
+        artnet->begin();
+        artnet->subscribeArtDmxUniverse(universe, onArtDmxUniverse);
+        artnet->subscribeArtDmx(onArtDmx);
     } else {
         Serial.println("Use Ethernet for ArtNet");
         // Ethernet stuff
         Ethernet.begin(mac, ip_ether);
         // ArtnetEther
-        artnet_ether.begin();
-        artnet_ether.subscribeArtDmxUniverse(universe, onArtDmxUniverse);
-        artnet_ether.subscribeArtDmx(onArtDmx);
+        artnet = std::make_unique<ArtnetEther>();
+        artnet->begin();
+        artnet->subscribeArtDmxUniverse(universe, onArtDmxUniverse);
+        artnet->subscribeArtDmx(onArtDmx);
     }
 }
 
 void loop() {
-    // TODO: Switching the following instances at runtime
     // check if artnet packet has come and execute callback
-    artnet_wifi.parse();
-    artnet_ether.parse();
+    artnet->parse();
 
     value = (millis() / 4) % 256;
     memset(data, value, size);
 
-    artnet_wifi.setArtDmxData(data, size);
-    artnet_ether.setArtDmxData(data, size);
+    artnet->setArtDmxData(data, size);
 
     // automatically send set data in 40fps
-    artnet_wifi.streamArtDmxTo(target_ip, universe);
-    artnet_ether.streamArtDmxTo(target_ip, universe);
+    artnet->streamArtDmxTo(target_ip, universe);
 }
