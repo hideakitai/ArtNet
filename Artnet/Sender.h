@@ -12,7 +12,11 @@
 namespace art_net {
 
 template <typename S>
+#ifndef ARDUINO_ARCH_AVR
 class Sender_ : virtual ISender_
+#else
+class Sender_
+#endif
 {
     S* stream;
     Array<PACKET_SIZE> packet;
@@ -30,27 +34,27 @@ public:
 #endif
 
     // streaming artdmx packet
-    void setArtDmxData(const uint8_t* const data, uint16_t size) override
+    void setArtDmxData(const uint8_t* const data, uint16_t size)
     {
         art_dmx::setDataTo(this->packet.data(), data, size);
     }
-    void setArtDmxData(uint16_t ch, uint8_t data) override
+    void setArtDmxData(uint16_t ch, uint8_t data)
     {
         art_dmx::setDataTo(this->packet.data(), ch, data);
     }
 
-    void streamArtDmxTo(const String& ip, uint16_t universe15bit) override
+    void streamArtDmxTo(const String& ip, uint16_t universe15bit)
     {
         uint8_t net = (universe15bit >> 8) & 0x7F;
         uint8_t subnet = (universe15bit >> 4) & 0x0F;
         uint8_t universe = (universe15bit >> 0) & 0x0F;
         this->streamArtDmxTo(ip, net, subnet, universe, 0);
     }
-    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe) override
+    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe)
     {
         this->streamArtDmxTo(ip, net, subnet, universe, 0);
     }
-    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical) override
+    void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical)
     {
         Destination dest {ip, net, subnet, universe};
         uint32_t now = millis();
@@ -64,27 +68,27 @@ public:
     }
 
     // streaming artnzs packet
-    void setArtNzsData(const uint8_t* const data, uint16_t size) override
+    void setArtNzsData(const uint8_t* const data, uint16_t size)
     {
         art_nzs::setDataTo(this->packet.data(), data, size);
     }
-    void setArtNzsData(uint16_t ch, uint8_t data) override
+    void setArtNzsData(uint16_t ch, uint8_t data)
     {
         art_nzs::setDataTo(this->packet.data(), ch, data);
     }
 
-    void streamArtNzsTo(const String& ip, uint16_t universe15bit) override
+    void streamArtNzsTo(const String& ip, uint16_t universe15bit)
     {
         uint8_t net = (universe15bit >> 8) & 0x7F;
         uint8_t subnet = (universe15bit >> 4) & 0x0F;
         uint8_t universe = (universe15bit >> 0) & 0x0F;
         this->streamArtNzsTo(ip, net, subnet, universe, 0);
     }
-    void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe) override
+    void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe)
     {
         this->streamArtNzsTo(ip, net, subnet, universe, 0);
     }
-    void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code) override
+    void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code)
     {
         Destination dest {ip, net, subnet, universe};
         uint32_t now = millis();
@@ -98,18 +102,18 @@ public:
     }
 
     // one-line artdmx sender
-    void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size) override
+    void sendArtDmx(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size)
     {
         uint8_t net = (universe15bit >> 8) & 0x7F;
         uint8_t subnet = (universe15bit >> 4) & 0x0F;
         uint8_t universe = (universe15bit >> 0) & 0x0F;
         this->sendArtDmx(ip, net, subnet, universe, 0, data, size);
     }
-    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size) override
+    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size)
     {
         this->sendArtDmx(ip, net, subnet, universe, 0, data, size);
     }
-    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size) override
+    void sendArtDmx(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical, const uint8_t *data, uint16_t size)
     {
         Destination dest {ip, net, subnet, universe};
         this->setArtDmxData(data, size);
@@ -117,31 +121,31 @@ public:
     }
 
     // one-line artnzs sender
-    void sendArtNzs(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size) override
+    void sendArtNzs(const String& ip, uint16_t universe15bit, const uint8_t* const data, uint16_t size)
     {
         uint8_t net = (universe15bit >> 8) & 0x7F;
         uint8_t subnet = (universe15bit >> 4) & 0x0F;
         uint8_t universe = (universe15bit >> 0) & 0x0F;
         this->sendArtNzs(ip, net, subnet, universe, data, size);
     }
-    void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size) override
+    void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, const uint8_t* const data, uint16_t size)
     {
         this->sendArtNzs(ip, net, subnet, universe, 0, data, size);
     }
-    void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code, const uint8_t *data, uint16_t size) override
+    void sendArtNzs(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code, const uint8_t *data, uint16_t size)
     {
         Destination dest {ip, net, subnet, universe};
         this->setArtNzsData(data, size);
         this->sendArxNzsInternal(dest, start_code);
     }
 
-    void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512) override
+    void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512)
     {
         art_trigger::setDataTo(packet.data(), oem, key, subkey, payload, size);
         this->sendRawData(ip, DEFAULT_PORT, packet.data(), packet.size());
     }
 
-    void sendArtSync(const String& ip) override
+    void sendArtSync(const String& ip)
     {
         art_sync::setMetadataTo(packet.data());
         this->sendRawData(ip, DEFAULT_PORT, packet.data(), art_sync::PACKET_SIZE);
@@ -190,7 +194,11 @@ protected:
 };
 
 template <typename S>
+#ifndef ARDUINO_ARCH_AVR
 class Sender : public ISender, public Sender_<S>
+#else
+class Sender : public Sender_<S>
+#endif
 {
     S stream;
 
