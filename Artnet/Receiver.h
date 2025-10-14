@@ -8,6 +8,7 @@
 #include "ArtPollReply.h"
 #include "ArtTrigger.h"
 #include "ArtSync.h"
+#include "ReceiverTraits.h"
 
 namespace art_net {
 
@@ -22,7 +23,7 @@ static NoPrint no_log;
 } // namespace
 
 template <typename S>
-class Receiver_
+class Receiver_ : virtual IReceiver_
 {
     S *stream;
     Array<PACKET_SIZE> packet;
@@ -45,7 +46,7 @@ public:
     }
 #endif
 
-    OpCode parse()
+    OpCode parse() override
     {
         if (!isNetworkReady<S>()) {
             return OpCode::NoPacket;
@@ -140,7 +141,7 @@ public:
     }
 
     // subscribe artdmx packet for specified net, subnet, and universe
-    void subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const ArtDmxCallback& func)
+    void subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const ArtDmxCallback& func) override
     {
         if (net > 0x7F) {
             this->logger->println(F("net should be less than 0x7F"));
@@ -159,57 +160,57 @@ public:
     }
 
     // subscribe artdmx packet for specified universe (15 bit)
-    void subscribeArtDmxUniverse(uint16_t universe, const ArtDmxCallback& func)
+    void subscribeArtDmxUniverse(uint16_t universe, const ArtDmxCallback& func) override
     {
         this->callback_art_dmx_universes.insert(std::make_pair(universe, func));
     }
 
     // subscribe artnzs packet for specified universe (15 bit)
-    void subscribeArtNzsUniverse(uint16_t universe, const ArtNzsCallback& func)
+    void subscribeArtNzsUniverse(uint16_t universe, const ArtNzsCallback& func) override
     {
         this->callback_art_nzs_universes.insert(std::make_pair(universe, func));
     }
 
     // subscribe artdmx packet for all universes
-    void subscribeArtDmx(const ArtDmxCallback& func)
+    void subscribeArtDmx(const ArtDmxCallback& func) override
     {
         this->callback_art_dmx = func;
     }
 
     // subscribe other packets
-    void subscribeArtSync(const ArtSyncCallback& func)
+    void subscribeArtSync(const ArtSyncCallback& func) override
     {
         this->callback_art_sync = func;
     }
 
     // subscribe art_trigger packet
-    void subscribeArtTrigger(const ArtTriggerCallback& func)
+    void subscribeArtTrigger(const ArtTriggerCallback& func) override
     {
         this->callback_art_trigger = func;
     }
 
-    void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe)
+    void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe) override
     {
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
         this->unsubscribeArtDmxUniverse(u);
     }
-    void unsubscribeArtDmxUniverse(uint16_t universe)
+    void unsubscribeArtDmxUniverse(uint16_t universe) override
     {
         auto it = this->callback_art_dmx_universes.find(universe);
         if (it != this->callback_art_dmx_universes.end()) {
             this->callback_art_dmx_universes.erase(it);
         }
     }
-    void unsubscribeArtDmxUniverses()
+    void unsubscribeArtDmxUniverses() override
     {
         this->callback_art_dmx_universes.clear();
     }
-    void unsubscribeArtDmx()
+    void unsubscribeArtDmx() override
     {
         this->callback_art_dmx = nullptr;
     }
 
-    void unsubscribeArtNzsUniverse(uint16_t universe)
+    void unsubscribeArtNzsUniverse(uint16_t universe) override
     {
         auto it = this->callback_art_nzs_universes.find(universe);
         if (it != this->callback_art_nzs_universes.end()) {
@@ -217,23 +218,23 @@ public:
         }
     }
 
-    void unsubscribeArtSync()
+    void unsubscribeArtSync() override
     {
         this->callback_art_sync = nullptr;
     }
 
-    void unsubscribeArtTrigger()
+    void unsubscribeArtTrigger() override
     {
         this->callback_art_trigger = nullptr;
     }
 
 #ifdef FASTLED_VERSION
-    void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, CRGB* leds, uint16_t num)
+    void forwardArtDmxDataToFastLED(uint8_t net, uint8_t subnet, uint8_t universe, CRGB* leds, uint16_t num) override
     {
         uint16_t u = ((uint16_t)net << 8) | ((uint16_t)subnet << 4) | (uint16_t)universe;
         this->forwardArtDmxDataToFastLED(u, leds, num);
     }
-    void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num)
+    void forwardArtDmxDataToFastLED(uint16_t universe, CRGB* leds, uint16_t num) override
     {
         this->subscribeArtDmxUniverse(universe, [this, leds, num](const uint8_t* data, const uint16_t size, const ArtDmxMetadata &, const RemoteInfo &) {
             size_t n;
@@ -259,47 +260,47 @@ public:
 #endif
 
     // https://art-net.org.uk/how-it-works/discovery-packets/artpollreply/
-    void setArtPollReplyConfigOem(uint16_t oem)
+    void setArtPollReplyConfigOem(uint16_t oem) override
     {
         this->art_poll_reply_config.oem = oem;
     }
-    void setArtPollReplyConfigEstaMan(uint16_t esta_man)
+    void setArtPollReplyConfigEstaMan(uint16_t esta_man) override
     {
         this->art_poll_reply_config.esta_man = esta_man;
     }
-    void setArtPollReplyConfigStatus1(uint8_t status1)
+    void setArtPollReplyConfigStatus1(uint8_t status1) override
     {
         this->art_poll_reply_config.status1 = status1;
     }
-    void setArtPollReplyConfigStatus2(uint8_t status2)
+    void setArtPollReplyConfigStatus2(uint8_t status2) override
     {
         this->art_poll_reply_config.status2 = status2;
     }
-    void setArtPollReplyConfigShortName(const String &short_name)
+    void setArtPollReplyConfigShortName(const String &short_name) override
     {
         this->art_poll_reply_config.short_name = short_name;
     }
-    void setArtPollReplyConfigLongName(const String &long_name)
+    void setArtPollReplyConfigLongName(const String &long_name) override
     {
         this->art_poll_reply_config.long_name = long_name;
     }
-    void setArtPollReplyConfigNodeReport(const String &node_report)
+    void setArtPollReplyConfigNodeReport(const String &node_report) override
     {
         this->art_poll_reply_config.node_report = node_report;
     }
-    void setArtPollReplyConfigSwIn(size_t index, uint8_t sw_in)
+    void setArtPollReplyConfigSwIn(size_t index, uint8_t sw_in) override
     {
         if (index < 4) {
             this->art_poll_reply_config.sw_in[index] = sw_in;
         }
     }
-    void setArtPollReplyConfigSwIn(uint8_t sw_in[4])
+    void setArtPollReplyConfigSwIn(uint8_t sw_in[4]) override
     {
         for (size_t i = 0; i < 4; ++i) {
             this->art_poll_reply_config.sw_in[i] = sw_in[i];
         }
     }
-    void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2, uint8_t sw_in_3)
+    void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2, uint8_t sw_in_3) override
     {
         this->setArtPollReplyConfigSwIn(0, sw_in_0);
         this->setArtPollReplyConfigSwIn(1, sw_in_1);
@@ -315,7 +316,7 @@ public:
         const String &long_name,
         const String &node_report,
         uint8_t sw_in[4]
-    ) {
+    ) override {
         this->setArtPollReplyConfigOem(oem);
         this->setArtPollReplyConfigEstaMan(esta_man);
         this->setArtPollReplyConfigStatus1(status1);
@@ -325,12 +326,12 @@ public:
         this->setArtPollReplyConfigNodeReport(node_report);
         this->setArtPollReplyConfigSwIn(sw_in);
     }
-    void setArtPollReplyConfig(const ArtPollReplyConfig &cfg)
+    void setArtPollReplyConfig(const ArtPollReplyConfig &cfg) override
     {
         this->art_poll_reply_config = cfg;
     }
 
-    void setLogger(Print* logger)
+    void setLogger(Print* logger) override
     {
         this->logger = logger;
     }
@@ -413,7 +414,7 @@ private:
 };
 
 template <typename S>
-class Receiver : public Receiver_<S>
+class Receiver : public IReceiver, public Receiver_<S>
 {
     S stream;
 
