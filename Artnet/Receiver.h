@@ -140,9 +140,7 @@ public:
     }
 
     // subscribe artdmx packet for specified net, subnet, and universe
-    template <typename Fn>
-    auto subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    void subscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe, const ArtDmxCallback& func)
     {
         if (net > 0x7F) {
             this->logger->println(F("net should be less than 0x7F"));
@@ -161,42 +159,33 @@ public:
     }
 
     // subscribe artdmx packet for specified universe (15 bit)
-    template <typename Fn>
-    auto subscribeArtDmxUniverse(uint16_t universe, const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    void subscribeArtDmxUniverse(uint16_t universe, const ArtDmxCallback& func)
     {
-        this->callback_art_dmx_universes.insert(std::make_pair(universe, arx::function_traits<Fn>::cast(func)));
+        this->callback_art_dmx_universes.insert(std::make_pair(universe, func));
     }
 
     // subscribe artnzs packet for specified universe (15 bit)
-    template <typename Fn>
-    auto subscribeArtNzsUniverse(uint16_t universe, const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    void subscribeArtNzsUniverse(uint16_t universe, const ArtNzsCallback& func)
     {
-        this->callback_art_nzs_universes.insert(std::make_pair(universe, arx::function_traits<Fn>::cast(func)));
+        this->callback_art_nzs_universes.insert(std::make_pair(universe, func));
     }
 
     // subscribe artdmx packet for all universes
-    template <typename Fn>
-    auto subscribeArtDmx(const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    void subscribeArtDmx(const ArtDmxCallback& func)
     {
-        this->callback_art_dmx = arx::function_traits<Fn>::cast(func);
+        this->callback_art_dmx = func;
     }
 
     // subscribe other packets
-    template <typename Fn>
-    auto subscribeArtSync(const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    void subscribeArtSync(const ArtSyncCallback& func)
     {
-        this->callback_art_sync = arx::function_traits<Fn>::cast(func);
+        this->callback_art_sync = func;
     }
 
-    template <typename Fn>
-    auto subscribeArtTrigger(const Fn &func)
-    -> std::enable_if_t<arx::is_callable<Fn>::value>
+    // subscribe art_trigger packet
+    void subscribeArtTrigger(const ArtTriggerCallback& func)
     {
-        this->callback_art_trigger = arx::function_traits<Fn>::cast(func);
+        this->callback_art_trigger = func;
     }
 
     void unsubscribeArtDmxUniverse(uint8_t net, uint8_t subnet, uint8_t universe)
