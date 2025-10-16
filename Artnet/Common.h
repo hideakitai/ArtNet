@@ -64,11 +64,11 @@ constexpr uint16_t HEADER_SIZE {18};
 constexpr uint16_t PACKET_SIZE {530};
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-template <uint16_t SIZE>
-using Array = std::array<uint8_t, SIZE>;
+template <uint16_t SIZE, typename T = uint8_t>
+using Array = std::array<T, SIZE>;
 #else
-template <uint16_t SIZE>
-using Array = arx::stdx::vector<uint8_t, SIZE>;
+template <uint16_t SIZE, typename T = uint8_t>
+using Array = arx::stdx::vector<T, SIZE>;
 #endif
 
 struct RemoteInfo
