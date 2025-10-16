@@ -47,11 +47,10 @@ public:
 
     OpCode parse()
     {
-#ifdef ARTNET_ENABLE_WIFI
-        if (!isNetworkReady()) {
+        if (!isNetworkReady<S>()) {
             return OpCode::NoPacket;
         }
-#endif
+
         size_t size = this->stream->parsePacket();
         if (size == 0) {
             return OpCode::NoPacket;
@@ -378,9 +377,9 @@ private:
 
     void sendArtPollReply(const RemoteInfo &remote)
     {
-        const IPAddress my_ip = this->localIP();
+        const IPAddress my_ip = getLocalIP<S>();
         uint8_t my_mac[6];
-        this->macAddress(my_mac);
+        getMacAddress<S>(my_mac);
 
         arx::stdx::map<uint16_t, bool> universes;
         for (const auto &cb_pair : this->callback_art_dmx_universes) {
@@ -421,84 +420,6 @@ private:
     {
         return this->packet.data() + art_trigger::PAYLOAD;
     }
-
-#ifdef ARTNET_ENABLE_WIFI
-    template <typename T = S>
-    auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress>
-    {
-#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
-        if( WiFi.getMode() == WIFI_AP ) {
-            return WiFi.softAPIP();
-        } else {
-            return WiFi.localIP();
-        }
-#else
-        return WiFi.localIP();
-#endif
-    }
-    template <typename T = S>
-    auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress>
-    {
-#if defined(ARDUINO_ARCH_ESP32)
-        if( WiFi.getMode() == WIFI_AP ) {
-            return WiFi.softAPSubnetMask();
-        } else {
-            return WiFi.subnetMask();
-        }
-#else
-        return WiFi.subnetMask();
-#endif
-    }
-    template <typename T = S>
-    auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value>
-    {
-#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_RP2040)
-        if( WiFi.getMode() == WIFI_AP ) {
-            WiFi.softAPmacAddress(mac);
-        } else {
-            WiFi.macAddress(mac);
-        }
-#else
-        WiFi.macAddress(mac);
-#endif
-    }
-#endif  // ARTNET_ENABLE_WIFI
-
-#ifdef ARTNET_ENABLE_ETHER
-    template <typename T = S>
-    auto localIP() -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress>
-    {
-        return Ethernet.localIP();
-    }
-    template <typename T = S>
-    auto subnetMask() -> std::enable_if_t<std::is_same<T, EthernetUDP>::value, IPAddress>
-    {
-        return Ethernet.subnetMask();
-    }
-    template <typename T = S>
-    inline auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, EthernetUDP>::value>
-    {
-        Ethernet.MACAddress(mac);
-    }
-#endif  // ARTNET_ENABLE_ETHER
-
-#ifdef ARTNET_ENABLE_ETH
-    template <typename T = S>
-    auto localIP() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress>
-    {
-        return ETH.localIP();
-    }
-    template <typename T = S>
-    auto subnetMask() -> std::enable_if_t<std::is_same<T, WiFiUDP>::value, IPAddress>
-    {
-        return ETH.subnetMask();
-    }
-    template <typename T = S>
-    auto macAddress(uint8_t* mac) -> std::enable_if_t<std::is_same<T, WiFiUDP>::value>
-    {
-        ETH.macAddress(mac);
-    }
-#endif  // ARTNET_ENABLE_ETH
 
 };
 

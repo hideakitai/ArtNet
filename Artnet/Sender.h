@@ -154,11 +154,10 @@ protected:
 
     void sendArxDmxInternal(const Destination &dest, uint8_t physical)
     {
-#ifdef ARTNET_ENABLE_WIFI
-        if (!isNetworkReady()) {
+        if (!isNetworkReady<S>()) {
             return;
         }
-#endif
+
         if (this->dmx_sequences.find(dest) == this->dmx_sequences.end()) {
             this->dmx_sequences.insert(std::make_pair(dest, uint8_t(0)));
         }
@@ -169,11 +168,10 @@ protected:
 
     void sendArxNzsInternal(const Destination &dest, uint8_t start_code)
     {
-#ifdef ARTNET_ENABLE_WIFI
-        if (!isNetworkReady()) {
+        if (!isNetworkReady<S>()) {
             return;
         }
-#endif
+
         if (this->nzs_sequences.find(dest) == this->nzs_sequences.end()) {
             this->nzs_sequences.insert(std::make_pair(dest, uint8_t(0)));
         }

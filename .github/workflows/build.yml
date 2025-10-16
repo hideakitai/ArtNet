@@ -43,6 +43,9 @@ jobs:
           # - vendor: rp2040
           #   arch: rp2040
           #   name: rpipicow
+          # - vendor: rp2040
+          #   arch: rp2040
+          #   name: rpipico2w
         include:
           - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
             board:
@@ -200,6 +203,9 @@ jobs:
           - vendor: rp2040
             arch: rp2040
             name: rpipicow
+          - vendor: rp2040
+            arch: rp2040
+            name: rpipico2w
           # - vendor: teensy
           #   arch: avr
           #   name: teensy35
@@ -337,6 +343,9 @@ jobs:
           # - vendor: rp2040
           #   arch: rp2040
           #   name: rpipicow
+          # - vendor: rp2040
+          #   arch: rp2040
+          #   name: rpipico2w
         include:
           # TODO: temporary disabled because of compile error of FastLED for SAMD
           # - index: https://downloads.arduino.cc/packages/package_index.json
