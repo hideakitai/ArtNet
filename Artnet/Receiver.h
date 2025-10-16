@@ -41,6 +41,20 @@ class Receiver_
 
     Print *logger {&no_log};
 
+    static constexpr uint16_t PENDING_POLL_REPLY_CACHE_SIZE {3};
+    static constexpr uint16_t MAX_POLL_REPLY_DELAY_MS {1000};
+
+    struct PendingPollReply
+    {
+        // NOTE: To simplify the logic, we use fixed size array and do not remove old entries
+        bool active {false};
+        RemoteInfo remote {};
+        uint32_t requested_at_ms {0};
+        uint32_t wait_ms {0};
+    };
+
+    Array<PENDING_POLL_REPLY_CACHE_SIZE, PendingPollReply> pending_poll_replies {};
+
 public:
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 #else
@@ -55,6 +69,8 @@ public:
         if (!isNetworkReady<S>()) {
             return OpCode::NoPacket;
         }
+
+        this->processPendingPollReplies();
 
         size_t size = this->stream->parsePacket();
         if (size == 0) {
@@ -107,7 +123,7 @@ public:
                 break;
             }
             case OpCode::Poll: {
-                this->sendArtPollReply(remote_info);
+                this->scheduleArtPollReply(remote_info);
                 op_code = OpCode::Poll;
                 break;
             }
@@ -392,6 +408,37 @@ private:
             this->stream->beginPacket(remote.ip, DEFAULT_PORT);
             this->stream->write(reply.b, sizeof(art_poll_reply::Packet));
             this->stream->endPacket();
+        }
+    }
+
+    void processPendingPollReplies()
+    {
+        const uint32_t now = millis();
+        for (auto &pending : this->pending_poll_replies) {
+            if (!pending.active) {
+                continue;
+            }
+            if (now >= pending.requested_at_ms + pending.wait_ms) {
+                this->sendArtPollReply(pending.remote);
+                pending.active = false;
+            }
+        }
+    }
+
+    /// @brief Schedule to send ArtPollReply after random delay up to MAX_POLL_REPLY_DELAY_MS
+    /// @param remote RemoteInfo of the requester
+    /// @note If there are more than PENDING_POLL_REPLY_CACHE_SIZE requests at the same time, the extra requests will be ignored.
+    void scheduleArtPollReply(const RemoteInfo &remote)
+    {
+        const uint32_t now = millis();
+        for (auto &pending : this->pending_poll_replies) {
+            if (!pending.active) {
+                pending.active = true;
+                pending.remote = remote;
+                pending.requested_at_ms = now;
+                pending.wait_ms = static_cast<uint32_t>(random(MAX_POLL_REPLY_DELAY_MS + 1));
+                return;
+            }
         }
     }
 
