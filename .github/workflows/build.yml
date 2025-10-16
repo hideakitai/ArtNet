@@ -385,3 +385,52 @@ jobs:
             - name: FastLED
             - source-url: https://github.com/JAndrassy/EthernetENC.git
           verbose: true
+
+  build-multi:
+    name: "Build Test (Multiple): ${{matrix.board.arch}}:${{matrix.board.name}}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          - vendor: esp8266
+            arch: esp8266
+            name: generic
+          - vendor: esp32
+            arch: esp32
+            name: esp32
+          - vendor: esp32
+            arch: esp32
+            name: esp32s3
+          - vendor: esp32
+            arch: esp32
+            name: esp32c3
+        include:
+          - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
+            board:
+              vendor: esp8266
+          - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+            board:
+              vendor: esp32
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
+      - name: compile example sketchs
+        uses: arduino/compile-sketches@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          platforms: |
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
+          sketch-paths: |
+            - examples/Multiple
+          libraries: |
+            - source-path: ./
+            - name: ArxContainer
+            - name: ArxTypeTraits
+            - name: WiFi
+            - name: Ethernet
+          verbose: true

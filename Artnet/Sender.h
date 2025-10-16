@@ -7,11 +7,16 @@
 #include "ArtNzs.h"
 #include "ArtTrigger.h"
 #include "ArtSync.h"
+#include "SenderTraits.h"
 
 namespace art_net {
 
 template <typename S>
+#ifndef ARDUINO_ARCH_AVR
+class Sender_ : virtual ISender_
+#else
 class Sender_
+#endif
 {
     S* stream;
     Array<PACKET_SIZE> packet;
@@ -189,14 +194,18 @@ protected:
 };
 
 template <typename S>
+#ifndef ARDUINO_ARCH_AVR
+class Sender : public ISender, public Sender_<S>
+#else
 class Sender : public Sender_<S>
+#endif
 {
     S stream;
 
 public:
-    void begin()
+    void begin(uint16_t send_port = DEFAULT_PORT)
     {
-        this->stream.begin(DEFAULT_PORT);
+        this->stream.begin(send_port);
         this->Sender_<S>::attach(this->stream);
     }
 };

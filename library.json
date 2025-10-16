@@ -11,12 +11,12 @@
 		"url": "https://github.com/hideakitai",
 		"maintainer": true
 	},
-	"version": "0.8.3",
+	"version": "0.9.0",
 	"license": "MIT",
 	"frameworks": "*",
 	"platforms": "*",
 	"dependencies": {
 		"hideakitai/ArxContainer": ">=0.6.0",
-		"hideakitai/ArxTypeTraits": "*"
+		"hideakitai/ArxTypeTraits": ">=0.3.2"
 	}
 }

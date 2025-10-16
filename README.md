@@ -28,6 +28,7 @@
   - ETH (ESP32)
   - NativeEthernet (Teensy 4.1)
 - Supports a lot of boards which can use Ethernet or WiFi
+- Supports using multiple network interfaces in the same sketch
 - Multiple receiver callbacks depending on universe
 - Mutilple destination streaming with sender
 - One-line send to desired destination
@@ -84,7 +85,7 @@ Where `{interface}` is one of the following depending on the interface you want 
 | ETH (ESP32)   | ArtnetETH.h           | ArtnetETH         |
 | NativeEthernet| ArtnetNativeEther.h   | ArtnetNativeEther |
 
-Also, you can use multiple interfaces in the same sketch.
+You can use multiple interfaces in the same sketch if your platform supports using multiple network interfaces simultaneously without conflicts (e.g., ESP32 can use both WiFi and Ethernet at the same time, but Raspberry Pi Pico W cannot). See [examples/Multiple](examples/Multiple) for more details.
 
 ### ArtnetReceiver
 
