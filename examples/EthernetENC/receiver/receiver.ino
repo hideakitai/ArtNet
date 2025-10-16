@@ -5,7 +5,7 @@
 const IPAddress ip(192, 168, 0, 201);
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB};
 
-ArtnetReceiver artnet;
+ArtnetEtherENCReceiver artnet;
 uint16_t universe1 = 1; // 0 - 32767
 uint8_t net = 0;        // 0 - 127
 uint8_t subnet = 0;     // 0 - 15

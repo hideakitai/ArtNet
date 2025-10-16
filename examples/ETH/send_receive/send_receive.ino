@@ -5,7 +5,7 @@ const IPAddress ip(192, 168, 0, 201);
 const IPAddress gateway(192, 168, 0, 1);
 const IPAddress subnet(255, 255, 255, 0);
 
-Artnet artnet;
+ArtnetETH artnet;
 const String target_ip = "192.168.0.200";
 uint8_t universe = 1;  // 0 - 15
 

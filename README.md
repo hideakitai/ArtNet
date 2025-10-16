@@ -3,16 +3,13 @@
 [Art-Net](https://en.wikipedia.org/wiki/Art-Net) Sender/Receiver for Arduino (Ethernet, WiFi)
 
 > [!WARNING]
-> Breaking API changes from v0.4.0 and above
-
-> [!WARNING]
-> Dependent libraries removed from v0.3.0
-
-If you have already installed this library before v0.3.0, please follow:
-
-- Cloned from GitHub (manually): Please install dependent libraries manually
-- Installed from library manager: re-install this library from library manager
-  - Dependent libraries will be installed automatically
+> Breaking API changes from v0.9.0 and above. `Artnet.h` is no longer included. Please include the header file and use interface-specific classes depending on the interface you want to use.
+>
+> - WiFi: `ArtnetWiFi.h` (`ArtnetWiFi`, `ArtnetWiFiSender`, `ArtnetWiFiReceiver`)
+> - Ethernet: `ArtnetEther.h` (`ArtnetEther`, `ArtnetEtherSender`, `ArtnetEtherReceiver`)
+> - EthernetENC (ENC28J60): `ArtnetEtherENC.h` (`ArtnetEtherENC`, `ArtnetEtherENCSender`, `ArtnetEtherENCReceiver`)
+> - ETH (ESP32): `ArtnetETH.h` (`ArtnetETH`, `ArtnetETHSender`, `ArtnetETHReceiver`)
+> - NativeEthernet (Teensy 4.1): `ArtnetNativeEther.h` (`ArtnetNativeEther`, `ArtnetNativeEtherSender`, `ArtnetNativeEtherReceiver`)
 
 ## Feature
 
@@ -29,6 +26,7 @@ If you have already installed this library before v0.3.0, please follow:
   - Ethernet
   - EthernetENC
   - ETH (ESP32)
+  - NativeEthernet (Teensy 4.1)
 - Supports a lot of boards which can use Ethernet or WiFi
 - Multiple receiver callbacks depending on universe
 - Mutilple destination streaming with sender
@@ -54,6 +52,7 @@ If you have already installed this library before v0.3.0, please follow:
 
 - ESP32 (Ethernet and ETH)
 - ESP8266
+- Teensy 4.1 (NativeEthernet)
 - Almost all platforms without WiFi
 - Any platform supported by ENC28J60 (please read following section)
 
@@ -63,38 +62,35 @@ If you have already installed this library before v0.3.0, please follow:
 When using the ENC28J60 controller
 
 - make sure to **clone** the [EthernetENC](https://github.com/JAndrassy/EthernetENC) library (version =< 2.0.4 doesn't support MAC address)
-- simply replace `#include <Artnet.h>` with `#include <ArtnetEtherENC.h>`
+- simply replace `#include <ArtnetEther.h>` with `#include <ArtnetEtherENC.h>`
+
 </details>
 
 ## Usage
 
-This library has following Art-Net controller options.
-Please use them depending on the situation.
+This library has following Art-Net controller options. Please use them depending on the situation.
 
-- ArtnetReveiver
-- ArtnetSender
-- Artnet (Integrated Sender/Receiver)
+- `Artnet{interface}Receiver`
+- `Artnet{interface}Sender`
+- `Artnet{interface}`
 
-### Include Artnet
+Where `{interface}` is one of the following depending on the interface you want to use.
 
-Please include `#include "Artnet.h` first.
+| Interface     | Header File           | Class Name Prefix |
+|---------------|-----------------------|-------------------|
+| WiFi          | ArtnetWiFi.h          | ArtnetWiFi        |
+| Ethernet      | ArtnetEther.h         | ArtnetEther       |
+| EthernetENC   | ArtnetEtherENC.h      | ArtnetEtherENC    |
+| ETH (ESP32)   | ArtnetETH.h           | ArtnetETH         |
+| NativeEthernet| ArtnetNativeEther.h   | ArtnetNativeEther |
 
-If you use the board which has both `WiFi` and `Ethernet`, you can't use `#include <Artnet.h>`. Please replace it with `#include <ArtnetWiFi.h>` or `#include <ArtnetEther.h>` depending on the interface you want to use.
-
-```C++
-// For the boards which can use ether WiFi or Ethernet
-#include <Artnet.h>
-// OR use WiFi on the board which can use both WiFi and Ethernet
-#include <ArtnetWiFi.h>
-// OR use Ethenet on the board which can use both WiFi and Ethernet
-#include <ArtnetEther.h>
-```
+Also, you can use multiple interfaces in the same sketch.
 
 ### ArtnetReceiver
 
 ```C++
-#include <Artnet.h>
-ArtnetReceiver artnet;
+#include <ArtnetWiFi.h>
+ArtnetWiFiReceiver artnet;
 
 void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
     // you can also use pre-defined callbacks
@@ -121,8 +117,8 @@ void loop() {
 ### ArtnetSender
 
 ```C++
-#include <Artnet.h>
-ArtnetSender artnet;
+#include <ArtnetWiFi.h>
+ArtnetWiFiSender artnet;
 
 void setup() {
     // setup Ethernet/WiFi...
@@ -149,11 +145,11 @@ void loop() {
 
 ### Artnet (Integrated Sender/Receiver)
 
-`ArtNet` class has `ArtNetReceiver` and `ArtNetSender` features.
+`ArtNet` class has both `ArtNetReceiver` and `ArtNetSender` features.
 
 ```C++
-#include <Artnet.h>
-Artnet artnet;
+#include <ArtnetWiFi.h>
+ArtnetWiFi artnet;
 
 void setup()
 {
@@ -184,8 +180,8 @@ void loop() {
 ### Artnet Receiver + FastLED
 
 ```C++
-#include <Artnet.h>
-ArtnetReceiver artnet;
+#include <ArtnetWiFi.h>
+ArtnetWiFiReceiver artnet;
 
 // FastLED
 #define NUM_LEDS 1
@@ -238,7 +234,7 @@ void loop() {
 - `ArtPoll` is automatically parsed and sends `ArtPollReply`
 - You can configure the following information of by `setArtPollReplyConfig()`
 - Other settings are set automatically based on registerd callbacks
-- Please refer [here](https://art-net.org.uk/downloads/art-net.pdf) for more information
+- Please refer the [spec](https://art-net.org.uk/downloads/art-net.pdf) for more information
 
 ```C++
 struct ArtPollReplyMetadata
@@ -284,7 +280,7 @@ void setArtPollReplyConfigSwIn(uint8_t sw_in_0, uint8_t sw_in_1, uint8_t sw_in_2
 
 ## ArtTrigger
 
-You can send/subscribe `ArtTrigger` using the follwing APIs. Please refer [here](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttrigger/) for more information.
+You can send/subscribe `ArtTrigger` using the following APIs. Please refer the [spec](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttrigger/) for more information.
 
 ```C++
 void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t subkey = 0, const uint8_t *payload = nullptr, uint16_t size = 512);
@@ -294,7 +290,7 @@ using ArtTriggerCallback = std::function<void(const ArtTriggerMetadata &metadata
 
 ## ArtSync
 
-You can send/subscribe `ArtSync` using the follwing APIs. Please refer [here](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttimesync/) for more information.
+You can send/subscribe `ArtSync` using the following APIs. Please refer the [spec](https://art-net.org.uk/how-it-works/time-keeping-triggering/arttimesync/) for more information.
 
 ```C++
 void sendArtSync(const String& ip);
@@ -304,7 +300,7 @@ using ArtSyncCallback = std::function<void(const ArtNetRemoteInfo &remote)>;
 
 ## APIs
 
-### ArtnetSender
+### ArtnetSender APIs
 
 ```C++
 // streaming artdmx packet
@@ -332,7 +328,7 @@ void sendArtTrigger(const String& ip, uint16_t oem = 0, uint8_t key = 0, uint8_t
 void sendArtSync(const String& ip);
 ```
 
-### ArtnetReceiver
+### ArtnetReceiver APIs
 
 ```C++
 using ArtDmxCallback = std::function<void(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote)>;
