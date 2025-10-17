@@ -397,9 +397,6 @@ jobs:
       fail-fast: false
       matrix:
         board:
-          - vendor: esp8266
-            arch: esp8266
-            name: generic
           - vendor: esp32
             arch: esp32
             name: esp32
@@ -410,9 +407,6 @@ jobs:
             arch: esp32
             name: esp32c3
         include:
-          - index: https://arduino.esp8266.com/stable/package_esp8266com_index.json
-            board:
-              vendor: esp8266
           - index: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
             board:
               vendor: esp32
