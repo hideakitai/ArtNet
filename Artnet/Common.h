@@ -57,7 +57,7 @@ constexpr uint16_t PROTOCOL_VER {14}; // 0x000E
 constexpr uint8_t ID_LENGTH {8};
 constexpr char ARTNET_ID[ID_LENGTH] {"Art-Net"};
 constexpr float DEFAULT_FPS {40.};
-constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
+constexpr double DEFAULT_INTERVAL_MS {1000. / (double)DEFAULT_FPS};
 
 // ArtDmx, ArtTrigger has same structure
 constexpr uint16_t HEADER_SIZE {18};
@@ -67,6 +67,7 @@ constexpr uint16_t PACKET_SIZE {530};
 template <uint16_t SIZE, typename T = uint8_t>
 using Array = std::array<T, SIZE>;
 #else
+constexpr size_t FIXED_CONTAINER_CAPACITY = 3;
 template <uint16_t SIZE, typename T = uint8_t>
 using Array = arx::stdx::vector<T, SIZE>;
 #endif
@@ -122,12 +123,12 @@ inline bool operator==(const Destination &rhs, const Destination &lhs)
 
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 // sender
-using LastSendTimeMsMap = std::map<Destination, uint32_t>;
+using LastSendTimeMsMap = std::map<Destination, double>;
 using SequenceMap = std::map<Destination, uint8_t>;
 #else
 // sender
-using LastSendTimeMsMap = arx::stdx::map<Destination, uint32_t>;
-using SequenceMap = arx::stdx::map<Destination, uint8_t>;
+using LastSendTimeMsMap = arx::stdx::map<Destination, double, FIXED_CONTAINER_CAPACITY>;
+using SequenceMap = arx::stdx::map<Destination, uint8_t, FIXED_CONTAINER_CAPACITY>;
 #endif
 
 }  // namespace art_net

@@ -75,6 +75,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: WiFi
             - name: FastLED
           verbose: true
@@ -122,6 +123,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: WiFiNINA
             - name: VidorPeripherals
             - name: FastLED
@@ -161,6 +163,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
           verbose: true
 
   build-ethernet:
@@ -251,6 +254,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: Ethernet
             - name: FastLED
           verbose: true
@@ -295,6 +299,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: FastLED
           verbose: true
 
@@ -382,6 +387,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: FastLED
             - source-url: https://github.com/JAndrassy/EthernetENC.git
           verbose: true
@@ -431,6 +437,7 @@ jobs:
             - source-path: ./
             - name: ArxContainer
             - name: ArxTypeTraits
+            - name: PollingTimer
             - name: WiFi
             - name: Ethernet
           verbose: true

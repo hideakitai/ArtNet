@@ -8,6 +8,7 @@
 #include "ArtTrigger.h"
 #include "ArtSync.h"
 #include "SenderTraits.h"
+#include <PollingTimer.h>
 
 namespace art_net {
 
@@ -20,6 +21,7 @@ class Sender_
 {
     S* stream;
     Array<PACKET_SIZE> packet;
+    PollingTimer timer;
     LastSendTimeMsMap last_send_times;
     SequenceMap dmx_sequences;
     SequenceMap nzs_sequences;
@@ -30,6 +32,7 @@ public:
     Sender_()
     {
         this->packet.resize(PACKET_SIZE);
+        this->timer.start();
     }
 #endif
 
@@ -57,9 +60,9 @@ public:
     void streamArtDmxTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t physical)
     {
         Destination dest {ip, net, subnet, universe};
-        uint32_t now = millis();
+        double now = timer.msec();
         if (this->last_send_times.find(dest) == this->last_send_times.end()) {
-            this->last_send_times.insert(std::make_pair(dest, uint32_t(0)));
+            this->last_send_times.insert(std::make_pair(dest, 0.0));
         }
         if (now >= this->last_send_times[dest] + DEFAULT_INTERVAL_MS) {
             this->sendArxDmxInternal(dest, physical);
@@ -91,9 +94,9 @@ public:
     void streamArtNzsTo(const String& ip, uint8_t net, uint8_t subnet, uint8_t universe, uint8_t start_code)
     {
         Destination dest {ip, net, subnet, universe};
-        uint32_t now = millis();
+        double now = timer.msec();
         if (this->last_send_times.find(dest) == this->last_send_times.end()) {
-            this->last_send_times.insert(std::make_pair(dest, uint32_t(0)));
+            this->last_send_times.insert(std::make_pair(dest, 0.0));
         }
         if (now >= this->last_send_times[dest] + DEFAULT_INTERVAL_MS) {
             this->sendArxNzsInternal(dest, start_code);
