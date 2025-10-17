@@ -9,9 +9,7 @@ on:
       - "library.properties"
       - "library.json"
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: ["**"]
     paths-ignore:
       - .git*
       - "**.md"
