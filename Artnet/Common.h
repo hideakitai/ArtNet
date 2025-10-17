@@ -57,7 +57,7 @@ constexpr uint16_t PROTOCOL_VER {14}; // 0x000E
 constexpr uint8_t ID_LENGTH {8};
 constexpr char ARTNET_ID[ID_LENGTH] {"Art-Net"};
 constexpr float DEFAULT_FPS {40.};
-constexpr uint32_t DEFAULT_INTERVAL_MS {(uint32_t)(1000. / DEFAULT_FPS)};
+constexpr double DEFAULT_INTERVAL_MS {1000. / (double)DEFAULT_FPS};
 
 // ArtDmx, ArtTrigger has same structure
 constexpr uint16_t HEADER_SIZE {18};
@@ -126,7 +126,7 @@ using LastSendTimeMsMap = std::map<Destination, uint32_t>;
 using SequenceMap = std::map<Destination, uint8_t>;
 #else
 // sender
-using LastSendTimeMsMap = arx::stdx::map<Destination, uint32_t>;
+using LastSendTimeMsMap = arx::stdx::map<Destination, double>;
 using SequenceMap = arx::stdx::map<Destination, uint8_t>;
 #endif
 
