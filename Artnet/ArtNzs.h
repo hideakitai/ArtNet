@@ -38,7 +38,7 @@ using CallbackType = std::function<void(const uint8_t *data, uint16_t size, cons
 #if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
 using CallbackMap = std::map<uint16_t, CallbackType>;
 #else
-using CallbackMap = arx::stdx::map<uint16_t, CallbackType>;
+using CallbackMap = arx::stdx::map<uint16_t, CallbackType, FIXED_CONTAINER_CAPACITY>;
 #endif
 
 inline Metadata generateMetadataFrom(const uint8_t *packet)

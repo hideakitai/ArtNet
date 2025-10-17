@@ -400,6 +400,8 @@ void setLogger(Print*);
 
 Some boards without enough memory (e.g. Uno, Nano, etc.) may not be able to use integrated sender/receiver because of the lack of enough memory. Please consider to use more powerful board or to use only sender OR receiver.
 
+In addition, those boards have limitation of the number of callbacks and destinations (see `FIXED_CONTAINER_CAPACITY`) because of the lack of memory. Please consider to reduce the number of callbacks/destinations or to use more powerful board.
+
 ## Reference
 
 - [Spec (Art-Net 4)](http://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf)
