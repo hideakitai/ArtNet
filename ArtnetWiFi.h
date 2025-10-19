@@ -99,25 +99,25 @@ struct IsNetworkReady<ArtnetWiFiClass>
 };
 
 template <>
-IPAddress getLocalIP<WiFiUDP>()
+inline IPAddress getLocalIP<WiFiUDP>()
 {
     return LocalIP<ArtnetWiFiClass>::get(WiFi);
 }
 
 template <>
-IPAddress getSubnetMask<WiFiUDP>()
+inline IPAddress getSubnetMask<WiFiUDP>()
 {
     return SubnetMask<ArtnetWiFiClass>::get(WiFi);
 }
 
 template <>
-void getMacAddress<WiFiUDP>(uint8_t mac[6])
+inline void getMacAddress<WiFiUDP>(uint8_t mac[6])
 {
     MacAddress<ArtnetWiFiClass>::get(WiFi, mac);
 }
 
 template <>
-bool isNetworkReady<WiFiUDP>()
+inline bool isNetworkReady<WiFiUDP>()
 {
     return IsNetworkReady<ArtnetWiFiClass>::get(WiFi);
 }

@@ -40,25 +40,25 @@ struct MacAddress<UIPEthernetClass>
 };
 
 template <>
-IPAddress getLocalIP<EthernetUDP>()
+inline IPAddress getLocalIP<EthernetUDP>()
 {
     return LocalIP<UIPEthernetClass>::get(Ethernet);
 }
 
 template <>
-IPAddress getSubnetMask<EthernetUDP>()
+inline IPAddress getSubnetMask<EthernetUDP>()
 {
     return SubnetMask<UIPEthernetClass>::get(Ethernet);
 }
 
 template <>
-void getMacAddress<EthernetUDP>(uint8_t mac[6])
+inline void getMacAddress<EthernetUDP>(uint8_t mac[6])
 {
     MacAddress<UIPEthernetClass>::get(Ethernet, mac);
 }
 
 template <>
-bool isNetworkReady<EthernetUDP>()
+inline bool isNetworkReady<EthernetUDP>()
 {
     return true;
 }
