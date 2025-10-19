@@ -41,25 +41,25 @@ struct MacAddress<ETHClass>
 };
 
 template <>
-IPAddress getLocalIP<ETHUdp>()
+inline IPAddress getLocalIP<ETHUdp>()
 {
     return LocalIP<ETHClass>::get(ETH);
 }
 
 template <>
-IPAddress getSubnetMask<ETHUdp>()
+inline IPAddress getSubnetMask<ETHUdp>()
 {
     return SubnetMask<ETHClass>::get(ETH);
 }
 
 template <>
-void getMacAddress<ETHUdp>(uint8_t mac[6])
+inline void getMacAddress<ETHUdp>(uint8_t mac[6])
 {
     MacAddress<ETHClass>::get(ETH, mac);
 }
 
 template <>
-bool isNetworkReady<ETHUdp>()
+inline bool isNetworkReady<ETHUdp>()
 {
     return true;
 }
