@@ -27,14 +27,13 @@ class Sender_
     SequenceMap nzs_sequences;
 
 public:
-#if ARX_HAVE_LIBSTDCPLUSPLUS >= 201103L  // Have libstdc++11
-#else
     Sender_()
     {
+#if ARX_HAVE_LIBSTDCPLUSPLUS < 201103L
         this->packet.resize(PACKET_SIZE);
+#endif
         this->timer.start();
     }
-#endif
 
     // streaming artdmx packet
     void setArtDmxData(const uint8_t* const data, uint16_t size)
